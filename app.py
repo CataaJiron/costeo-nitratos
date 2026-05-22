@@ -15,8 +15,8 @@ COSTOS = [
     ('1.2 Operación Pozas (NV+CS+PV+PB)', 'Operación Pozas (NV+CS+PV+PB)',          'Op. Pozas'),
     ('1.3 CRISTALIZACION',                'Total Cristalización (NPT II/IV/NPT III)','Cristalización'),
     ('1.4 KCl',                           'KCl',                                    'KCl'),
-    ('1.5 Terminado+Tpte Interm',         'Terminado+Tpte Interm',                  'Terminados'),
-    ('1.6 Transporte y Puerto',           'Transporte y Puerto',                    'Tpte+Puerto'),
+    ('1.5 Terminado+Tpte Interm',         'Terminado+Tpte Interm',                  'Terminados + Tpte interm'),
+    ('1.6 Transporte y Puerto',           'Transporte y Puerto',                    'Tpte + Puerto'),
     ('1.7 Perdidas F/E',                  'Perdidas F/E',                           'Pérdidas FE'),
     ('1.8 Distributivos + Depreciación',  'Distributivos + Depreciación',           'Distributivos'),
     ('1.9 OTROS',                         'OTROS',                                  'Otros'),
@@ -94,12 +94,19 @@ def botones_mes(key):
 def kpis_row(df, mes, tipo):
     ppto_s = total_serie(df, tipo, 'PPTO')
     rp_s   = total_rp_serie(df, tipo)
+    
     ppto_m = ppto_s[mes]
     rp_m   = rp_s[mes]
-    ppto_acum = sum(ppto_s[:mes+1]) / (mes+1)
-    rp_acum   = sum(rp_s[:mes+1])   / (mes+1)
-    ppto_puntual = total_serie(df, 'Puntual', 'PPTO')
-    k1,k2,k3,k4 = st.columns(4)
+    
+    # ❌ Antes: dividía por (mes+1) → promedio incorrecto
+    # ppto_acum = sum(ppto_s[:mes+1]) / (mes+1)
+    # rp_acum   = sum(rp_s[:mes+1])   / (mes+1)
+    
+    # ✅ Ahora: suma directa desde la tabla
+    ppto_acum = sum(ppto_s[:mes+1])
+    rp_acum   = sum(rp_s[:mes+1])
+
+    k1, k2, k3, k4 = st.columns(4)
     k1.metric(f"PPTO {MESES[mes]} ({tipo})", f"${ppto_m:.1f}/T",
               delta=f"Real/Proy: ${rp_m:.1f}/T  ({rp_m-ppto_m:+.1f})", delta_color="inverse")
     k2.metric(f"Acumulado Ene-{MESES[mes]} PPTO", f"${ppto_acum:.1f}/T",
