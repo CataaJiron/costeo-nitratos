@@ -548,21 +548,12 @@ elif pagina == "Sensibilidad":
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
         # 1.1 Tpte Sales = precio × FC
-	# 1. Calculamos las toneladas de transporte y la producción asegurando que no sean cero
-	ton_tpte_total = v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"]
-	consumo_sales_total = v['NV cat 1'] + v['PB'] + v['CS']
-
-	# 2. Aplicamos los salvavidas en la línea 551
-	precio_tpte = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"]) / ton_tpte_total if ton_tpte_total > 0 else 0.0
-	fc_sales_total = consumo_sales_total / prod_total if prod_total > 0 else 0.0
-
-	# 3. El resultado final limpio y seguro
-	c11 = precio_tpte * fc_sales_total
-
-
-
-
-
+        #c11 = ((v["G_TPTE_NV"]+v["G_TPTE_PB"]+v["G_CAMINOS_NV"]) / ((v["TON_TPTE_NV"]+v["TON_TPTE_PB"]+v["TON_TPTE_CS"])))* ((v['NV cat 1'] + v['PB'] + v['CS']) / prod_total)
+        ton_tpte_total = v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"]
+        consumo_sales_total = v['NV cat 1'] + v['PB'] + v['CS']
+        precio_tpte = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"]) / ton_tpte_total if ton_tpte_total > 0 else 0.0
+        fc_sales_total = consumo_sales_total / prod_total if prod_total > 0 else 0.0
+        c11 = precio_tpte * fc_sales_total
 
 
  
