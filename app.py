@@ -540,20 +540,28 @@ elif pagina == "Sensibilidad":
         'OTROS':         gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
     }
  
-    # ── Recálculo ─────────────────────────────────────────────────────────────
+# ── Recálculo ─────────────────────────────────────────────────────────────
     def recalcular(v):
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
-        # 1.1 Tpte Sales = precio × FC
-        #c11 = ((v["G_TPTE_NV"]+v["G_TPTE_PB"]+v["G_CAMINOS_NV"]) / ((v["TON_TPTE_NV"]+v["TON_TPTE_PB"]+v["TON_TPTE_CS"])))* ((v['NV cat 1'] + v['PB'] + v['CS']) / prod_total)
+        # 1.1 Tpte Sales (CORREGIDO CON VARIABLES EXISTENTES)
+        # Sumamos el gasto de transporte real cargado en tu base de datos
+        gasto_tpte_sales_total = v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"]
+        
+        # Obtenemos las toneladas movilizadas totales
         ton_tpte_total = v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"]
-        consumo_sales_total = v['NV cat 1'] + v['PB'] + v['CS']
-        precio_tpte = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"]) / ton_tpte_total if ton_tpte_total > 0 else 0.0
-        fc_sales_total = consumo_sales_total / prod_total if prod_total > 0 else 0.0
-        c11 = precio_tpte * fc_sales_total
+        
+        # Calculamos el precio unitario por tonelada transportada
+        precio_real_tpte = gasto_tpte_sales_total / ton_tpte_total if ton_tpte_total > 0 else 0.0
+        
+        # Usamos el Factor de Consumo de Sales global que tienes en la base de datos ('FC_SALES')
+        fc_sales_total = v['FC_SALES'] if 'FC_SALES' in v else 0.0
+        
+        # El costo para el modelo de negocio es: Precio del transporte x Factor de Consumo de Sales
+        c11 = precio_real_tpte * fc_sales_total
 
         # 1.2 Pozas = (gasto NV+CS+PB + depr) / prod_total
         c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
