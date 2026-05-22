@@ -514,8 +514,8 @@ elif pagina == "Sensibilidad":
 
     st.divider()
 
-# ── CALCULAR IMPACTO MATRICIAL CRISTALINO ───────────────────────────────
-    # 1. Registrar nuevas producciones
+    # ── CALCULAR IMPACTO ────────────────────────────────────────────────────
+    # Producción nueva
     new_prod = {
         'prod_npt3': prod_npt3,
         'prod_npt4': prod_npt4,
@@ -524,136 +524,78 @@ elif pagina == "Sensibilidad":
     }
     for label, (d, prod_key, base) in deltas_p.items():
         if d != 0:
-            new_prod[prod_key] = max(0.001, new_prod.get(prod_key, 0) + d)
+            new_prod[prod_key] = new_prod.get(prod_key, 0) + d
 
     new_prod['prod_total'] = new_prod['prod_npt3'] + new_prod['prod_npt4']
     new_prod['prod_term']  = new_prod['prod_pril_dtp'] + new_prod['prod_secado']
 
-    # Inicializamos diccionarios para capturar el impacto REAL por cada componente exacto
-    impactos_por_componente = {nom: 0.0 for _, _, nom in COSTOS}
+    impacto = 0
     detalle = []
 
-    # Mapeo de qué pestaña de Gasto (KUS) afecta a qué componente de la lista COSTOS
-    # Esto asegura que si mueves un Gasto, impacte al componente correcto en la tabla
-    gasto_a_componente = {
-        'Gasto Tpte NV': 'Tpte Sales', 'Gasto Tpte PB': 'Tpte Sales',
-        'Gasto Planta NPT3': 'Cristalización', 'Gasto Planta NPT4': 'Cristalización',
-        'Gasto Tpte CS-TOC': 'Terminados + Tpte interm',
-        'Gasto Prilado': 'Terminados + Tpte interm', 'Gasto DTP': 'Terminados + Tpte interm', 'Gasto Secado': 'Terminados + Tpte interm',
-        'Gasto Embarque': 'Tpte + Puerto', 'Gasto Almacenaje': 'Tpte + Puerto',
-        'Distributivos': 'Distributivos',
-        'Gasto Pozas NV': 'Op. Pozas', 'Gasto Pozas CS': 'Op. Pozas', 'Gasto Pozas PB': 'Op. Pozas'
-    }
-
-    # 2. Procesar Gastos (KUS) y asignarlos a su componente
+    # Impacto gastos
     for label, (d, prod_key, base) in deltas_g.items():
         if d != 0:
             pbase = {'prod_total': prod_total, 'prod_pril_dtp': prod_pril_dtp, 'prod_secado': prod_secado}.get(prod_key, prod_total)
             pnew  = new_prod.get(prod_key, pbase)
-            
-            if pbase > 0 and pnew > 0:
-                costo_unit_base = base / pbase
-                costo_unit_nuevo = (base + d) / pnew
-                imp = costo_unit_nuevo - costo_unit_base
-                
-                comp_asociado = gasto_a_componente.get(label)
-                if comp_asociado in impactos_por_componente:
-                    impactos_por_componente[comp_asociado] += imp
-                detalle.append((f"Gasto: {label}", f"{d:+.0f} KUS", imp))
+            if pbase > 0:
+                imp = (base + d) / pbase - base / pbase if pnew == pbase else (base + d) / pnew - base / pbase
+                imp = d / pbase
+                impacto += imp
+                detalle.append((label, f"{d:+.0f} KUS", round(imp,2)))
 
-    # 3. Procesar Cambios de Producción (Dilución/Efecto Volumen sobre la base del Excel)
+    # Impacto producción sobre costos existentes
     componentes_por_prod = {
-        'prod_total': [0, 1, 2, 3, 5, 6, 7, 8], # Afecta a casi toda la cadena
-        'prod_term':  [4],                       # Terminados
+        'prod_total':    [0,1,2,3,5,6,7,8],
+        'prod_term':     [4],
     }
-
     for pk, idxs in componentes_por_prod.items():
-        pbase = prod_total if pk == 'prod_total' else prod_term
+        pbase = prod_total if pk=='prod_total' else prod_term
         pnew  = new_prod.get(pk, pbase)
-        
         if pnew != pbase and pbase > 0 and pnew > 0:
             for idx in idxs:
                 sa, c, nom = COSTOS[idx]
-                
-                # Buscamos el valor unitario original directamente en la sección COSTO TOTAL del Excel
-                val_unitario_base = gv(df, 'COSTO TOTAL', sa, c, mes, tipo, 'PPTO')
-                
-                # Si gv devolvió cero por problemas de etiquetas, buscamos sólo por subárea para asegurar captura
-                if val_unitario_base == 0:
-                    mask_alternativa = (df['Fecha'] == sorted(df['Fecha'].unique())[mes]) & (df['SUBAREA'] == sa) & (df['Tipo_2'] == 'PPTO') & (df['Tipo'] == tipo)
-                    r_alt = df[mask_alternativa]
-                    if not r_alt.empty:
-                        val_unitario_base = r_alt['GASTO/COSTO'].sum()
+                val = gv(df,'COSTO TOTAL',sa,c,mes,tipo,'PPTO')
+                gasto_est = val * pbase
+                nuevo_costo = gasto_est / pnew
+                imp = nuevo_costo - val
+                if abs(imp) > 0.01:
+                    impacto += imp
+                    detalle.append((f"Prod {pk} → {nom}", f"{pnew-pbase:+.1f} Kton", round(imp,2)))
 
-                # Lógica de dilución de costo unitario por volumen
-                gasto_total_estimado = val_unitario_base * pbase
-                nuevo_costo_unitario = gasto_total_estimado / pnew
-                imp = nuevo_costo_unitario - val_unitario_base
-                
-                if abs(imp) > 0.001:
-                    impactos_por_componente[nom] += imp
-                    detalle.append((f"Volumen {pk} → {nom}", f"{pnew-pbase:+.1f} Kton", imp))
-
-    # 4. Procesar Factores de Consumo (KCl y Sales) y asignarlos a sus filas
-    precio_tpte = gv(df, 'TRANSPORTE DE SALES', 'Total Transporte de Sales (promedio)', 'Total Transporte de Sales (promedio)', mes, tipo, 'PPTO', 'USD/TNitr sales')
-    precio_kcl  = gv(df, 'KCl', 'Total KCl', 'Total KCl', mes, tipo, 'PPTO', 'US$/T')
+    # Impacto factores (simplificado: delta fc × precio promedio KCl o precio tpte)
+    precio_tpte = gv(df,'TRANSPORTE DE SALES','Total Transporte de Sales (promedio)',
+                     'Total Transporte de Sales (promedio)',mes,tipo,'PPTO','USD/TNitr sales')
+    precio_kcl  = gv(df,'KCl','Total KCl','Total KCl',mes,tipo,'PPTO','US$/T')
 
     for label, (d, fc_key, base) in deltas_fc.items():
         if d != 0:
             if 'NaNO3' in label:
                 imp = d * precio_tpte if precio_tpte > 0 else 0
-                impactos_por_componente['Tpte Sales'] += imp
             else:
                 imp = d * precio_kcl if precio_kcl > 0 else 0
-                impactos_por_componente['KCl'] += imp
-                
             if abs(imp) > 0.001:
-                detalle.append((f"Factor: {label}", f"{d:+.4f}", imp))
+                impacto += imp
+                detalle.append((label, f"{d:+.4f}", round(imp,2)))
 
-    # 5. CALCULAR EL IMPACTO TOTAL REAL (Suma exacta de la afectación de los componentes)
-    impacto_total_real = sum(impactos_por_componente.values())
-    costo_nuevo = max(0.0, costo_base + impacto_total_real)
+    costo_nuevo = costo_base + impacto
 
-    # ── RENDERIZADO DE FILAS DE METRICAS ────────────────────────────────────
     k1, k2, k3 = st.columns(3)
     k1.metric(f"Costo base PPTO {MESES[mes]}", f"${costo_base:.1f}/T")
-    k2.metric("Impacto Total Sincronizado", f"{impacto_total_real:+.2f} US$/T", delta_color="inverse")
+    k2.metric("Impacto total", f"{impacto:+.1f} US$/T", delta_color="inverse")
     k3.metric("Nuevo costo estimado", f"${costo_nuevo:.1f}/T",
-              delta=f"{impacto_total_real:+.2f}", delta_color="inverse")
-
-    # 6. TABLA DETALLADA POR COMPONENTE (Muestra exactamente tu estructura de Nitratos)
-    st.subheader("Resumen de Impacto por Componente de Costo")
-    
-    filas_tabla_componentes = []
-    for _, _, nom in COSTOS:
-        imp_comp = impactos_por_componente[nom]
-        filas_tabla_componentes.append({
-            "Componente Nitratos": nom,
-            "Impacto Unitario": round(imp_comp, 2),
-            "Estado": "Sube Costo 🔺" if imp_comp > 0.01 else ("Baja Costo 📉" if imp_comp < -0.01 else "Sin Cambios ➖")
-        })
-    
-    # Añadir fila de validación de Costo Total
-    filas_tabla_componentes.append({
-        "Componente Nitratos": "➔ COSTO TOTAL SUMADO",
-        "Impacto Unitario": round(impacto_total_real, 2),
-        "Estado": "TOTAL"
-    })
-
-    df_comp_render = pd.DataFrame(filas_tabla_componentes)
-    
-    def color_impactos(val):
-        if isinstance(val, (int, float)):
-            if val > 0.01: return "background-color: #FADBD8; color: #78281F; font-weight: bold;"
-            if val < -0.01: return "background-color: #D4EFDF; color: #145A32; font-weight: bold;"
-        return ""
-
-    st.dataframe(
-        df_comp_render.style.map(color_impactos, subset=["Impacto Unitario"]),
-        use_container_width=True, hide_index=True
-    )
+              delta=f"{impacto:+.1f}", delta_color="inverse")
 
     if detalle:
-        with st.expander("Ver bitácora de cálculos raíz (Deltas aplicados)"):
-            df_d = pd.DataFrame(detalle, columns=["Variable Raíz", "Cambio Input", "Impacto Unitario"])
-            st.dataframe(df_d.format({"Impacto Unitario": "{:+.2f} US$/T"}), use_container_width=True, hide_index=True)
+        st.subheader("Detalle del impacto")
+        df_d = pd.DataFrame(detalle, columns=["Variable","Cambio","Impacto US$/T"])
+        def col_imp(val):
+            if isinstance(val, float):
+                return "color: red" if val > 0 else "color: green"
+            return ""
+        st.dataframe(
+            df_d.style
+                .map(col_imp, subset=["Impacto US$/T"])
+                .format({"Impacto US$/T": "{:.1f}"}),
+            use_container_width=True, hide_index=True
+        )
+
