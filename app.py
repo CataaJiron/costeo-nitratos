@@ -453,33 +453,51 @@ elif pagina == "Sensibilidad":
         # Producción NPT3 (Kton)
         'KNO3_T_NPT3':   _r('PRODUCCION','NPT3','- KNO3 T NPT III'),
         'KNO3_R_NPT3':   _r('PRODUCCION','NPT3','- KNO3 R NPT III'),
+    
         # Producción NPT4 (Kton)
         'KNO3_L_NPT4':   _r('PRODUCCION','NPT4','- KNO3 L NPT II/IV'),
         'CSSI_NPT4':     _r('PRODUCCION','NPT4','- CSSI NPT II/IV'),
         'CSSR_NPT4':     _r('PRODUCCION','NPT4','- CSSR NPT II/IV'),
+    
         # Producción Terminados (Kton)
         'PRIL_DTP':      _r('PRODUCCION','TERMINADOS','PRILADO + DTP'),
         'SECADO':        _r('PRODUCCION','TERMINADOS','SECADO'),
+    
         # Gastos Pozas (KUS)
         'G_POZAS_NV':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV'),
         'G_POZAS_CS':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS'),
         'G_POZAS_PB':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB'),
+        'G_DEPRECIACION_CS':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Depreciación CS'),
+    
         # Gastos Plantas (KUS)
         'G_PRIL':        _r('GASTO','TERMINADOS','Gasto Planta Prilado CS'),
         'G_DTP':         _r('GASTO','TERMINADOS','Gasto Planta DTP'),
         'G_SECADO':      _r('GASTO','TERMINADOS','Gasto Planta Secado KNO3'),
         'G_NPT3':        _r('GASTO','CRISTALIZACION','Gasto NPT III + Korda'),
         'G_NPT4':        _r('GASTO','CRISTALIZACION','Gasto NPT IV'),
+
+        
         # Puerto — gastos (KUS) y toneladas (Kton) por separado
         'G_EMBARQUE':    _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage','KUS'),
-        'TON_EMBARQUE':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage','Kton', nth=1),  # granel real
+        'TON_EMBARQUE_TOTAL':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque total','Kton'),  # granel real
         'G_ALMACENAJE':  _r('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral','KUS'),
         'TON_ALMACENAJE':_r('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral','Kton'),
         'G_DIST_T':      _r('Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral','KUS'),
         'TON_DESPACHO':  _r('Distributivos Trimestral','DISTRIBUTIVOS','Despacho Camiones y contenedores','Kton'),
+        'TON_EMBARQUE_GRANEL':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel','Kton'),
+
+
         # Transporte camiones — gasto (KUS) y toneladas (Kton) por separado
-        'G_TPTE_CAM':    _r('GASTO','TRANSPORTE','Tpte Camiones Terminados'),
+        'G_TPTE_CAM':    _r('GASTO','TRANSPORTE','Tpte Camiones Terminados', 'KUS'),
         'TON_TPTE_CAM':  _r('TRANSPORTE','TRANSPORTE','Tpte Camiones Terminados','kTon'),
+        'G_TPTE_NV':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales NV', 'KUS'),
+        'TON_TPTE_NV':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales NV a CS (Cat 1 + Cat 3)', 'kTon'),
+        'G_TPTE_PB':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales PB', 'KUS'),
+        'TON_TPTE_PB':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS', 'kTon'),
+        'G_CAMINOS_NV':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Op Canchas + Caminos NV', 'KUS'),
+        'TON_TPTE_CS':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'kTon'),        
+
+
         # FC KCl (adimensional: KTon KCl / Kton prod)
         'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
         'FC_MOP70_NPT3': _r('KCl','CONSUMO NPT3','MOP 70', nth=0),
@@ -487,29 +505,38 @@ elif pagina == "Sensibilidad":
         'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
         'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
         'FC_SS_NPT4':    _r('KCl','CONSUMO NPT4','SS', nth=0),
+        
         # Precio KCl (US$/T)
         'P_MOP90':       _r('KCl','Costo Promedio KCl','MOP 90'),
         'P_MOP70':       _r('KCl','Costo Promedio KCl','MOP 70'),
         'P_SS':          _r('KCl','Costo Promedio KCl','SS'),
+        
         # FC NaNO3 y precio transporte sales
         'FC_SALES':      _r('TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales'),
         'P_TPTE_SALES':  _r('TRANSPORTE DE SALES','Total Transporte de Sales (promedio)','Total Transporte de Sales (promedio)'),
+        'NV cat 1':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- NV cat 1'),
+        'PB':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- PB'),
+        'CS':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- CS'),        
+
+
         # Depreciaciones (fijas, no editables)
         'DEPR_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas CS'),
-        'DEPR_PRIL':     _r('GASTO','TERMINADOS','Depreciación Planta Prilado CS'),
-        'DEPR_DTP':      _r('GASTO','TERMINADOS','Depreciación Planta DTP'),
-        'DEPR_SECADO':   _r('GASTO','TERMINADOS','Depreciación Planta Secado KNO3'),
-        'DEPR_NPT3':     _r('GASTO','CRISTALIZACION','Depreciación NPT III'),
-        'DEPR_NPT4':     _r('GASTO','CRISTALIZACION','Depreciación NPT IV'),
-        'DEPR_PUERTO_USDPT': _r('DEPRECIACION','PUERTO','Depreciacion Puerto','US$/T'),
+        'G_DEP_PRIL':        _r('GASTO','TERMINADOS','Gasto Depreciación Prilado CS'),
+        'G_DEP_DTP':         _r('GASTO','TERMINADOS','Gasto Depreciación DTP'),
+        'G_DEP_SECADO':      _r('GASTO','TERMINADOS','Gasto Depreciación Secado KNO3'),
+        'G_DEP_NPT3':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT III'),
+        'G_DEP_NPT4':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT IV'),
+        'DEPR_PUERTO': _r('DEPRECIACION','PUERTO','Depreciacion Puerto','KUS'),
         'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios '),
         'DIST_NITRATOS': _area('Distributivos Nitratos'),
         'DEPR_COM':      _area('Depreciación Costo Comun'),
+
+
         # Perdidas FE (fijas)
-        'PERD_FE':       _r('Perdidas F/E','Perdidas F/E','Perdidas F/E'),
-        'PERD_PUERTO':   _r('- Perdidas y FE (Puerto/Cancha)',
-                            '- Perdidas y FE (Puerto/Cancha)',
-                            '- Perdidas y FE (Puerto/Cancha)'),
+        'GEN_FE':       _r('PERDIDAS','PERDIDAS','Generación Producto FE (Terminados)'),
+        'GEN_Perdidas':       _r('PERDIDAS','PERDIDAS','Generación Perdidas / Costras (Terminados)'),
+        'GEN_Perdidas_Puerto':   _r('PERDIDAS','PERDIDAS', 'Perdidas / FE puerto y cancha'),
+        'GEN_Perdidas_Degradacion':   _r('Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha', 'Perdidas y degradaciones puerto y cancha'),
         'OTROS':         gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
     }
  
@@ -521,38 +548,48 @@ elif pagina == "Sensibilidad":
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
         # 1.1 Tpte Sales = precio × FC
-        c11 = v['P_TPTE_SALES'] * v['FC_SALES']
+        c11 = ((v["G_TPTE_NV"]+v["G_TPTE_PB"]+v["G_CAMINOS_NV"]) / ((v["TON_TPTE_NV"]+v["TON_TPTE_PB"]+v["TON_TPTE_CS"])))* ((v['NV cat 1'] + v['PB'] + v['CS']) / prod_total)
  
         # 1.2 Pozas = (gasto NV+CS+PB + depr) / prod_total
         c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
- 
+
         # 1.3 Cristalización = (gasto NPT3+NPT4 + depr) / prod_total
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEPR_NPT3'] + v['DEPR_NPT4']) / prod_total if prod_total > 0 else 0.0
  
-        # 1.4 KCl = fc_total × costo_promedio
-        cons_mop90 = v['FC_MOP90_NPT3']*npt3 + v['FC_MOP90_NPT4']*npt4
-        cons_mop70 = v['FC_MOP70_NPT3']*npt3 + v['FC_MOP70_NPT4']*npt4
-        cons_ss    = v['FC_SS_NPT3']*npt3    + v['FC_SS_NPT4']*npt4
+         # 1.4 KCl = fc_total × costo_promedio
+        cons_mop90 = (v['FC_MOP90_NPT3']*npt3) + (v['FC_MOP90_NPT4']*npt4)
+        cons_mop70 = (v['FC_MOP70_NPT3']*npt3) + (v['FC_MOP70_NPT4']*npt4)
+        cons_ss    = (v['FC_SS_NPT3']*npt3)    + (v['FC_SS_NPT4']*npt4)
         cons_total = cons_mop90 + cons_mop70 + cons_ss
         costo_prom_kcl = (v['P_MOP90']*cons_mop90 + v['P_MOP70']*cons_mop70 + v['P_SS']*cons_ss) / cons_total if cons_total > 0 else 0.0
-        fc_kcl_total   = cons_total / prod_total if prod_total > 0 else 0.0
+        Fc_KCl_MOP90_70 = (v["cons_mop90"]+v["cons_mop70"]) / (npt3 + v['KNO3_L_NPT4'])
+        Fc_KCl_SS = v["cons_SS"] / (npt3 + v['KNO3_L_NPT4'])
+        fc_kcl_total   = Fc_KCl_SS + Fc_KCl_MOP90_70 > 0 else 0.0
+        
         c14 = fc_kcl_total * costo_prom_kcl
  
-        # 1.5 Terminados = gasto_total / prod_terminados
-        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT']
-               + v['DEPR_PRIL'] + v['DEPR_DTP'] + v['DEPR_SECADO']) / prod_term if prod_term > 0 else 0.0
  
+        # 1.5 Terminados = gasto_total / prod_terminados
+        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEPR_PRIL'] + v['DEPR_DTP'] + v['DEPR_SECADO']) / prod_term if prod_term > 0 else 0.0
+ 
+
         # 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']   / v['TON_TPTE_CAM']  if v['TON_TPTE_CAM']  > 0 else 0.0
-        c_embarque = v['G_EMBARQUE']    / v['TON_EMBARQUE']  if v['TON_EMBARQUE']  > 0 else 0.0
+        c_embarque = v['G_EMBARQUE']    / v['TON_EMBARQUE_TOTAL']  if v['TON_EMBARQUE_TOTAL']  > 0 else 0.0
         c_alm      = v['G_ALMACENAJE']  / v['TON_ALMACENAJE']if v['TON_ALMACENAJE']> 0 else 0.0
-        vol_dist   = v['TON_EMBARQUE']  + v['TON_DESPACHO']
-        c_dist     = v['G_DIST_T']      / vol_dist            if vol_dist           > 0 else 0.0
-        c16 = c_tpte + c_embarque + c_alm + c_dist + v['DEPR_PUERTO_USDPT']
+        c_dist     = v['G_DIST_T']  / (v['TON_EMBARQUE_TOTAL'] + v["TON_DESPACHO"])if (v['TON_EMBARQUE_TOTAL'] + v["TON_DESPACHO"])> 0 else 0.0
+        dep_puerto = v['DEPR_PUERTO'] / (v['TON_EMBARQUE_TOTAL'] + v["TON_DESPACHO"])if (v['TON_EMBARQUE_TOTAL'] + v["TON_DESPACHO"])> 0 else 0.0
+
+        c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
  
+
         # 1.7 Perdidas FE (fijas)
-        c17 = v['PERD_FE'] + v['PERD_PUERTO']
- 
+        c17 = Perdidas_FE_Puerto_Cancha + Perdidas_FE
+        Perd_FE = (v["GEN_FE"] - v["GEN_Perdidas"] ) / prod_term if prod_term > 0 else 0.0
+        Perdidas_FE = Op_dep * Perd_FE 
+        Op_dep = c11 + c12 + c13 + c14
+        Perdidas_FE_Puerto_Cancha = v['GEN_Perdidas_Degradacion'] / (Op_dep + Perdidas_FE + c15)
+
         # 1.8 Distributivos + Depreciación
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
  
