@@ -815,36 +815,39 @@ elif pagina == "Sensibilidad":
  
         st.divider()
  
-        # ─── FC NaNO3 / Tpte Sales ────────────────────────────────────────────
+        # ─── TRANSPORTE DE SALES ─────────────────────────────────────────────
         st.markdown("#### 🧂 Transporte de Sales")
-        fs1, fs2 = st.columns(2)
-        with fs1:
-            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key="ui_P_TPTE_SALES")
-        with fs2:
-            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key="ui_FC_SALES")
-        st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
- 
-        st.divider()
-        if st.button("🔄 Restablecer valores PPTO", use_container_width=True):
-            st.session_state['sv']      = copy.deepcopy(BASE)
-            st.session_state['sv_mes']  = mes
-            st.session_state['reset']   = True
-            # Borrar todos los ui_ para forzar re-render
-            for k in list(st.session_state.keys()):
-                if k.startswith("ui_"):
-                    del st.session_state[k]
-            st.rerun()
-    if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes:
-        st.session_state['sv']     = copy.deepcopy(BASE)
-        st.session_state['sv_mes'] = mes
-    
-    # ← AGREGA ESTO
-    if st.session_state.get('reset'):
-        st.session_state['sv']    = copy.deepcopy(BASE)
-        st.session_state['reset'] = False
 
-    V = st.session_state['sv']
+        def fila_tpte(label, key_g, key_ton):
+            c1, c2, c3 = st.columns([2, 2, 1])
+            with c1:
+                V[key_g]   = st.number_input(f"{label} (KUS)",  value=round(V[key_g], 1),   step=10.0, format="%.1f",   key=f"ui_ts_{key_g}")
+            with c2:
+                V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f",   key=f"ui_ts_{key_ton}")
+            with c3:
+                ratio = V[key_g] / V[key_ton] if V[key_ton] > 0 else 0.0
+                st.metric("USD/KTon", f"${ratio:.2f}")
 
+        fila_tpte("NV → CS",     "G_TPTE_NV",   "TON_TPTE_NV")
+        fila_tpte("PB → CS",     "G_TPTE_PB",   "TON_TPTE_PB")
+        fila_tpte("Caminos NV",  "G_CAMINOS_NV","TON_TPTE_CS")
+
+        # Consumo sales por origen (editable para cambiar FC)
+        st.caption("Consumo Sales por origen (KTon NaNO3)")
+        cs1, cs2, cs3 = st.columns(3)
+        with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key="ui_ts_NV")
+        with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key="ui_ts_PB")
+        with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key="ui_ts_CS")
+
+        consumo_tot_v = V['NV cat 1'] + V['PB'] + V['CS']
+        prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
+        fc_v = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
+        precio_nv_v = V['G_TPTE_NV']    / V['TON_TPTE_NV']   if V['TON_TPTE_NV']  > 0 else 0.0
+        precio_pb_v = V['G_TPTE_PB']    / V['TON_TPTE_PB']   if V['TON_TPTE_PB']  > 0 else 0.0
+        precio_cs_v = V['G_CAMINOS_NV'] / V['TON_TPTE_CS']   if V['TON_TPTE_CS']  > 0 else 0.0
+        precio_prom_v = (precio_nv_v*V['NV cat 1'] + precio_pb_v*V['PB'] + precio_cs_v*V['CS']) / consumo_tot_v if consumo_tot_v > 0 else 0.0
+        c11_preview = precio_prom_v * fc_v
+        st.caption(f"FC Sales: {fc_v:.4f} | Precio prom: ${precio_prom_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
 
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
