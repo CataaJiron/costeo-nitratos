@@ -521,7 +521,8 @@ elif pagina == "Sensibilidad":
 
 
         # Depreciaciones (fijas, no editables)
-        'DEPR_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas CS'),
+
+        'DEPR_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Depreciación CS'),
         'DEP_PRIL':        _r('GASTO','TERMINADOS','Gasto Depreciación Prilado CS'),
         'DEP_DTP':         _r('GASTO','TERMINADOS','Gasto Depreciación DTP'),
         'DEP_SECADO':      _r('GASTO','TERMINADOS','Gasto Depreciación Secado KNO3'),
