@@ -589,10 +589,9 @@ elif pagina == "Sensibilidad":
  
 
         # 1.7 Perdidas FE (fijas)
-        
+        Op_dep = c11 + c12 + c13 + c14
         Perd_FE = (v["GEN_FE"] - v["GEN_Perdidas"] ) / prod_term if prod_term > 0 else 0.0
         Perdidas_FE = Op_dep * Perd_FE 
-        Op_dep = c11 + c12 + c13 + c14
         Perdidas_FE_Puerto_Cancha = v['GEN_Perdidas_Degradacion'] / (Op_dep + Perdidas_FE + c15)
         c17 = Perdidas_FE_Puerto_Cancha + Perdidas_FE
 
