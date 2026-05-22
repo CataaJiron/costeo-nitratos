@@ -700,8 +700,8 @@ elif pagina == "Sensibilidad":
                 V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
-        tot_crist = V['G_NPT3']+V['G_NPT4']+V['DEPR_NPT3']+V['DEPR_NPT4']
-        st.caption(f"📌 Total Crist (incl. depr. ${V['DEPR_NPT3']+V['DEPR_NPT4']:.0f} KUS fija): **${tot_crist:.0f} KUS** → **${tot_crist/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
+        tot_crist = V['G_NPT3']+V['G_NPT4']+V['DEP_NPT3']+V['DEP_NPT4']
+        st.caption(f"📌 Total Crist (incl. depr. ${V['DEP_NPT3']+V['DEP_NPT4']:.0f} KUS fija): **${tot_crist:.0f} KUS** → **${tot_crist/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
  
         st.caption("Terminados → USD/T sobre Pril+DTP+Secado")
         for lbl, key in [("Prilado CS", "G_PRIL"), ("DTP", "G_DTP"), ("Secado KNO3", "G_SECADO")]:
