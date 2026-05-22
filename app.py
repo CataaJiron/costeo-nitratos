@@ -541,13 +541,25 @@ elif pagina == "Sensibilidad":
         'GEN_Perdidas_Degradacion':   _r('Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha', 'Perdidas y degradaciones puerto y cancha'),
         'OTROS':         gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
     }
- 
-    def recalcular(v):
+     def recalcular(v):
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
+
+
+
+
+        # 1.1 Tpte Sales: precio (USD/TNitr) × fc_sales (NaNO3/Ton)
+        # precio está en USD/TNitr sales, fc_sales en KTon NaNO3 / Kton prod
+        # resultado: USD/T
+        consumo_sales_total = (v['NV cat 1'] + v['PB'] + v['CS'])
+        ton_tpte_total = (v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"])
+        gasto_tpte_total = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"])
+        precio_tpte = gasto_tpte_total / ton_tpte_total if ton_tpte_total > 0 else 0.0
+        fc_sales = (consumo_sales_total / prod_total) if prod_total > 0 else 0.0
+        c11 = fc_sales * ton_tpte_total
 
         if v == BASE:  # solo imprime para el base, no para el simulado
             st.write("DEBUG Tpte Sales:")
@@ -566,17 +578,6 @@ elif pagina == "Sensibilidad":
             st.write(f"  precio_tpte: {precio_tpte}")
             st.write(f"  fc_sales: {fc_sales}")
             st.write(f"  prod_total: {prod_total}")
-
-
-        # 1.1 Tpte Sales: precio (USD/TNitr) × fc_sales (NaNO3/Ton)
-        # precio está en USD/TNitr sales, fc_sales en KTon NaNO3 / Kton prod
-        # resultado: USD/T
-        consumo_sales_total = (v['NV cat 1'] + v['PB'] + v['CS'])
-        ton_tpte_total = (v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"])
-        gasto_tpte_total = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"])
-        precio_tpte = gasto_tpte_total / ton_tpte_total if ton_tpte_total > 0 else 0.0
-        fc_sales = (consumo_sales_total / prod_total) if prod_total > 0 else 0.0
-        c11 = fc_sales * ton_tpte_total
 
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
