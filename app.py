@@ -559,7 +559,7 @@ elif pagina == "Sensibilidad":
         c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
 
         # 1.3 Cristalización = (gasto NPT3+NPT4 + depr) / prod_total
-        c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEPR_NPT3'] + v['DEPR_NPT4']) / prod_total if prod_total > 0 else 0.0
+        c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
  
          # 1.4 KCl = fc_total × costo_promedio
         cons_mop90 = (v['FC_MOP90_NPT3']*npt3) + (v['FC_MOP90_NPT4']*npt4)
@@ -575,7 +575,7 @@ elif pagina == "Sensibilidad":
  
  
         # 1.5 Terminados = gasto_total / prod_terminados
-        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEPR_PRIL'] + v['DEPR_DTP'] + v['DEPR_SECADO']) / prod_term if prod_term > 0 else 0.0
+        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
  
 
         # 1.6 Tpte + Puerto
