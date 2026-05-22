@@ -198,7 +198,7 @@ if pagina == "Dashboard":
         margin=dict(t=60, b=20),
         annotations=annotations,
     )
-    fig.update_yaxes(gridcolor="#f0f0f08f")
+    fig.update_yaxes(gridcolor="#f0f0f0")
     st.plotly_chart(fig, use_container_width=True)
 
     # Barras apiladas composición
@@ -227,7 +227,7 @@ if pagina == "Dashboard":
                 xanchor="center", yanchor="bottom"
             ) for mes, total in zip(MESES, totales_ppto)]
         )
-        fig2.update_yaxes(gridcolor="#f0f0f08f")
+        fig2.update_yaxes(gridcolor="#f0f0f0")
         st.plotly_chart(fig2, use_container_width=True)
 
     with col_tab2:
@@ -252,10 +252,8 @@ if pagina == "Dashboard":
                 xanchor="center", yanchor="bottom"
             ) for mes, total in zip(MESES, totales_rp)]
         )
-        fig3.update_yaxes(gridcolor="#f0f0f08f")
+        fig3.update_yaxes(gridcolor="#f0f0f0")
         st.plotly_chart(fig3, use_container_width=True)
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 # ANALISIS MENSUAL
 # ══════════════════════════════════════════════════════════════════════════════
