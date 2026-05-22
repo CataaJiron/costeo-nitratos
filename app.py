@@ -863,6 +863,15 @@ elif pagina == "Sensibilidad":
         precio_prom_v = (precio_nv_v*V['NV cat 1'] + precio_pb_v*V['PB'] + precio_cs_v*V['CS']) / consumo_tot_v if consumo_tot_v > 0 else 0.0
         c11_preview = precio_prom_v * fc_v
         st.caption(f"FC Sales: {fc_v:.4f} | Precio prom: ${precio_prom_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+   
+     st.divider()
+        if st.button("🔄 Restablecer valores PPTO", use_container_width=True):
+            for k in list(st.session_state.keys()):
+                if k.startswith("ui_"):
+                    del st.session_state[k]
+            st.session_state['sv']     = copy.deepcopy(BASE)
+            st.session_state['sv_mes'] = mes
+            st.rerun()
 
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
