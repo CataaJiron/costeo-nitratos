@@ -785,6 +785,7 @@ elif pagina == "Sensibilidad":
             use_container_width=True, hide_index=True, height=360,
         )
  
+
         st.divider()
         st.markdown("**PPTO vs Simulado**")
         fig = go.Figure()
