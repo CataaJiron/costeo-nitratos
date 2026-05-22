@@ -569,7 +569,7 @@ elif pagina == "Sensibilidad":
         costo_prom_kcl = (v['P_MOP90']*cons_mop90 + v['P_MOP70']*cons_mop70 + v['P_SS']*cons_ss) / cons_total if cons_total > 0 else 0.0
         Fc_KCl_MOP90_70 = cons_mop90 + cons_mop70 / (npt3 + v['KNO3_L_NPT4'])
         Fc_KCl_SS = cons_SS / (npt3 + v['KNO3_L_NPT4'])
-        fc_kcl_total   = Fc_KCl_SS + Fc_KCl_MOP90_70 > 0 else 0.0
+        fc_kcl_total   = Fc_KCl_SS + Fc_KCl_MOP90_70
         
         c14 = fc_kcl_total * costo_prom_kcl
  
