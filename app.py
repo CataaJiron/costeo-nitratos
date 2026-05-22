@@ -517,7 +517,6 @@ elif pagina == "Sensibilidad":
 
 
     # ── CALCULAR IMPACTO ────────────────────────────────────────────────────
-    # Producción nueva
     new_prod = {
         'prod_npt3':     prod_npt3,
         'prod_npt4':     prod_npt4,
@@ -531,128 +530,154 @@ elif pagina == "Sensibilidad":
     new_prod['prod_total'] = new_prod['prod_npt3'] + new_prod['prod_npt4']
     new_prod['prod_term']  = new_prod['prod_pril_dtp'] + new_prod['prod_secado']
 
-    # Gastos base + delta
+    pt    = new_prod['prod_total']
+    pterm = new_prod['prod_term']
+
     def g(a, sa, c, med='KUS'):
         return gv(df, a, sa, c, mes, tipo, 'PPTO', med)
 
-    def gasto_nuevo(label, a, sa, c, med='KUS'):
+    def gd(label, a, sa, c, med='KUS'):
+        """Gasto base + delta del usuario"""
         base = g(a, sa, c, med)
         d, _, _ = deltas_g.get(label, (0, None, None))
         return base + d
 
-    def fc_nuevo(label, a, sa, c, med):
+    def fc(label, a, sa, c, med):
+        """Factor base + delta del usuario"""
         base = g(a, sa, c, med)
         d, _, _ = deltas_fc.get(label, (0, None, None))
         return base + d
 
-    pt  = new_prod['prod_total']
-    pp  = new_prod['prod_pril_dtp']
-    ps  = new_prod['prod_secado']
-    pterm = new_prod['prod_term']
-    p3  = new_prod['prod_npt3']
-    p4  = new_prod['prod_npt4']
+    def imp(nuevo, base):
+        return round(nuevo - base, 2)
 
     detalle = []
     costo_nuevo = 0
 
-    # 1.1 Transporte de Sales
-    fc_nano3     = fc_nuevo('Fc NaNO3', 'TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales','NaNO3/Ton')
+    # 1.1 Tpte Sales
     precio_tpte  = g('TRANSPORTE DE SALES','Total Transporte de Sales (promedio)','Total Transporte de Sales (promedio)','USD/TNitr sales')
-    tpte_sales   = fc_nano3 * precio_tpte if pt > 0 else 0
-    detalle.append(("Tpte Sales", f"Fc:{fc_nano3:.4f} × ${precio_tpte:.1f}", round(tpte_sales, 2)))
-    costo_nuevo += tpte_sales
+    fc_nano3_b   = g('TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales','NaNO3/Ton')
+    fc_nano3_n   = fc('Fc NaNO3','TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales','NaNO3/Ton')
+    tpte_b = fc_nano3_b * precio_tpte
+    tpte_n = fc_nano3_n * precio_tpte
+    costo_nuevo += tpte_n
+    if abs(tpte_n - tpte_b) > 0.01:
+        detalle.append(("Tpte Sales", f"Fc:{fc_nano3_n:.4f} × ${precio_tpte:.1f}", imp(tpte_n, tpte_b)))
 
-    # 1.2 Operación Pozas
-    gasto_pozas = (
-        gasto_nuevo('Gasto Pozas NV', 'GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV') +
-        gasto_nuevo('Gasto Pozas PB', 'GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB') +
-        gasto_nuevo('Gasto Pozas CS', 'GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS') +
-        g('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas')
-    )
-    op_pozas = gasto_pozas / pt if pt > 0 else 0
-    detalle.append(("Op. Pozas", f"${gasto_pozas:.0f} KUS / {pt:.1f} Kton", round(op_pozas, 2)))
-    costo_nuevo += op_pozas
+    # 1.2 Op. Pozas
+    g_pozas_b = (g('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV') +
+                 g('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB') +
+                 g('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS') +
+                 g('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas'))
+    g_pozas_n = (gd('Gasto Pozas NV','GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV') +
+                 gd('Gasto Pozas PB','GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB') +
+                 gd('Gasto Pozas CS','GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS') +
+                 g('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas'))
+    pozas_b = g_pozas_b / prod_total if prod_total > 0 else 0
+    pozas_n = g_pozas_n / pt         if pt > 0         else 0
+    costo_nuevo += pozas_n
+    if abs(pozas_n - pozas_b) > 0.01:
+        detalle.append(("Op. Pozas", f"${g_pozas_n:.0f} / {pt:.1f} Kton", imp(pozas_n, pozas_b)))
 
     # 1.3 Cristalización
-    gasto_crist = (
-        gasto_nuevo('Gasto Planta NPT4', 'GASTO','CRISTALIZACION','Gasto NPT IV') +
-        gasto_nuevo('Gasto Planta NPT3', 'GASTO','CRISTALIZACION','Gasto NPT III + Korda') +
-        g('GASTO','CRISTALIZACION','Depreciación NPT IV') +
-        g('GASTO','CRISTALIZACION','Depreciación NPT III')
-    )
-    cristalizacion = gasto_crist / pt if pt > 0 else 0
-    detalle.append(("Cristalización", f"${gasto_crist:.0f} KUS / {pt:.1f} Kton", round(cristalizacion, 2)))
-    costo_nuevo += cristalizacion
+    g_crist_b = (g('GASTO','CRISTALIZACION','Gasto NPT IV') +
+                 g('GASTO','CRISTALIZACION','Gasto NPT III + Korda') +
+                 g('GASTO','CRISTALIZACION','Depreciación NPT IV') +
+                 g('GASTO','CRISTALIZACION','Depreciación NPT III'))
+    g_crist_n = (gd('Gasto Planta NPT4','GASTO','CRISTALIZACION','Gasto NPT IV') +
+                 gd('Gasto Planta NPT3','GASTO','CRISTALIZACION','Gasto NPT III + Korda') +
+                 g('GASTO','CRISTALIZACION','Depreciación NPT IV') +
+                 g('GASTO','CRISTALIZACION','Depreciación NPT III'))
+    crist_b = g_crist_b / prod_total if prod_total > 0 else 0
+    crist_n = g_crist_n / pt         if pt > 0         else 0
+    costo_nuevo += crist_n
+    if abs(crist_n - crist_b) > 0.01:
+        detalle.append(("Cristalización", f"${g_crist_n:.0f} / {pt:.1f} Kton", imp(crist_n, crist_b)))
 
     # 1.4 KCl
-    precio_kcl   = g('KCl','Total KCl','Total KCl','US$/T')
-    fc_mop90_npt3 = fc_nuevo('Fc KCl MOP90 NPT3','KCl','Fc KCl NPT3','MOP 90','KTon KCl 95%')
-    fc_mop70_npt3 = fc_nuevo('Fc KCl MOP70 NPT3','KCl','CONSUMO NPT3','MOP 70','KTon KCl 95%')
-    fc_ss_npt3    = fc_nuevo('Fc KCl SS NPT3',   'KCl','CONSUMO NPT3','SS',    'KTon KCl 95%')
-    fc_mop70_npt4 = fc_nuevo('Fc KCl MOP70 NPT4','KCl','Fc KCl NPT4','MOP 70','KTon KCl 95%')
+    precio_kcl    = g('KCl','Total KCl','Total KCl','US$/T')
+    fc_mop90_b    = g('KCl','Fc KCl NPT3','MOP 90','KTon KCl 95%')
+    fc_mop70_b    = g('KCl','CONSUMO NPT3','MOP 70','KTon KCl 95%')
+    fc_ss_b       = g('KCl','CONSUMO NPT3','SS','KTon KCl 95%')
+    fc_mop70n4_b  = g('KCl','Fc KCl NPT4','MOP 70','KTon KCl 95%')
+    fc_kcl_b = (fc_mop90_b + fc_mop70_b + fc_mop70n4_b + fc_ss_b) / prod_total if prod_total > 0 else 0
+    kcl_b = fc_kcl_b * precio_kcl
 
-    consumo_global_mop = fc_mop90_npt3 + fc_mop70_npt3 + fc_mop70_npt4
-    consumo_global_ss  = fc_ss_npt3
-    kno3_l = g('PRODUCCION','NPT4','- KNO3 L NPT II/IV','Kton')  # base, ajustar si hay delta prod
-    fc_9070  = consumo_global_mop / pt if pt > 0 else 0
-    fc_ss_g  = consumo_global_ss  / pt if pt > 0 else 0
-    fc_global_kcl = fc_9070 + fc_ss_g
-    kcl = fc_global_kcl * precio_kcl
-    detalle.append(("KCl", f"Fc:{fc_global_kcl:.4f} × ${precio_kcl:.1f}", round(kcl, 2)))
-    costo_nuevo += kcl
+    fc_mop90_n   = fc('Fc KCl MOP90 NPT3','KCl','Fc KCl NPT3','MOP 90','KTon KCl 95%')
+    fc_mop70_n   = fc('Fc KCl MOP70 NPT3','KCl','CONSUMO NPT3','MOP 70','KTon KCl 95%')
+    fc_ss_n      = fc('Fc KCl SS NPT3','KCl','CONSUMO NPT3','SS','KTon KCl 95%')
+    fc_mop70n4_n = fc('Fc KCl MOP70 NPT4','KCl','Fc KCl NPT4','MOP 70','KTon KCl 95%')
+    fc_kcl_n = (fc_mop90_n + fc_mop70_n + fc_mop70n4_n + fc_ss_n) / pt if pt > 0 else 0
+    kcl_n = fc_kcl_n * precio_kcl
+    costo_nuevo += kcl_n
+    if abs(kcl_n - kcl_b) > 0.01:
+        detalle.append(("KCl", f"Fc:{fc_kcl_n:.4f} × ${precio_kcl:.1f}", imp(kcl_n, kcl_b)))
 
     # 1.5 Terminados + Tpte Intermedios
-    gasto_term = (
-        gasto_nuevo('Gasto Prilado',    'GASTO','TERMINADOS','Gasto Planta Prilado CS') +
-        gasto_nuevo('Gasto DTP',        'GASTO','TERMINADOS','Gasto Planta DTP') +
-        gasto_nuevo('Gasto Secado',     'GASTO','TERMINADOS','Gasto Planta Secado KNO3') +
-        gasto_nuevo('Gasto Tpte CS-TOC','GASTO','TERMINADOS','Gasto Transporte Intermedios') +
-        g('GASTO','TERMINADOS','Depreciación Planta Prilado CS') +
-        g('GASTO','TERMINADOS','Depreciación Planta DTP') +
-        g('GASTO','TERMINADOS','Depreciación Planta Secado KNO3')
-    )
-    terminados = gasto_term / pterm if pterm > 0 else 0
-    detalle.append(("Terminados+Tpte", f"${gasto_term:.0f} KUS / {pterm:.1f} Kton", round(terminados, 2)))
-    costo_nuevo += terminados
+    g_term_b = (g('GASTO','TERMINADOS','Gasto Planta Prilado CS') +
+                g('GASTO','TERMINADOS','Gasto Planta DTP') +
+                g('GASTO','TERMINADOS','Gasto Planta Secado KNO3') +
+                g('GASTO','TERMINADOS','Gasto Transporte Intermedios') +
+                g('GASTO','TERMINADOS','Depreciación Planta Prilado CS') +
+                g('GASTO','TERMINADOS','Depreciación Planta DTP') +
+                g('GASTO','TERMINADOS','Depreciación Planta Secado KNO3'))
+    g_term_n = (gd('Gasto Prilado','GASTO','TERMINADOS','Gasto Planta Prilado CS') +
+                gd('Gasto DTP','GASTO','TERMINADOS','Gasto Planta DTP') +
+                gd('Gasto Secado','GASTO','TERMINADOS','Gasto Planta Secado KNO3') +
+                gd('Gasto Tpte CS-TOC','GASTO','TERMINADOS','Gasto Transporte Intermedios') +
+                g('GASTO','TERMINADOS','Depreciación Planta Prilado CS') +
+                g('GASTO','TERMINADOS','Depreciación Planta DTP') +
+                g('GASTO','TERMINADOS','Depreciación Planta Secado KNO3'))
+    term_b = g_term_b / prod_term if prod_term > 0 else 0
+    term_n = g_term_n / pterm     if pterm > 0     else 0
+    costo_nuevo += term_n
+    if abs(term_n - term_b) > 0.01:
+        detalle.append(("Terminados+Tpte", f"${g_term_n:.0f} / {pterm:.1f} Kton", imp(term_n, term_b)))
 
-    # 1.6 Transporte y Puerto
-    # a. Tpte Camiones
-    tpte_cam_kusd = gasto_nuevo('Gasto Tpte NV','TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV') + \
-                    gasto_nuevo('Gasto Tpte PB','TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB')
-    tpte_cam_usd_ton = g('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV','USD/Ton') # ajustar key si es distinta
-    tpte_camiones = tpte_cam_kusd / pt if pt > 0 else 0
+    # 1.6 Tpte y Puerto
+    emb_kusd_b  = g('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage')
+    alm_kusd_b  = g('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral')
+    emb_kton    = g('PRODUCCION','TERMINADOS','Embarque Total','Kton')
+    desp_kton   = g('PRODUCCION','TERMINADOS','Despacho Camiones','Kton')
+    cons_kton   = g('PRODUCCION','TERMINADOS','Consolidación Container','Kton')
+    tot_desp    = emb_kton + desp_kton + cons_kton
+    dep_pto     = g('GASTO','PUERTO','Depreciación Puerto')
+    tpte_nv_b   = g('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV')
+    tpte_pb_b   = g('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB')
 
-    # b. Puerto
-    embarque_kusd = gasto_nuevo('Gasto Embarque','Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage')
-    embarque_kton = g('PRODUCCION','TERMINADOS','Embarque Total','Kton')
-    almacenaje_kusd = gasto_nuevo('Gasto Almacenaje','Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral')
-    dist_kusd     = gasto_nuevo('Distributivos','Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral')
-    despacho_kton = g('PRODUCCION','TERMINADOS','Despacho Camiones','Kton')
-    consol_kton   = g('PRODUCCION','TERMINADOS','Consolidación Container','Kton')
-    total_despacho = embarque_kton + despacho_kton + consol_kton
+    pto_b = ((tpte_nv_b + tpte_pb_b) / prod_total if prod_total > 0 else 0) + \
+            ((emb_kusd_b + alm_kusd_b) / emb_kton  if emb_kton > 0  else 0) + \
+            (dep_pto / tot_desp                     if tot_desp > 0  else 0)
 
-    puerto_op   = (embarque_kusd / embarque_kton if embarque_kton > 0 else 0) + \
-                  (almacenaje_kusd / embarque_kton if embarque_kton > 0 else 0)
-    dep_puerto  = g('GASTO','PUERTO','Depreciación Puerto') / total_despacho if total_despacho > 0 else 0
-    tpte_puerto = tpte_camiones + puerto_op + dep_puerto
-    detalle.append(("Tpte y Puerto", f"${embarque_kusd:.0f}+${almacenaje_kusd:.0f} KUS", round(tpte_puerto, 2)))
-    costo_nuevo += tpte_puerto
+    emb_kusd_n  = gd('Gasto Embarque','Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage')
+    alm_kusd_n  = gd('Gasto Almacenaje','Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral')
+    tpte_nv_n   = gd('Gasto Tpte NV','TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV')
+    tpte_pb_n   = gd('Gasto Tpte PB','TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB')
+
+    pto_n = ((tpte_nv_n + tpte_pb_n) / pt         if pt > 0        else 0) + \
+            ((emb_kusd_n + alm_kusd_n) / emb_kton  if emb_kton > 0 else 0) + \
+            (dep_pto / tot_desp                     if tot_desp > 0 else 0)
+    costo_nuevo += pto_n
+    if abs(pto_n - pto_b) > 0.01:
+        detalle.append(("Tpte y Puerto", f"${emb_kusd_n:.0f}+${alm_kusd_n:.0f} KUS", imp(pto_n, pto_b)))
 
     # 1.7 Pérdidas y FE
-    base_perdidas = tpte_sales + op_pozas + cristalizacion + kcl
-    pct_fe = g('GASTO','PERDIDAS','Perdidas F/E %','%')
-    perdidas_fe_term  = base_perdidas * pct_fe if pct_fe > 0 else 0
-    perdidas_fe_puerto = g('GASTO','PERDIDAS','Perdidas y FE Puerto/Cancha','US$/T')
-    perdidas = perdidas_fe_term + perdidas_fe_puerto
-    detalle.append(("Pérdidas y FE", f"{pct_fe:.2%}", round(perdidas, 2)))
-    costo_nuevo += perdidas
+    pct_fe     = g('GASTO','PERDIDAS','Perdidas F/E %','%')
+    fe_pto     = g('GASTO','PERDIDAS','Perdidas y FE Puerto/Cancha','US$/T')
+    perdidas_b = (tpte_b + pozas_b + crist_b + kcl_b) * pct_fe + fe_pto
+    perdidas_n = (tpte_n + pozas_n + crist_n + kcl_n) * pct_fe + fe_pto
+    costo_nuevo += perdidas_n
+    if abs(perdidas_n - perdidas_b) > 0.01:
+        detalle.append(("Pérdidas y FE", f"{pct_fe:.4f} × base", imp(perdidas_n, perdidas_b)))
 
     # 1.8 Distributivos + Depreciación
     dep_comun = g('GASTO','DISTRIBUTIVOS','Depreciación Costo Común')
     dist_nit  = g('GASTO','DISTRIBUTIVOS','Distributivos Nitratos KUSD')
-    dist_dep  = (dep_comun + dist_nit) / pt if pt > 0 else 0
-    detalle.append(("Dist+Depreciación", f"${dep_comun+dist_nit:.0f} KUS / {pt:.1f} Kton", round(dist_dep, 2)))
-    costo_nuevo += dist_dep
+    distdep_b = (dep_comun + dist_nit) / prod_total if prod_total > 0 else 0
+    distdep_n = (dep_comun + dist_nit) / pt         if pt > 0         else 0
+    costo_nuevo += distdep_n
+    if abs(distdep_n - distdep_b) > 0.01:
+        detalle.append(("Dist+Depreciación", f"${dep_comun+dist_nit:.0f} / {pt:.1f} Kton", imp(distdep_n, distdep_b)))
 
     # ── MÉTRICAS ────────────────────────────────────────────────────────────
     impacto = costo_nuevo - costo_base
@@ -676,16 +701,3 @@ elif pagina == "Sensibilidad":
                 .format({"US$/T": "{:.1f}"}),
             use_container_width=True, hide_index=True
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
