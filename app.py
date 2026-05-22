@@ -715,10 +715,10 @@ elif pagina == "Sensibilidad":
  
         st.divider()
  
-        # ─── PUERTO ───────────────────────────────────────────────────────────
+# ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
 
-        # Función local exclusiva para Puerto para evitar choques de llaves
+        # 1. Función local exclusiva para Puerto
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
@@ -729,6 +729,7 @@ elif pagina == "Sensibilidad":
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
 
+        # 2. Llamadas a las filas de la tabla
         fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
                            "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
                            step_ton=0.1)
@@ -736,8 +737,20 @@ elif pagina == "Sensibilidad":
         fila_usdton_puerto("Almacenaje (KUS)", "G_ALMACENAJE", 
                            "Almacenaje (Kton)", "TON_ALMACENAJE", 
                            step_ton=1.0)
+
+        # 3. Inputs manuales y cálculo de Distributivos (CORREGIDO AQUÍ)
+        c1, c2, c3 = st.columns([2, 2, 1])
+        with c1:
+            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key="ui_G_DIST_T")
+        with c2:
+            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key="ui_TON_DESPACHO")
+        with c3:
+            # Calculamos las variables en el flujo global para que el caption de abajo las pueda leer
+            vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
+            ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
+            st.metric("=> USD/T", f"${ratio_d:.2f}")
  
-        # CORREGIDO: Mensaje informativo con la variable correcta
+        # Ahora vol_d ya existe aquí afuera y no fallará
         st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
  
     # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
