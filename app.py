@@ -551,12 +551,12 @@ elif pagina == "Sensibilidad":
         # 1.1 Tpte Sales: precio (USD/TNitr) × fc_sales (NaNO3/Ton)
         # precio está en USD/TNitr sales, fc_sales en KTon NaNO3 / Kton prod
         # resultado: USD/T
-        consumo_sales_total = v['NV cat 1'] + v['PB'] + v['CS']
-        ton_tpte_total = v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"]
-        gasto_tpte_total = v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"]
+        consumo_sales_total = (v['NV cat 1'] + v['PB'] + v['CS'])
+        ton_tpte_total = (v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"])
+        gasto_tpte_total = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"])
         precio_tpte = gasto_tpte_total / ton_tpte_total if ton_tpte_total > 0 else 0.0
-        fc_sales = consumo_sales_total / prod_total if prod_total > 0 else 0.0
-        c11 = precio_tpte * fc_sales
+        fc_sales = (consumo_sales_total / prod_total) if prod_total > 0 else 0.0
+        c11 = fc_sales * ton_tpte_total
 
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
