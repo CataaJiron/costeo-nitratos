@@ -521,11 +521,11 @@ elif pagina == "Sensibilidad":
 
         # Depreciaciones (fijas, no editables)
         'DEPR_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas CS'),
-        'G_DEP_PRIL':        _r('GASTO','TERMINADOS','Gasto Depreciación Prilado CS'),
-        'G_DEP_DTP':         _r('GASTO','TERMINADOS','Gasto Depreciación DTP'),
-        'G_DEP_SECADO':      _r('GASTO','TERMINADOS','Gasto Depreciación Secado KNO3'),
-        'G_DEP_NPT3':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT III'),
-        'G_DEP_NPT4':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT IV'),
+        'DEP_PRIL':        _r('GASTO','TERMINADOS','Gasto Depreciación Prilado CS'),
+        'DEP_DTP':         _r('GASTO','TERMINADOS','Gasto Depreciación DTP'),
+        'DEP_SECADO':      _r('GASTO','TERMINADOS','Gasto Depreciación Secado KNO3'),
+        'DEP_NPT3':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT III'),
+        'DEP_NPT4':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT IV'),
         'DEPR_PUERTO': _r('DEPRECIACION','PUERTO','Depreciacion Puerto','KUS'),
         'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios '),
         'DIST_NITRATOS': _area('Distributivos Nitratos'),
