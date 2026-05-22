@@ -576,9 +576,9 @@ elif pagina == "Sensibilidad":
 
         # 1.5 Terminados
         Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
-        c15 = Gasto_Total_terminados / prod_term if prod_term > 0 else 0.0        
+        c15 = Gasto_Total_terminados / prod_term if prod_term > 0 else 0.0
 
-	# 1.6 Tpte + Puerto
+        # 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
         c_embarque = v['G_EMBARQUE']  / v['TON_EMBARQUE_TOTAL']  if v['TON_EMBARQUE_TOTAL'] > 0  else 0.0
         c_alm      = v['G_ALMACENAJE']/ v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
@@ -893,5 +893,4 @@ elif pagina == "Sensibilidad":
             legend=dict(orientation='h', y=1.05),
         )
         st.plotly_chart(fig, use_container_width=True) 
-
 
