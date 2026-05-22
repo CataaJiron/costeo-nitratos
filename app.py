@@ -559,7 +559,7 @@ elif pagina == "Sensibilidad":
         c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
 
         # 1.3 Cristalización = (gasto NPT3+NPT4 + depr) / prod_total
-        c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
+        c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total
  
          # 1.4 KCl = fc_total × costo_promedio
         cons_mop90 = (v['FC_MOP90_NPT3']*npt3) + (v['FC_MOP90_NPT4']*npt4)
@@ -716,16 +716,15 @@ elif pagina == "Sensibilidad":
         st.divider()
  
         # ─── PUERTO ───────────────────────────────────────────────────────────
+        # ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
- 
-        # CORREGIDO: Se usan las llaves exactas del diccionario 'BASE'
         fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
-                    "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
-                    step_ton=0.1)
-                    
+            "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
+            step_ton=0.1, prefix="puerto_emb_")
+        
         fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", 
-                    "Almacenaje (Kton)", "TON_ALMACENAJE", 
-                    step_ton=1.0)
+            "Almacenaje (Kton)", "TON_ALMACENAJE", 
+            step_ton=1.0, prefix="puerto_alm_")
  
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
@@ -854,4 +853,5 @@ elif pagina == "Sensibilidad":
             legend=dict(orientation='h', y=1.05),
         )
         st.plotly_chart(fig, use_container_width=True) 
+
 
