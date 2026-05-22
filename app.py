@@ -743,17 +743,11 @@ elif pagina == "Sensibilidad":
  
         # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
         st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
+        
+        # Se agrega el 'prefix' para evitar el error de StreamlitDuplicateElementKey
         fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
                     "Tpte Camiones (Kton)", "TON_TPTE_CAM",
-                    step_ton=0.1)
- 
-        st.divider()
- 
-        # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
-        st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
-        fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
-                    "Tpte Camiones (Kton)", "TON_TPTE_CAM",
-                    step_ton=0.1)
+                    step_ton=0.1, prefix="camiones_")
  
         st.divider()
  
