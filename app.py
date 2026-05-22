@@ -601,6 +601,273 @@ elif pagina == "Sensibilidad":
         )
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# SENSIBILIDAD2
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "Sensibilidad2:
+    st.title("Simulador de sensibilidad")
+    st.caption("Modifica variables para ver el impacto en el costo total US$/T")
+
+    col_v, _ = st.columns([2,6])
+    with col_v:
+        modo = st.radio("Vista base", ["Puntual","Acumulado"], horizontal=True, label_visibility="collapsed")
+    tipo = "Puntual" if modo == "Puntual" else "Acumulado"
+
+    mes = botones_mes("sens")
+    st.divider()
+
+    # Bases
+    costo_base = sum(gv(df,'COSTO TOTAL',sa,c,mes,tipo,'PPTO') for sa,c,_ in COSTOS)
+    prod_npt3  = gv(df,'PRODUCCION','NPT3','PRODUCCION TOTAL NPT3',mes,tipo,'PPTO','Kton')
+    prod_npt4  = gv(df,'PRODUCCION','NPT4','PRODUCCION TOTAL NPT4',mes,tipo,'PPTO','Kton')
+    prod_total = prod_npt3 + prod_npt4
+    prod_pril_dtp = gv(df,'PRODUCCION','TERMINADOS','PRILADO + DTP',mes,tipo,'PPTO','Kton')
+    prod_secado   = gv(df,'PRODUCCION','TERMINADOS','SECADO',mes,tipo,'PPTO','Kton')
+    prod_term     = prod_pril_dtp + prod_secado
+
+    st.info(
+        f"**{MESES[mes]} — {modo} (PPTO)** | "
+        f"Costo base: **${costo_base:.1f}/T** | "
+        f"Prod total: {prod_total:.1f} Kton | "
+        f"Terminados: {prod_term:.1f} Kton"
+    )
+
+    tab_g, tab_p, tab_fc = st.tabs(["Gastos (KUS)", "Producción (Kton)", "Factores de consumo"])
+
+    deltas_g  = {}
+    deltas_p  = {}
+    deltas_fc = {}
+
+    # ── TAB GASTOS ──────────────────────────────────────────────────────────
+    GASTOS_DEF = [
+        ('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV',  'KUS','Gasto Tpte NV',      'prod_total'),
+        ('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB',  'KUS','Gasto Tpte PB',      'prod_total'),
+        ('GASTO','CRISTALIZACION','Gasto NPT III + Korda',                                   'KUS','Gasto Planta NPT3',  'prod_total'),
+        ('GASTO','CRISTALIZACION','Gasto NPT IV',                                             'KUS','Gasto Planta NPT4',  'prod_total'),
+        ('GASTO','TERMINADOS','Gasto Transporte Intermedios',                                 'KUS','Gasto Tpte CS-TOC',  'prod_total'),
+        ('GASTO','TERMINADOS','Gasto Planta Prilado CS',                                      'KUS','Gasto Prilado',      'prod_pril_dtp'),
+        ('GASTO','TERMINADOS','Gasto Planta DTP',                                             'KUS','Gasto DTP',          'prod_pril_dtp'),
+        ('GASTO','TERMINADOS','Gasto Planta Secado KNO3',                                     'KUS','Gasto Secado',       'prod_secado'),
+        ('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage',               'KUS','Gasto Embarque',     'prod_total'),
+        ('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral',                        'KUS','Gasto Almacenaje',   'prod_total'),
+        ('Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral',               'KUS','Distributivos',      'prod_total'),
+        ('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV',                 'KUS','Gasto Pozas NV',     'prod_total'),
+        ('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS',                 'KUS','Gasto Pozas CS',     'prod_total'),
+        ('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB',                 'KUS','Gasto Pozas PB',     'prod_total'),
+    ]
+
+    with tab_g:
+        st.caption("Delta en KUS (positivo = sube gasto = sube costo)")
+        col1, col2 = st.columns(2)
+        for i, (a,sa,c,med,label,prod_key) in enumerate(GASTOS_DEF):
+            base = gv(df, a, sa, c, mes, tipo, 'PPTO', med)
+            with (col1 if i%2==0 else col2):
+                d = st.number_input(f"{label}  *(base: {base:.0f})*", value=0, step=50, key=f"g_{i}")
+                deltas_g[label] = (d, prod_key, base)
+
+    # ── TAB PRODUCCIÓN ──────────────────────────────────────────────────────
+    PROD_DEF = [
+        ('PRODUCCION','TERMINADOS','PRILADO + DTP',     'Kton','Prod Prilado+DTP',   'prod_pril_dtp'),
+        ('PRODUCCION','TERMINADOS','SECADO',            'Kton','Prod Secado',         'prod_secado'),
+        ('PRODUCCION','NPT3','- KNO3 T NPT III',        'Kton','KNO3 T NPT III',      'prod_npt3'),
+        ('PRODUCCION','NPT3','- KNO3 R NPT III',        'Kton','KNO3 R NPT III',      'prod_npt3'),
+        ('PRODUCCION','NPT4','- CSSR NPT II/IV',        'Kton','CSSR NPT II/IV',      'prod_npt4'),
+        ('PRODUCCION','NPT4','- CSSI NPT II/IV',        'Kton','CSSI NPT II/IV',      'prod_npt4'),
+        ('PRODUCCION','NPT4','- KNO3 L NPT II/IV',      'Kton','KNO3 L NPT II/IV',   'prod_npt4'),
+    ]
+
+    with tab_p:
+        st.caption("Delta en Kton (positivo = sube producción)")
+        col1, col2 = st.columns(2)
+        for i, (a,sa,c,med,label,prod_key) in enumerate(PROD_DEF):
+            base = gv(df, a, sa, c, mes, tipo, 'PPTO', med)
+            with (col1 if i%2==0 else col2):
+                d = st.number_input(f"{label}  *(base: {base:.2f})*", value=0.0, step=0.5, key=f"p_{i}")
+                deltas_p[label] = (d, prod_key, base)
+
+    # ── TAB FACTORES ────────────────────────────────────────────────────────
+    FC_DEF = [
+        ('TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales','NaNO3/Ton','Fc NaNO3',           'fc_npt3_mop90'),
+        ('KCl','Fc KCl NPT3','MOP 90',   'KTon KCl 95%','Fc KCl MOP90 NPT3', 'fc_npt3_mop90'),
+        ('KCl','CONSUMO NPT3','MOP 70',   'KTon KCl 95%','Fc KCl MOP70 NPT3', 'fc_npt3_mop70'),
+        ('KCl','CONSUMO NPT3','SS',       'KTon KCl 95%','Fc KCl SS NPT3',    'fc_npt3_ss'),
+        ('KCl','Fc KCl NPT4','MOP 70',   'KTon KCl 95%','Fc KCl MOP70 NPT4', 'fc_npt4_mop70'),
+    ]
+
+    with tab_fc:
+        st.caption("Delta en el factor (ajuste directo sobre el valor base)")
+        col1, col2 = st.columns(2)
+        for i, (a,sa,c,med,label,fc_key) in enumerate(FC_DEF):
+            base = gv(df, a, sa, c, mes, tipo, 'PPTO', med)
+            with (col1 if i%2==0 else col2):
+                d = st.number_input(f"{label}  *(base: {base:.4f})*", value=0.0, step=0.01, format="%.4f", key=f"fc_{i}")
+                deltas_fc[label] = (d, fc_key, base)
+
+    st.divider()
+
+
+    # ── CALCULAR IMPACTO ────────────────────────────────────────────────────
+    # Producción nueva
+    new_prod = {
+        'prod_npt3':     prod_npt3,
+        'prod_npt4':     prod_npt4,
+        'prod_pril_dtp': prod_pril_dtp,
+        'prod_secado':   prod_secado,
+    }
+    for label, (d, prod_key, base) in deltas_p.items():
+        if d != 0:
+            new_prod[prod_key] = new_prod[prod_key] + d
+
+    new_prod['prod_total'] = new_prod['prod_npt3'] + new_prod['prod_npt4']
+    new_prod['prod_term']  = new_prod['prod_pril_dtp'] + new_prod['prod_secado']
+
+    # Gastos base + delta
+    def g(a, sa, c, med='KUS'):
+        return gv(df, a, sa, c, mes, tipo, 'PPTO', med)
+
+    def gasto_nuevo(label, a, sa, c, med='KUS'):
+        base = g(a, sa, c, med)
+        d, _, _ = deltas_g.get(label, (0, None, None))
+        return base + d
+
+    def fc_nuevo(label, a, sa, c, med):
+        base = g(a, sa, c, med)
+        d, _, _ = deltas_fc.get(label, (0, None, None))
+        return base + d
+
+    pt  = new_prod['prod_total']
+    pp  = new_prod['prod_pril_dtp']
+    ps  = new_prod['prod_secado']
+    pterm = new_prod['prod_term']
+    p3  = new_prod['prod_npt3']
+    p4  = new_prod['prod_npt4']
+
+    detalle = []
+    costo_nuevo = 0
+
+    # 1.1 Transporte de Sales
+    fc_nano3     = fc_nuevo('Fc NaNO3', 'TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales','NaNO3/Ton')
+    precio_tpte  = g('TRANSPORTE DE SALES','Total Transporte de Sales (promedio)','Total Transporte de Sales (promedio)','USD/TNitr sales')
+    tpte_sales   = fc_nano3 * precio_tpte if pt > 0 else 0
+    detalle.append(("Tpte Sales", f"Fc:{fc_nano3:.4f} × ${precio_tpte:.1f}", round(tpte_sales, 2)))
+    costo_nuevo += tpte_sales
+
+    # 1.2 Operación Pozas
+    gasto_pozas = (
+        gasto_nuevo('Gasto Pozas NV', 'GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV') +
+        gasto_nuevo('Gasto Pozas PB', 'GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB') +
+        gasto_nuevo('Gasto Pozas CS', 'GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS') +
+        g('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas')
+    )
+    op_pozas = gasto_pozas / pt if pt > 0 else 0
+    detalle.append(("Op. Pozas", f"${gasto_pozas:.0f} KUS / {pt:.1f} Kton", round(op_pozas, 2)))
+    costo_nuevo += op_pozas
+
+    # 1.3 Cristalización
+    gasto_crist = (
+        gasto_nuevo('Gasto Planta NPT4', 'GASTO','CRISTALIZACION','Gasto NPT IV') +
+        gasto_nuevo('Gasto Planta NPT3', 'GASTO','CRISTALIZACION','Gasto NPT III + Korda') +
+        g('GASTO','CRISTALIZACION','Depreciación NPT IV') +
+        g('GASTO','CRISTALIZACION','Depreciación NPT III')
+    )
+    cristalizacion = gasto_crist / pt if pt > 0 else 0
+    detalle.append(("Cristalización", f"${gasto_crist:.0f} KUS / {pt:.1f} Kton", round(cristalizacion, 2)))
+    costo_nuevo += cristalizacion
+
+    # 1.4 KCl
+    precio_kcl   = g('KCl','Total KCl','Total KCl','US$/T')
+    fc_mop90_npt3 = fc_nuevo('Fc KCl MOP90 NPT3','KCl','Fc KCl NPT3','MOP 90','KTon KCl 95%')
+    fc_mop70_npt3 = fc_nuevo('Fc KCl MOP70 NPT3','KCl','CONSUMO NPT3','MOP 70','KTon KCl 95%')
+    fc_ss_npt3    = fc_nuevo('Fc KCl SS NPT3',   'KCl','CONSUMO NPT3','SS',    'KTon KCl 95%')
+    fc_mop70_npt4 = fc_nuevo('Fc KCl MOP70 NPT4','KCl','Fc KCl NPT4','MOP 70','KTon KCl 95%')
+
+    consumo_global_mop = fc_mop90_npt3 + fc_mop70_npt3 + fc_mop70_npt4
+    consumo_global_ss  = fc_ss_npt3
+    kno3_l = g('PRODUCCION','NPT4','- KNO3 L NPT II/IV','Kton')  # base, ajustar si hay delta prod
+    fc_9070  = consumo_global_mop / pt if pt > 0 else 0
+    fc_ss_g  = consumo_global_ss  / pt if pt > 0 else 0
+    fc_global_kcl = fc_9070 + fc_ss_g
+    kcl = fc_global_kcl * precio_kcl
+    detalle.append(("KCl", f"Fc:{fc_global_kcl:.4f} × ${precio_kcl:.1f}", round(kcl, 2)))
+    costo_nuevo += kcl
+
+    # 1.5 Terminados + Tpte Intermedios
+    gasto_term = (
+        gasto_nuevo('Gasto Prilado',    'GASTO','TERMINADOS','Gasto Planta Prilado CS') +
+        gasto_nuevo('Gasto DTP',        'GASTO','TERMINADOS','Gasto Planta DTP') +
+        gasto_nuevo('Gasto Secado',     'GASTO','TERMINADOS','Gasto Planta Secado KNO3') +
+        gasto_nuevo('Gasto Tpte CS-TOC','GASTO','TERMINADOS','Gasto Transporte Intermedios') +
+        g('GASTO','TERMINADOS','Depreciación Planta Prilado CS') +
+        g('GASTO','TERMINADOS','Depreciación Planta DTP') +
+        g('GASTO','TERMINADOS','Depreciación Planta Secado KNO3')
+    )
+    terminados = gasto_term / pterm if pterm > 0 else 0
+    detalle.append(("Terminados+Tpte", f"${gasto_term:.0f} KUS / {pterm:.1f} Kton", round(terminados, 2)))
+    costo_nuevo += terminados
+
+    # 1.6 Transporte y Puerto
+    # a. Tpte Camiones
+    tpte_cam_kusd = gasto_nuevo('Gasto Tpte NV','TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV') + \
+                    gasto_nuevo('Gasto Tpte PB','TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB')
+    tpte_cam_usd_ton = g('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV','USD/Ton') # ajustar key si es distinta
+    tpte_camiones = tpte_cam_kusd / pt if pt > 0 else 0
+
+    # b. Puerto
+    embarque_kusd = gasto_nuevo('Gasto Embarque','Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage')
+    embarque_kton = g('PRODUCCION','TERMINADOS','Embarque Total','Kton')
+    almacenaje_kusd = gasto_nuevo('Gasto Almacenaje','Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral')
+    dist_kusd     = gasto_nuevo('Distributivos','Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral')
+    despacho_kton = g('PRODUCCION','TERMINADOS','Despacho Camiones','Kton')
+    consol_kton   = g('PRODUCCION','TERMINADOS','Consolidación Container','Kton')
+    total_despacho = embarque_kton + despacho_kton + consol_kton
+
+    puerto_op   = (embarque_kusd / embarque_kton if embarque_kton > 0 else 0) + \
+                  (almacenaje_kusd / embarque_kton if embarque_kton > 0 else 0)
+    dep_puerto  = g('GASTO','PUERTO','Depreciación Puerto') / total_despacho if total_despacho > 0 else 0
+    tpte_puerto = tpte_camiones + puerto_op + dep_puerto
+    detalle.append(("Tpte y Puerto", f"${embarque_kusd:.0f}+${almacenaje_kusd:.0f} KUS", round(tpte_puerto, 2)))
+    costo_nuevo += tpte_puerto
+
+    # 1.7 Pérdidas y FE
+    base_perdidas = tpte_sales + op_pozas + cristalizacion + kcl
+    pct_fe = g('GASTO','PERDIDAS','Perdidas F/E %','%')
+    perdidas_fe_term  = base_perdidas * pct_fe if pct_fe > 0 else 0
+    perdidas_fe_puerto = g('GASTO','PERDIDAS','Perdidas y FE Puerto/Cancha','US$/T')
+    perdidas = perdidas_fe_term + perdidas_fe_puerto
+    detalle.append(("Pérdidas y FE", f"{pct_fe:.2%}", round(perdidas, 2)))
+    costo_nuevo += perdidas
+
+    # 1.8 Distributivos + Depreciación
+    dep_comun = g('GASTO','DISTRIBUTIVOS','Depreciación Costo Común')
+    dist_nit  = g('GASTO','DISTRIBUTIVOS','Distributivos Nitratos KUSD')
+    dist_dep  = (dep_comun + dist_nit) / pt if pt > 0 else 0
+    detalle.append(("Dist+Depreciación", f"${dep_comun+dist_nit:.0f} KUS / {pt:.1f} Kton", round(dist_dep, 2)))
+    costo_nuevo += dist_dep
+
+    # ── MÉTRICAS ────────────────────────────────────────────────────────────
+    impacto = costo_nuevo - costo_base
+
+    k1, k2, k3 = st.columns(3)
+    k1.metric(f"Costo base PPTO {MESES[mes]}", f"${costo_base:.1f}/T")
+    k2.metric("Impacto total", f"{impacto:+.1f} US$/T", delta_color="inverse")
+    k3.metric("Nuevo costo estimado", f"${costo_nuevo:.1f}/T",
+              delta=f"{impacto:+.1f}", delta_color="inverse")
+
+    if detalle:
+        st.subheader("Detalle del impacto")
+        df_d = pd.DataFrame(detalle, columns=["Componente", "Detalle cálculo", "US$/T"])
+        def col_imp(val):
+            if isinstance(val, float):
+                return "color: red" if val > 0 else "color: green"
+            return ""
+        st.dataframe(
+            df_d.style
+                .map(col_imp, subset=["US$/T"])
+                .format({"US$/T": "{:.1f}"}),
+            use_container_width=True, hide_index=True
+        )
+
+
 
 
 
