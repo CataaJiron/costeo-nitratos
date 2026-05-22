@@ -740,13 +740,15 @@ elif pagina == "Sensibilidad":
         st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
  
         # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
+
         st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
         
-        # Aquí pasamos una clave única en el cuarto argumento modificando el string directamente
+        # Mantenemos tus variables reales del diccionario, pero aislamos la UI con key_prefix
         fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
-                    "Tpte Camiones (Kton)", "TON_TPTE_CAM_UNICO", # <-- Cambiamos el nombre de la llave aquí para evitar duplicados
-                    step_ton=0.1) # <-- Sin el parámetro prefix aquí
+                    "Tpte Camiones (Kton)", "TON_TPTE_CAM",
+                    step_ton=0.1, key_prefix="camiones_")
  
+        st.divider()
         # ─── FC KCl ───────────────────────────────────────────────────────────
         st.markdown("#### ⚗️ Factor Consumo KCl (KTon KCl / Kton prod)")
  
