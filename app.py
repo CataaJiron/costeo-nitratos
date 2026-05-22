@@ -514,268 +514,88 @@ elif pagina == "Sensibilidad":
 
     st.divider()
 
-# ── CALCULAR IMPACTO ────────────────────────────────────
+    # ── CALCULAR IMPACTO ────────────────────────────────────────────────────
+    # Producción nueva
+    new_prod = {
+        'prod_npt3': prod_npt3,
+        'prod_npt4': prod_npt4,
+        'prod_pril_dtp': prod_pril_dtp,
+        'prod_secado': prod_secado,
+    }
+    for label, (d, prod_key, base) in deltas_p.items():
+        if d != 0:
+            new_prod[prod_key] = new_prod.get(prod_key, 0) + d
 
-# Producciones base
-prod_base = {
-    'prod_npt3': prod_npt3,
-    'prod_npt4': prod_npt4,
-    'prod_pril_dtp': prod_pril_dtp,
-    'prod_secado': prod_secado,
-    'prod_total': prod_total,
-    'prod_term': prod_term
-}
+    new_prod['prod_total'] = new_prod['prod_npt3'] + new_prod['prod_npt4']
+    new_prod['prod_term']  = new_prod['prod_pril_dtp'] + new_prod['prod_secado']
 
-# Producciones nuevas
-new_prod = prod_base.copy()
+    impacto = 0
+    detalle = []
 
-for _, (d, prod_key, _) in deltas_p.items():
+    # Impacto gastos
+    for label, (d, prod_key, base) in deltas_g.items():
+        if d != 0:
+            pbase = {'prod_total': prod_total, 'prod_pril_dtp': prod_pril_dtp, 'prod_secado': prod_secado}.get(prod_key, prod_total)
+            pnew  = new_prod.get(prod_key, pbase)
+            if pbase > 0:
+                imp = (base + d) / pbase - base / pbase if pnew == pbase else (base + d) / pnew - base / pbase
+                imp = d / pbase
+                impacto += imp
+                detalle.append((label, f"{d:+.0f} KUS", round(imp,2)))
 
-    if d != 0:
-        new_prod[prod_key] += d
+    # Impacto producción sobre costos existentes
+    componentes_por_prod = {
+        'prod_total':    [0,1,2,3,5,6,7,8],
+        'prod_term':     [4],
+    }
+    for pk, idxs in componentes_por_prod.items():
+        pbase = prod_total if pk=='prod_total' else prod_term
+        pnew  = new_prod.get(pk, pbase)
+        if pnew != pbase and pbase > 0 and pnew > 0:
+            for idx in idxs:
+                sa, c, nom = COSTOS[idx]
+                val = gv(df,'COSTO TOTAL',sa,c,mes,tipo,'PPTO')
+                gasto_est = val * pbase
+                nuevo_costo = gasto_est / pnew
+                imp = nuevo_costo - val
+                if abs(imp) > 0.01:
+                    impacto += imp
+                    detalle.append((f"Prod {pk} → {nom}", f"{pnew-pbase:+.1f} Kton", round(imp,2)))
 
-new_prod['prod_total'] = (
-    new_prod['prod_npt3']
-    + new_prod['prod_npt4']
-)
+    # Impacto factores (simplificado: delta fc × precio promedio KCl o precio tpte)
+    precio_tpte = gv(df,'TRANSPORTE DE SALES','Total Transporte de Sales (promedio)',
+                     'Total Transporte de Sales (promedio)',mes,tipo,'PPTO','USD/TNitr sales')
+    precio_kcl  = gv(df,'KCl','Total KCl','Total KCl',mes,tipo,'PPTO','US$/T')
 
-new_prod['prod_term'] = (
-    new_prod['prod_pril_dtp']
-    + new_prod['prod_secado']
-)
+    for label, (d, fc_key, base) in deltas_fc.items():
+        if d != 0:
+            if 'NaNO3' in label:
+                imp = d * precio_tpte if precio_tpte > 0 else 0
+            else:
+                imp = d * precio_kcl if precio_kcl > 0 else 0
+            if abs(imp) > 0.001:
+                impacto += imp
+                detalle.append((label, f"{d:+.4f}", round(imp,2)))
 
-detalle=[]
-costo_nuevo=costo_base
+    costo_nuevo = costo_base + impacto
 
+    k1, k2, k3 = st.columns(3)
+    k1.metric(f"Costo base PPTO {MESES[mes]}", f"${costo_base:.1f}/T")
+    k2.metric("Impacto total", f"{impacto:+.1f} US$/T", delta_color="inverse")
+    k3.metric("Nuevo costo estimado", f"${costo_nuevo:.1f}/T",
+              delta=f"{impacto:+.1f}", delta_color="inverse")
 
-# ───────────────── GASTOS ─────────────────
-
-for label,(d,prod_key,base) in deltas_g.items():
-
-    if d==0:
-        continue
-
-    pbase=prod_base.get(
-        prod_key,
-        prod_total
-    )
-
-    pnew=new_prod.get(
-        prod_key,
-        pbase
-    )
-
-    if pbase<=0 or pnew<=0:
-        continue
-
-    costo_original=base/pbase
-
-    costo_nuevo_comp=(
-        (base+d)
-        /pnew
-    )
-
-    imp=(
-        costo_nuevo_comp
-        -costo_original
-    )
-
-    costo_nuevo += imp
-
-    detalle.append(
-        (
-            label,
-            f"{d:+.0f} KUS",
-            round(imp,2)
-        )
-    )
-
-
-# ───────────────── PRODUCCIÓN ─────────────────
-
-componentes_por_prod={
-
-    'prod_total':[0,1,2,3,5,6,7,8],
-
-    'prod_term':[4]
-
-}
-
-for pk,idxs in componentes_por_prod.items():
-
-    pbase=prod_base[pk]
-    pnew=new_prod[pk]
-
-    if pnew==pbase:
-        continue
-
-    if pbase<=0 or pnew<=0:
-        continue
-
-    for idx in idxs:
-
-        sa,c,nom=COSTOS[idx]
-
-        costo_unitario=gv(
-            df,
-            'COSTO TOTAL',
-            sa,
-            c,
-            mes,
-            tipo,
-            'PPTO'
+    if detalle:
+        st.subheader("Detalle del impacto")
+        df_d = pd.DataFrame(detalle, columns=["Variable","Cambio","Impacto US$/T"])
+        def col_imp(val):
+            if isinstance(val, float):
+                return "color: red" if val > 0 else "color: green"
+            return ""
+        st.dataframe(
+            df_d.style
+                .map(col_imp, subset=["Impacto US$/T"])
+                .format({"Impacto US$/T": "{:.1f}"}),
+            use_container_width=True, hide_index=True
         )
 
-        gasto_total=(
-            costo_unitario
-            *pbase
-        )
-
-        nuevo_costo=(
-            gasto_total
-            /pnew
-        )
-
-        imp=(
-            nuevo_costo
-            -costo_unitario
-        )
-
-        if abs(imp)>0.01:
-
-            costo_nuevo += imp
-
-            detalle.append(
-
-                (
-                    f"{nom}",
-                    f"{pnew-pbase:+.1f} Kton",
-                    round(
-                        imp,
-                        2
-                    )
-                )
-            )
-
-
-# ───────────────── FACTORES ─────────────────
-
-precio_tpte=gv(
-    df,
-    'TRANSPORTE DE SALES',
-    'Total Transporte de Sales (promedio)',
-    'Total Transporte de Sales (promedio)',
-    mes,
-    tipo,
-    'PPTO',
-    'USD/TNitr sales'
-)
-
-precio_kcl=gv(
-    df,
-    'KCl',
-    'Total KCl',
-    'Total KCl',
-    mes,
-    tipo,
-    'PPTO',
-    'US$/T'
-)
-
-for label,(d,fc_key,base) in deltas_fc.items():
-
-    if d==0:
-        continue
-
-    precio=(
-        precio_tpte
-        if 'NaNO3' in label
-        else precio_kcl
-    )
-
-    imp=d*precio
-
-    costo_nuevo+=imp
-
-    detalle.append(
-
-        (
-            label,
-            f"{d:+.4f}",
-            round(
-                imp,
-                2
-            )
-        )
-    )
-
-
-# ───────────────── RESULTADO ─────────────────
-
-impacto=(
-    costo_nuevo
-    -costo_base
-)
-
-k1,k2,k3=st.columns(3)
-
-k1.metric(
-    f"Costo base PPTO {MESES[mes]}",
-    f"${costo_base:.1f}/T"
-)
-
-k2.metric(
-    "Impacto total",
-    f"{impacto:+.1f} US$/T",
-    delta_color="inverse"
-)
-
-k3.metric(
-    "Nuevo costo estimado",
-    f"${costo_nuevo:.1f}/T",
-    delta=f"{impacto:+.1f}",
-    delta_color="inverse"
-)
-
-
-if detalle:
-
-    st.subheader(
-        "Detalle del impacto"
-    )
-
-    df_d=pd.DataFrame(
-        detalle,
-        columns=[
-            "Variable",
-            "Cambio",
-            "Impacto US$/T"
-        ]
-    )
-
-    def col_imp(val):
-
-        if val>0:
-            return "color:red"
-
-        elif val<0:
-            return "color:green"
-
-        return ""
-
-    st.dataframe(
-        df_d.style
-        .map(
-            col_imp,
-            subset=[
-                "Impacto US$/T"
-            ]
-        )
-        .format(
-            {
-                "Impacto US$/T":"{:.1f}"
-            }
-        ),
-        use_container_width=True,
-        hide_index=True
-    )
