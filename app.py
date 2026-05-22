@@ -308,9 +308,6 @@ elif pagina == "Analisis mensual":
     fig4.update_yaxes(gridcolor="#f0f0f0")
     st.plotly_chart(fig4, use_container_width=True)
 
-
-
-
     # Evolución anual componente seleccionado
     st.subheader("Evolución anual por componente")
     comp_idx = st.selectbox("Componente:", range(len(NOMBRES)), format_func=lambda i: NOMBRES[i])
@@ -318,17 +315,45 @@ elif pagina == "Analisis mensual":
     s_ppto = gs(df, 'COSTO TOTAL', sa, c, tipo, 'PPTO')
     s_rp   = rp_serie(df, 'COSTO TOTAL', sa, c, tipo)
 
+    deltas = [rp - ppto for rp, ppto in zip(s_rp, s_ppto)]
+
     fig5 = go.Figure()
-    fig5.add_trace(go.Bar(name="PPTO", x=MESES, y=s_ppto, marker_color='#B5D4F4'))
-    fig5.add_trace(go.Scatter(name="Real+Proy", x=MESES, y=s_rp,
-                              mode="lines+markers",
-                              line=dict(color="#D85A30", width=2.5),
-                              marker=dict(size=[12 if i==mes else 7 for i in range(12)])))
+
+    # Barras agrupadas PPTO vs Real+Proy
+    fig5.add_trace(go.Bar(
+        name="PPTO", x=MESES, y=s_ppto,
+        marker_color='#152578',
+        text=[f"${v:.1f}" for v in s_ppto],
+        textposition="outside", textfont_size=10,
+    ))
+    fig5.add_trace(go.Bar(
+        name="Real+Proy", x=MESES, y=s_rp,
+        marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(s_rp, s_ppto)],
+        text=[f"${v:.1f}" for v in s_rp],
+        textposition="outside", textfont_size=10,
+    ))
+
+    # Delta encima de cada par
+    annotations = []
+    for i, (mes_label, delta) in enumerate(zip(MESES, deltas)):
+        color  = "#D85A30" if delta > 0 else "#2ECC71"
+        symbol = "▲" if delta > 0 else "▼"
+        annotations.append(dict(
+            x=mes_label,
+            y=max(s_ppto[i], s_rp[i]) * 1.15,
+            text=f"{symbol} {delta:+.1f}",
+            showarrow=False,
+            font=dict(size=11, color=color, family="Arial Black"),
+            xanchor="center",
+        ))
+
     fig5.update_layout(
-        title=f"{nombre} — {modo}", height=300,
+        barmode="group",
+        title=f"{nombre} — {modo}", height=380,
         legend=dict(orientation="h", y=1.1),
         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=50,b=20),
+        margin=dict(t=50, b=20),
+        annotations=annotations,
     )
     fig5.update_yaxes(gridcolor="#f0f0f0")
     st.plotly_chart(fig5, use_container_width=True)
