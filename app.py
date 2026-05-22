@@ -560,9 +560,8 @@ elif pagina == "Sensibilidad":
 
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
-        Gasto_pozas_Total =  (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEP_POZAS_CS'])
+        Gasto_pozas_Total =  (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['G_DEPRECIACION_CS'])
         c12 = Gasto_pozas_Total / prod_total if prod_total > 0 else 0.0
-
 
         # 1.3 Cristalización
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
