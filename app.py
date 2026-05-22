@@ -417,7 +417,7 @@ elif pagina == "Analisis mensual":
 elif pagina == "Sensibilidad":
     import copy
  
-    st.title(f"Simulador de Sensibilidad — {MESES[mes]}")
+    st.title(f"Simulador de Sensibilidad — {MESES[mes] if 'mes' in dir() else ''}")
  
     mes = botones_mes("sens")
     st.divider()
