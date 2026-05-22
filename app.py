@@ -431,7 +431,7 @@ elif pagina == "Sensibilidad":
         return gv(df, a, sa, c, mes, tipo, 'PPTO', med)
 
     # ── Bases ────────────────────────────────────────────────────────────────
-    costo_base    = sum(get('COSTO TOTAL', sa, c) for sa, c, _ in COSTOS)
+    costo_base    = sum(gv(df, 'COSTO TOTAL', sa, c, mes, tipo, 'PPTO') for sa, c, _ in COSTOS)  # ← esta línea
     prod_npt3     = get('PRODUCCION','NPT3','PRODUCCION TOTAL NPT3','Kton')
     prod_npt4     = get('PRODUCCION','NPT4','PRODUCCION TOTAL NPT4','Kton')
     prod_total    = prod_npt3 + prod_npt4
