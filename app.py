@@ -718,11 +718,13 @@ elif pagina == "Sensibilidad":
         # ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
  
-        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE",
-                    "Embarque Granel (Kton)",    "TON_EMBARQUE",
+        # CORREGIDO: Se usan las llaves exactas del diccionario 'BASE'
+        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
+                    "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
                     step_ton=0.1)
-        fila_usdton("Almacenaje (KUS)",          "G_ALMACENAJE",
-                    "Almacenaje (Kton)",          "TON_ALMACENAJE",
+                    
+        fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", 
+                    "Almacenaje (Kton)", "TON_ALMACENAJE", 
                     step_ton=1.0)
  
         c1, c2, c3 = st.columns([2, 2, 1])
@@ -731,11 +733,19 @@ elif pagina == "Sensibilidad":
         with c2:
             V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key="ui_TON_DESPACHO")
         with c3:
-            vol_d = V['TON_EMBARQUE'] + V['TON_DESPACHO']
+            # CORREGIDO: Aquí también se cambia TON_EMBARQUE por TON_EMBARQUE_TOTAL
+            vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
             ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
             st.metric("=> USD/T", f"${ratio_d:.2f}")
  
-        st.caption(f"ℹ️ Distributivos: denominador = Embarque Granel + Despacho Camiones = {vol_d:.2f} Kton")
+        # CORREGIDO: Mensaje informativo con la variable correcta
+        st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
+ 
+        # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
+        st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
+        fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
+                    "Tpte Camiones (Kton)", "TON_TPTE_CAM",
+                    step_ton=0.1)
  
         st.divider()
  
