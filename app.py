@@ -159,7 +159,7 @@ if pagina == "Dashboard":
     fig.add_trace(go.Bar(
         name="PPTO",
         x=MESES, y=ppto_s,
-        marker_color='#B5D4F4',
+        marker_color='#152578',
         text=[f"${v:.0f}" for v in ppto_s],
         textposition="outside",
         textfont_size=10,
@@ -168,7 +168,7 @@ if pagina == "Dashboard":
     fig.add_trace(go.Bar(
         name="Real + Proyección",
         x=MESES, y=rp_s,
-        marker_color='#D85A30',
+        marker_color='#80BC00',
         text=[f"${v:.0f}" for v in rp_s],
         textposition="outside",
         textfont_size=10,
