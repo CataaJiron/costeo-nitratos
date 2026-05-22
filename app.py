@@ -593,8 +593,8 @@ elif pagina == "Sensibilidad":
         # Pérdidas Terminados = Op_dep × pct_fe  (pct_fe desde tabla Perdidas F/E %)
         # Pérdidas Puerto = pct_deg × (Op_dep + Perd_term + c15)
         Op_dep      = c11 + c12 + c13 + c14
-        pct_fe      = v['PCT_FE']       # % desde tabla
-        pct_deg     = v['GEN_Perdidas_Degradacion']  # % desde tabla
+        pct_fe  = v.get('PCT_FE', BASE.get('PCT_FE', 0.0))
+        pct_deg = v.get('GEN_Perdidas_Degradacion', BASE.get('GEN_Perdidas_Degradacion', 0.0))  # % desde tabla
         perd_term   = Op_dep * pct_fe
         base_deg    = Op_dep + perd_term + c15
         perd_puerto = pct_deg * base_deg
@@ -622,6 +622,10 @@ elif pagina == "Sensibilidad":
         st.session_state['sv']     = copy.deepcopy(BASE)
         st.session_state['sv_mes'] = mes
     V = st.session_state['sv']
+    # Asegurar que todas las claves del BASE estén en V (por si se agregaron nuevas)
+    for k, val in BASE.items():
+        if k not in V:
+            V[k] = val
  
     # ── UI: inputs + resultados ───────────────────────────────────────────────
     col_inp, col_res = st.columns([3, 2], gap="large")
@@ -899,4 +903,3 @@ elif pagina == "Sensibilidad":
             legend=dict(orientation='h', y=1.05),
         )
         st.plotly_chart(fig, use_container_width=True)
-
