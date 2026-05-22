@@ -562,16 +562,16 @@ elif pagina == "Sensibilidad":
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total
  
          # 1.4 KCl = fc_total × costo_promedio
-        cons_mop90 = (v['FC_MOP90_NPT3']*npt3) + (v['FC_MOP90_NPT4']*v['KNO3_L_NPT4'])
-        cons_mop70 = (v['FC_MOP70_NPT3']*npt3) + (v['FC_MOP70_NPT4']* v['KNO3_L_NPT4'])
-        cons_ss    = (v['FC_SS_NPT3']*npt3) + (v['FC_SS_NPT4']* v['KNO3_L_NPT4'])
+        cons_mop90 = (v['FC_MOP90_NPT3'] * npt3) + (v['FC_MOP90_NPT4'] * npt4)
+        cons_mop70 = (v['FC_MOP70_NPT3'] * npt3) + (v['FC_MOP70_NPT4'] * npt4)
+        cons_ss    = (v['FC_SS_NPT3'] * npt3)    + (v['FC_SS_NPT4'] * npt4)
         cons_total = cons_mop90 + cons_mop70 + cons_ss
-        costo_prom_kcl = ((v['P_MOP90']*cons_mop90) + (v['P_MOP70']*cons_mop70) + (v['P_SS']*cons_ss)) / cons_total if cons_total > 0 else 0.0
-        Fc_KCl_MOP90_70 = cons_mop90 + cons_mop70 / (npt3 + v['KNO3_L_NPT4'])
-        Fc_KCl_SS = cons_ss / (npt3 + v['KNO3_L_NPT4'])
-        fc_kcl_total   = Fc_KCl_SS + Fc_KCl_MOP90_70
         
-        c14 = fc_kcl_total * costo_prom_kcl
+        # Costo total monetario de todo el KCl consumido (KUS)
+        costo_total_kcl = (v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)
+        
+        # El costo unitario real para el componente es: Costo Total KUS / Producción Total Kton
+        c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
  
  
         # 1.5 Terminados = gasto_total / prod_terminados
