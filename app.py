@@ -383,6 +383,10 @@ elif pagina == "Analisis mensual":
         rows.append(row_t)
 
     df_tabla = pd.DataFrame(rows)
+
+    # Columnas numéricas
+    cols_num = MESES + ["Acum Dic"]
+
     def highlight(row):
         styles = [''] * len(row)
         if row['Tipo'] == 'R+P':
@@ -398,8 +402,13 @@ elif pagina == "Analisis mensual":
                                 styles[i] = 'color: green'
                     except: pass
         return styles
-    st.dataframe(df_tabla.style.apply(highlight, axis=1),
-                 use_container_width=True, hide_index=True, height=500)
+
+    st.dataframe(
+        df_tabla.style
+            .apply(highlight, axis=1)
+            .format({col: "{:.1f}" for col in cols_num}),
+        use_container_width=True, hide_index=True, height=500
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
