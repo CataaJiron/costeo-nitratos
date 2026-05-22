@@ -594,14 +594,11 @@ elif pagina == "Sensibilidad":
                 return "color: red" if val > 0 else "color: green"
             return ""
         st.dataframe(
-    df_d.style
-        df_d.style
-        .map(col_imp, subset=["Impacto US$/T"])
-        .format({"Impacto US$/T": "{:.1f}"}),
-    use_container_width=True, hide_index=True
-    )
-
-
+            df_d.style
+                .map(col_imp, subset=["Impacto US$/T"])
+                .format({"Impacto US$/T": "{:.1f}"}),
+            use_container_width=True, hide_index=True
+        )
 
 
 
