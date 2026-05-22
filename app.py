@@ -514,88 +514,230 @@ elif pagina == "Sensibilidad":
 
     st.divider()
 
-    # ── CALCULAR IMPACTO ────────────────────────────────────────────────────
-    # Producción nueva
-    new_prod = {
+# ── CALCULAR DIRECTAMENTE EL COSTO EN FORMULACIÓN (CÓDIGO INTEGRAL) ──────
+
+    # 1. PARAMETRIZACIÓN DE VOLÚMENES ORIGINALES (FOTO BASE)
+    p_base = {
         'prod_npt3': prod_npt3,
         'prod_npt4': prod_npt4,
-        'prod_pril_dtp': prod_pril_dtp,
-        'prod_secado': prod_secado,
+        'total': prod_total if prod_total > 0 else 0.001,
+        'pril_dtp': prod_pril_dtp,
+        'secado': prod_secado,
+        'term': prod_term if prod_term > 0 else 0.001
     }
-    for label, (d, prod_key, base) in deltas_p.items():
-        if d != 0:
-            new_prod[prod_key] = new_prod.get(prod_key, 0) + d
 
-    new_prod['prod_total'] = new_prod['prod_npt3'] + new_prod['prod_npt4']
-    new_prod['prod_term']  = new_prod['prod_pril_dtp'] + new_prod['prod_secado']
-
-    impacto = 0
-    detalle = []
-
-    # Impacto gastos
-    for label, (d, prod_key, base) in deltas_g.items():
-        if d != 0:
-            pbase = {'prod_total': prod_total, 'prod_pril_dtp': prod_pril_dtp, 'prod_secado': prod_secado}.get(prod_key, prod_total)
-            pnew  = new_prod.get(prod_key, pbase)
-            if pbase > 0:
-                imp = (base + d) / pbase - base / pbase if pnew == pbase else (base + d) / pnew - base / pbase
-                imp = d / pbase
-                impacto += imp
-                detalle.append((label, f"{d:+.0f} KUS", round(imp,2)))
-
-    # Impacto producción sobre costos existentes
-    componentes_por_prod = {
-        'prod_total':    [0,1,2,3,5,6,7,8],
-        'prod_term':     [4],
+    # 2. PARAMETRIZACIÓN DE VOLÚMENES MODIFICADOS (FOTO SIMULADA)
+    # Acumulamos los deltas de producción ingresados en la interfaz por el usuario
+    d_npt3 = deltas_p.get('KNO3 T NPT III', (0,0,0))[0] + deltas_p.get('KNO3 R NPT III', (0,0,0))[0]
+    d_npt4 = deltas_p.get('- CSSR NPT II/IV', (0,0,0))[0] + deltas_p.get('- CSSI NPT II/IV', (0,0,0))[0] + deltas_p.get('- KNO3 L NPT II/IV', (0,0,0))[0]
+    
+    p_sim = {
+        'prod_npt3': max(0.001, prod_npt3 + d_npt3),
+        'prod_npt4': max(0.001, prod_npt4 + d_npt4),
+        'pril_dtp': max(0.001, prod_pril_dtp + deltas_p.get('Prod Prilado+DTP', (0, '', 0))[0]),
+        'secado': max(0.001, prod_secado + deltas_p.get('Prod Secado', (0, '', 0))[0])
     }
-    for pk, idxs in componentes_por_prod.items():
-        pbase = prod_total if pk=='prod_total' else prod_term
-        pnew  = new_prod.get(pk, pbase)
-        if pnew != pbase and pbase > 0 and pnew > 0:
-            for idx in idxs:
-                sa, c, nom = COSTOS[idx]
-                val = gv(df,'COSTO TOTAL',sa,c,mes,tipo,'PPTO')
-                gasto_est = val * pbase
-                nuevo_costo = gasto_est / pnew
-                imp = nuevo_costo - val
-                if abs(imp) > 0.01:
-                    impacto += imp
-                    detalle.append((f"Prod {pk} → {nom}", f"{pnew-pbase:+.1f} Kton", round(imp,2)))
+    p_sim['total'] = p_sim['prod_npt3'] + p_sim['prod_npt4']
+    p_sim['term']  = p_sim['pril_dtp'] + p_sim['secado']
 
-    # Impacto factores (simplificado: delta fc × precio promedio KCl o precio tpte)
-    precio_tpte = gv(df,'TRANSPORTE DE SALES','Total Transporte de Sales (promedio)',
-                     'Total Transporte de Sales (promedio)',mes,tipo,'PPTO','USD/TNitr sales')
-    precio_kcl  = gv(df,'KCl','Total KCl','Total KCl',mes,tipo,'PPTO','US$/T')
+    # 3. EXTRACCIÓN DE DATOS DE VALORIZACIÓN FIJOS (PRECIOS Y DEPRECIACIONES)
+    precio_tpte_sales_fijo = gv(df, 'TRANSPORTE DE SALES', 'Total Transporte de Sales (promedio)', 'Total Transporte de Sales (promedio)', mes, tipo, 'PPTO', 'USD/TNitr sales')
+    
+    deprec_pozas_nv_fijo   = gv(df, 'DEPRECIACION', 'Operación Pozas (NV+CS+PV+PB)', 'Depreciación CS', mes, tipo, 'PPTO')
+    deprec_npt3_fijo       = gv(df, 'DEPRECIACION', 'CRISTALIZACION', 'Depreciación NPT III', mes, tipo, 'PPTO')
+    deprec_npt4_fijo       = gv(df, 'DEPRECIACION', 'CRISTALIZACION', 'Depreciación NPT IV', mes, tipo, 'PPTO')
+    
+    deprec_prilado_fijo    = gv(df, 'DEPRECIACION', 'TERMINADOS', 'Depreciación Planta Prilado CS', mes, tipo, 'PPTO')
+    deprec_dtp_fijo        = gv(df, 'DEPRECIACION', 'TERMINADOS', 'Depreciación Planta DTP', mes, tipo, 'PPTO')
+    deprec_secado_fijo     = gv(df, 'DEPRECIACION', 'TERMINADOS', 'Depreciación Planta Secado KNO3', mes, tipo, 'PPTO')
+    
+    deprec_comun_fijo      = gv(df, 'DISTRIBUTIVOS + DEPRECIACION', 'Depreciación Costo Comun', 'Depreciación Costo Comun', mes, tipo, 'PPTO')
+    dist_nitratos_fijo     = gv(df, 'DISTRIBUTIVOS + DEPRECIACION', 'Distributivos Nitratos KUSD', 'Distributivos Nitratos KUSD', mes, tipo, 'PPTO')
 
-    for label, (d, fc_key, base) in deltas_fc.items():
-        if d != 0:
-            if 'NaNO3' in label:
-                imp = d * precio_tpte if precio_tpte > 0 else 0
-            else:
-                imp = d * precio_kcl if precio_kcl > 0 else 0
-            if abs(imp) > 0.001:
-                impacto += imp
-                detalle.append((label, f"{d:+.4f}", round(imp,2)))
+    # 4. ALGORITMO DE FORMULACIÓN DIRECTA CONCEPTUAL
+    def calcular_estructura_costos(p, dg, dfc):
+        c_linea = {}
 
-    costo_nuevo = costo_base + impacto
+        # ── 1.1 TRANSPORTE DE SALES
+        fc_nano3_base = gv(df, 'TRANSPORTE DE SALES', '- Factor Consumo de Sales', '- Factor Consumo de Sales', mes, tipo, 'PPTO', 'NaNO3/Ton')
+        fc_nano3_sim  = fc_nano3_base + dfc.get('Fc NaNO3', (0, '', 0))[0]
+        c_linea['Tpte Sales'] = fc_nano3_sim * (precio_tpte_sales_fijo if precio_tpte_sales_fijo > 0 else 1)
 
+        # ── 1.2 OPERACIÓN POZAS (USD/TON)
+        g_pozas_nv = gv(df, 'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas NV', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Pozas NV', (0,0,0))[0]
+        g_pozas_cs = gv(df, 'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas CS', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Pozas CS', (0,0,0))[0]
+        g_pozas_pb = gv(df, 'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas PB', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Pozas PB', (0,0,0))[0]
+        
+        total_usd_pozas = g_pozas_nv + g_pozas_cs + g_pozas_pb + deprec_pozas_nv_fijo
+        c_linea['Op. Pozas'] = total_usd_pozas / p['total']
+
+        # ── 1.3 CRISTALIZACION (USD/TON)
+        g_npt3 = gv(df, 'GASTO', 'CRISTALIZACION', 'Gasto NPT III + Korda', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Planta NPT3', (0,0,0))[0]
+        g_npt4 = gv(df, 'GASTO', 'CRISTALIZACION', 'Gasto NPT IV', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Planta NPT4', (0,0,0))[0]
+        
+        total_usd_cristalizacion = g_npt3 + g_npt4 + deprec_npt3_fijo + deprec_npt4_fijo
+        c_linea['Cristalización'] = total_usd_cristalizacion / p['total']
+
+        # ── 1.4 KCL (USD/TON) - DESARROLLO PONDERADO MATRICIAL
+        # Factores de consumo unitarios base del Excel + Deltas de la pantalla
+        fc_m90_n3 = gv(df, 'KCl', 'Fc KCl NPT3', 'MOP 90', mes, tipo, 'PPTO', 'KTon KCl 95%') + dfc.get('Fc KCl MOP90 NPT3', (0, '', 0))[0]
+        fc_m70_n3 = gv(df, 'KCl', 'CONSUMO NPT3', 'MOP 70', mes, tipo, 'PPTO', 'KTon KCl 95%') + dfc.get('Fc KCl MOP70 NPT3', (0, '', 0))[0]
+        fc_ss_n3  = gv(df, 'KCl', 'CONSUMO NPT3', 'SS', mes, tipo, 'PPTO', 'KTon KCl 95%') + dfc.get('Fc KCl SS NPT3', (0, '', 0))[0]
+        fc_m70_n4 = gv(df, 'KCl', 'Fc KCl NPT4', 'MOP 70', mes, tipo, 'PPTO', 'KTon KCl 95%') + dfc.get('Fc KCl MOP70 NPT4', (0, '', 0))[0]
+        
+        # Consumos Totales Dinámicos calculados a partir de las producciones vigentes
+        cons_m90 = (fc_m90_n3 * p['prod_npt3']) + (0.0 * p['prod_npt4'])
+        cons_m70 = (fc_m70_n3 * p['prod_npt3']) + (fc_m70_n4 * p['prod_npt4'])
+        cons_ss  = (fc_ss_n3  * p['prod_npt3']) + (0.0 * p['prod_npt4'])
+        cons_total_kcl = cons_m90 + cons_m70 + cons_ss
+        
+        # Rescatar Precios Unitarios de cada tipo de MOP para armar la ponderación
+        p_m90 = gv(df, 'KCl', 'Precios MOP 90', 'MOP 90', mes, tipo, 'PPTO', 'US$/T')
+        p_m70 = gv(df, 'KCl', 'Precios MOP 70', 'MOP 70', mes, tipo, 'PPTO', 'US$/T')
+        p_ss  = gv(df, 'KCl', 'Precios SS', 'SS', mes, tipo, 'PPTO', 'US$/T')
+        if p_m90 == 0: p_m90 = 350.0  # Salvaguardas operacionales
+        if p_m70 == 0: p_m70 = 310.0
+        if p_ss == 0:  p_ss = 280.0
+
+        # Ecuación del Costo Promedio Ponderado de KCl
+        if cons_total_kcl > 0:
+            costo_promedio_kcl = ((p_m90 * cons_m90) + (p_m70 * cons_m70) + (p_ss * cons_ss)) / cons_total_kcl
+        else:
+            costo_promedio_kcl = gv(df, 'KCl', 'Total KCl', 'Total KCl', mes, tipo, 'PPTO', 'US$/T')
+
+        # Factores globales consolidados sobre Producción Total
+        fc_m90_m70_global = (cons_m90 + cons_m70) / p['total']
+        fc_ss_global      = cons_ss / p['total']
+        fc_consumo_total  = fc_m90_m70_global + fc_ss_global
+
+        c_linea['KCl'] = fc_consumo_total * costo_promedio_kcl
+
+        # ── 1.5 TERMINADO + TPTE INTERM (USD/TON)
+        g_prilado  = gv(df, 'GASTO', 'TERMINADOS', 'Gasto Planta Prilado CS', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Prilado', (0,0,0))[0]
+        g_dtp      = gv(df, 'GASTO', 'TERMINADOS', 'Gasto Planta DTP', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto DTP', (0,0,0))[0]
+        g_secado   = gv(df, 'GASTO', 'TERMINADOS', 'Gasto Planta Secado KNO3', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Secado', (0,0,0))[0]
+        g_tpte_int = gv(df, 'GASTO', 'TERMINADOS', 'Gasto Transporte Intermedios', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Tpte CS-TOC', (0,0,0))[0]
+        
+        total_usd_terminados = (g_prilado + g_dtp + g_secado + g_tpte_int + 
+                                deprec_prilado_fijo + deprec_dtp_fijo + deprec_secado_fijo)
+        c_linea['Terminados + Tpte interm'] = total_usd_terminados / p['term']
+
+        # ── 1.6 TRANSPORTE Y PUERTO (USD/TON)
+        # Transporte Camiones
+        g_tpte_camiones_usd = gv(df, 'GASTO', 'Transporte Camiones', 'Gasto Camiones', mes, tipo, 'PPTO', 'KUS')
+        ton_tpte_camiones   = gv(df, 'PRODUCCION', 'Transporte Camiones', 'Toneladas Movilizadas', mes, tipo, 'PPTO', 'TON')
+        if ton_tpte_camiones <= 0: ton_tpte_camiones = p['term']
+        tpte_camiones_unit = g_tpte_camiones_usd / ton_tpte_camiones
+
+        # Cash Cost Puerto (Embarque, Demurrage, Almacenaje y Distributivos)
+        g_embarque_usd   = gv(df, 'GASTO', 'EMBARQUE', 'Embarque Granel + Demurrage', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Embarque', (0,0,0))[0]
+        ton_embarque     = gv(df, 'PRODUCCION', 'EMBARQUE', 'Embarque Granel TON', mes, tipo, 'PPTO', 'TON')
+        if ton_embarque <= 0: ton_embarque = p['total']
+        cc_embarque_unit = g_embarque_usd / ton_embarque
+
+        g_almacenaje_usd = gv(df, 'GASTO', 'ALMACENAJE', 'Almacenaje Trimestral', mes, tipo, 'PPTO', 'KUS') + dg.get('Gasto Almacenaje', (0,0,0))[0]
+        ton_almacenaje   = gv(df, 'PRODUCCION', 'ALMACENAJE', 'Almacenaje TON', mes, tipo, 'PPTO', 'TON')
+        if ton_almacenaje <= 0: ton_almacenaje = p['total']
+        cc_almacenaje_unit = g_almacenaje_usd / ton_almacenaje
+
+        g_dist_puerto_usd = gv(df, 'GASTO', 'DISTRIBUTIVOS PUERTO', 'Distributivos Puerto', mes, tipo, 'PPTO', 'KUS')
+        ton_embarque_total = gv(df, 'PRODUCCION', 'EMBARQUE TOTAL', 'Embarque Granel + Envasado TON', mes, tipo, 'PPTO', 'TON')
+        ton_despacho       = gv(df, 'PRODUCCION', 'DESPACHO CAMIONES', 'Despacho Camiones TON', mes, tipo, 'PPTO', 'TON')
+        ton_consolidacion  = gv(df, 'PRODUCCION', 'CONSOLIDACION', 'Consolidacion Container TON', mes, tipo, 'PPTO', 'TON')
+        divisor_global_puerto = ton_embarque_total + ton_despacho + ton_consolidacion
+        if divisor_global_puerto <= 0: divisor_global_puerto = p['total']
+        
+        cc_distributivos_puerto_unit = g_dist_puerto_usd / divisor_global_puerto
+
+        cash_cost_puerto = cc_embarque_unit + cc_almacenaje_unit + cc_distributivos_puerto_unit
+
+        # Depreciación y Gastos Proyecto
+        deprec_puerto_usd = gv(df, 'DEPRECIACION', 'PUERTO', 'Depreciación Puerto', mes, tipo, 'PPTO')
+        deprec_y_gastos_proyecto = deprec_puerto_usd / divisor_global_puerto
+
+        c_linea['Tpte + Puerto'] = tpte_camiones_unit + cash_cost_puerto + deprec_y_gastos_proyecto
+
+        # ── 1.7 PRODUCTOS F/E / PÉRDIDAS TERM+PUERTO Y CANCHA
+        total_operacion_y_deprec = c_linea['Tpte Sales'] + c_linea['Op. Pozas'] + c_linea['Cristalización'] + c_linea['KCl']
+        
+        # Pérdidas F/E Productos Terminados
+        gen_fe_term = gv(df, 'PERDIDAS Y FE', 'GENERACION FE', 'Generación Producto FE (Terminados)', mes, tipo, 'PPTO', 'TON')
+        gen_perd_term = gv(df, 'PERDIDAS Y FE', 'GENERACION FE', 'Generación Perdidas / Costras (Terminados)', mes, tipo, 'PPTO', 'TON')
+        tasa_perdidas_term = (gen_fe_term + gen_perd_term) / p['term']
+        if tasa_perdidas_term <= 0: tasa_perdidas_term = 0.015 # Salvaguarda matemática del 1.5%
+        
+        perdidas_fe_productos_terminados_prom = tasa_perdidas_term * total_operacion_y_deprec
+
+        # Pérdidas F/E Puerto/Cancha
+        tasa_perd_puerto_cancha = gv(df, 'PERDIDAS Y FE', 'PUERTO CANCHA', 'Tasa Perdidas Puerto Cancha %', mes, tipo, 'PPTO')
+        if tasa_perd_puerto_cancha <= 0: tasa_perd_puerto_cancha = 0.005 # Salvaguarda del 0.5%
+        if tasa_perd_puerto_cancha > 1: tasa_perd_puerto_cancha = tasa_perd_puerto_cancha / 100
+
+        base_acumulada_puerto_cancha = (total_operacion_y_deprec + c_linea['Terminados + Tpte interm'] + perdidas_fe_productos_terminados_prom)
+        perdidas_fe_puerto_cancha = tasa_perd_puerto_cancha * base_acumulada_puerto_cancha
+
+        c_linea['Pérdidas FE'] = perdidas_fe_productos_terminados_prom + perdidas_fe_puerto_cancha
+
+        # ── 1.8 DISTRIBUTIVOS + DEPRECIACIÓN
+        g_distributivos_delta = dg.get('Distributivos', (0,0,0))[0]
+        total_usd_distributivos = dist_nitratos_fijo + deprec_comun_fijo + g_distributivos_delta
+        c_linea['Distributivos'] = total_usd_distributivos / p['total']
+
+        # ── 1.9 OTROS
+        c_linea['Otros'] = gv(df, 'COSTO TOTAL', '1.9 OTROS', 'OTROS', mes, tipo, 'PPTO')
+
+        return c_linea
+
+    # 5. CORRER AMBOS ESCENARIOS EN PARALELO UTILIZANDO LAS REGLAS DE NEGOCIO
+    costos_base_calculados = calcular_structure_costos(p_base, {}, {})
+    costos_sim_calculados  = calcular_structure_costos(p_sim, deltas_g, deltas_fc)
+
+    # 6. OBTENER DELTAS NETOS COMPONENTE POR COMPONENTE
+    impactos_por_componente = {}
+    for _, _, nom in COSTOS:
+        # Si el Excel de la pestaña COSTO TOTAL difiere del recalculado base por redondeo, 
+        # medimos estrictamente el delta marginal de la formulación directa.
+        impactos_por_componente[nom] = costos_sim_calculados[nom] - costos_base_calculados[nom]
+
+    impacto_total_final = sum(impactos_por_componente.values())
+    costo_nuevo = max(0.0, costo_base + impacto_total_final)
+
+    # ── RENDERIZADO DE CONTENEDORES KPI's FINALES ───────────────────────────
     k1, k2, k3 = st.columns(3)
-    k1.metric(f"Costo base PPTO {MESES[mes]}", f"${costo_base:.1f}/T")
-    k2.metric("Impacto total", f"{impacto:+.1f} US$/T", delta_color="inverse")
-    k3.metric("Nuevo costo estimado", f"${costo_nuevo:.1f}/T",
-              delta=f"{impacto:+.1f}", delta_color="inverse")
+    k1.metric(f"Costo base PPTO {MESES[mes]}", f"${costo_base:.2f}/T")
+    k2.metric("Impacto Neto Formulación", f"{impacto_total_final:+.2f} US$/T", delta_color="inverse")
+    k3.metric("Nuevo costo simulado", f"${costo_nuevo:.1f}/T",
+              delta=f"{impacto_total_final:+.2f}", delta_color="inverse")
 
-    if detalle:
-        st.subheader("Detalle del impacto")
-        df_d = pd.DataFrame(detalle, columns=["Variable","Cambio","Impacto US$/T"])
-        def col_imp(val):
-            if isinstance(val, float):
-                return "color: red" if val > 0 else "color: green"
-            return ""
-        st.dataframe(
-            df_d.style
-                .map(col_imp, subset=["Impacto US$/T"])
-                .format({"Impacto US$/T": "{:.1f}"}),
-            use_container_width=True, hide_index=True
-        )
+    # ── TABLA DE RESUMEN EJECUTIVO POR LÍNEA MATRICIAL ──────────────────────
+    st.subheader("Resumen de Impacto por Componente de Costo")
+    
+    filas_tabla_componentes = []
+    for _, _, nom in COSTOS:
+        imp_comp = impactos_por_componente[nom]
+        filas_tabla_componentes.append({
+            "Componente Nitratos": nom,
+            "Impacto Unitario": imp_comp,
+            "Estado": "Sube Costo 🔺" if imp_comp > 0.01 else ("Baja Costo 📉" if imp_comp < -0.01 else "Sin Cambios ➖")
+        })
+    
+    filas_tabla_componentes.append({
+        "Componente Nitratos": "➔ COSTO TOTAL SUMADO",
+        "Impacto Unitario": impacto_total_final,
+        "Estado": "TOTAL"
+    })
 
+    df_comp_render = pd.DataFrame(filas_tabla_componentes)
+    
+    def color_impactos(val):
+        if isinstance(val, (int, float)):
+            if val > 0.01: return "background-color: #FADBD8; color: #78281F; font-weight: bold;"
+            if val < -0.01: return "background-color: #D4EFDF; color: #145A32; font-weight: bold;"
+        return ""
+
+    st.dataframe(
+        df_comp_render.style
+            .map(color_impactos, subset=["Impacto Unitario"])
+            .format({"Impacto Unitario": "{:+.2f} US$/T"}),
+        use_container_width=True, hide_index=True
+    )
