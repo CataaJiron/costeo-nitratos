@@ -275,20 +275,41 @@ elif pagina == "Analisis mensual":
     vals_ppto = [gv(df, 'COSTO TOTAL', sa, c, mes, tipo, 'PPTO') for sa, c, _ in COSTOS]
     vals_rp   = [rp_val(df, 'COSTO TOTAL', sa, c, mes, tipo) for sa, c, _ in COSTOS]
 
+    deltas = [rp - ppto for rp, ppto in zip(vals_rp, vals_ppto)]
+
     fig4 = go.Figure()
-    fig4.add_trace(go.Bar(name="PPTO", x=NOMBRES, y=vals_ppto, marker_color='#B5D4F4',
+    fig4.add_trace(go.Bar(name="PPTO", x=NOMBRES, y=vals_ppto, marker_color='#152578',
                           text=[f"${v:.1f}" for v in vals_ppto], textposition="outside", textfont_size=10))
     fig4.add_trace(go.Bar(name="Real+Proy", x=NOMBRES, y=vals_rp,
-                          marker_color=['#1D9E75' if r <= p else '#D85A30' for r, p in zip(vals_rp, vals_ppto)],
+                          marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(vals_rp, vals_ppto)],
                           text=[f"${v:.1f}" for v in vals_rp], textposition="outside", textfont_size=10))
+
+    # Delta encima de cada par de barras
+    annotations = []
+    for i, (nombre, delta) in enumerate(zip(NOMBRES, deltas)):
+        color  = "#D85A30" if delta > 0 else "#2ECC71"
+        symbol = "▲" if delta > 0 else "▼"
+        annotations.append(dict(
+            x=nombre,
+            y=max(vals_ppto[i], vals_rp[i]) * 1.15,
+            text=f"{symbol} {delta:+.1f}",
+            showarrow=False,
+            font=dict(size=11, color=color, family="Arial Black"),
+            xanchor="center",
+        ))
+
     fig4.update_layout(
         barmode="group", height=380, xaxis_tickangle=-20,
         legend=dict(orientation="h", y=1.1),
         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=40,b=60),
+        margin=dict(t=50, b=60),
+        annotations=annotations,
     )
     fig4.update_yaxes(gridcolor="#f0f0f0")
     st.plotly_chart(fig4, use_container_width=True)
+
+
+
 
     # Evolución anual componente seleccionado
     st.subheader("Evolución anual por componente")
