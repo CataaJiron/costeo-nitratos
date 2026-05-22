@@ -717,36 +717,48 @@ elif pagina == "Sensibilidad":
  
         # ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
- 
-        # SOLUCIÓN DIRECTA: Quitamos el parámetro 'prefix' de la función y lo sumamos en el key del input
-        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
-                    "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
-                    step_ton=0.1) # <-- Sin el parámetro prefix aquí
+
+        # Función local exclusiva para Puerto para evitar choques de llaves
+        def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
+            c1, c2, c3 = st.columns([2, 2, 1])
+            with c1:
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}")
+            with c2:
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}")
+            with c3:
+                ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
+                st.metric("=> USD/T", f"${ratio:.2f}")
+
+        fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
+                           "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
+                           step_ton=0.1)
                     
-        fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", 
-                    "Almacenaje (Kton)", "TON_ALMACENAJE", 
-                    step_ton=1.0) # <-- Sin el parámetro prefix aquí
+        fila_usdton_puerto("Almacenaje (KUS)", "G_ALMACENAJE", 
+                           "Almacenaje (Kton)", "TON_ALMACENAJE", 
+                           step_ton=1.0)
  
-        c1, c2, c3 = st.columns([2, 2, 1])
-        with c1:
-            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key="ui_G_DIST_T")
-        with c2:
-            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key="ui_TON_DESPACHO")
-        with c3:
-            vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
-            ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
-            st.metric("=> USD/T", f"${ratio_d:.2f}")
- 
+        # CORREGIDO: Mensaje informativo con la variable correcta
         st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
  
-        # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
-
+    # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
         st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
         
-        # Mantenemos tus variables reales del diccionario, pero aislamos la UI con key_prefix
-        fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
-                    "Tpte Camiones (Kton)", "TON_TPTE_CAM",
-                    step_ton=0.1, key_prefix="camiones_")
+        # CAMBIO DEFINITIVO: Creamos una función local exclusiva para camiones
+        # Esto ignora cualquier problema de caché o duplicado en el código de arriba
+        def fila_usdton_camiones(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
+            c1, c2, c3 = st.columns([2, 2, 1])
+            with c1:
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}")
+            with c2:
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}")
+            with c3:
+                ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
+                st.metric("=> USD/T", f"${ratio:.2f}")
+
+        # Ejecutamos la nueva función con tus llaves originales del diccionario
+        fila_usdton_camiones("Tpte Camiones (KUS)", "G_TPTE_CAM",
+                             "Tpte Camiones (Kton)", "TON_TPTE_CAM",
+                             step_ton=0.1)
  
         st.divider()
         # ─── FC KCl ───────────────────────────────────────────────────────────
