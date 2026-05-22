@@ -94,24 +94,22 @@ def botones_mes(key):
 def kpis_row(df, mes, tipo):
     ppto_s = total_serie(df, tipo, 'PPTO')
     rp_s   = total_rp_serie(df, tipo)
-    
-    ppto_m = ppto_s[mes]
-    rp_m   = rp_s[mes]
-    
-    # ❌ Antes: dividía por (mes+1) → promedio incorrecto
-    # ppto_acum = sum(ppto_s[:mes+1]) / (mes+1)
-    # rp_acum   = sum(rp_s[:mes+1])   / (mes+1)
-    
-    # ✅ Ahora: suma directa desde la tabla
-    ppto_acum = sum(ppto_s[:mes+1])
-    rp_acum   = sum(rp_s[:mes+1])
+
+    ppto_m    = ppto_s[mes]
+    rp_m      = rp_s[mes]
+
+    # Acumulado: leer directo del mes seleccionado con tipo='Acumulado'
+    ppto_acum_s = total_serie(df, 'Acumulado', 'PPTO')
+    rp_acum_s   = total_rp_serie(df, 'Acumulado')
+
+    ppto_acum = ppto_acum_s[mes]
+    rp_acum   = rp_acum_s[mes]
 
     k1, k2, k3, k4 = st.columns(4)
     k1.metric(f"PPTO {MESES[mes]} ({tipo})", f"${ppto_m:.1f}/T",
               delta=f"Real/Proy: ${rp_m:.1f}/T  ({rp_m-ppto_m:+.1f})", delta_color="inverse")
     k2.metric(f"Acumulado Ene-{MESES[mes]} PPTO", f"${ppto_acum:.1f}/T",
               delta=f"R+P: ${rp_acum:.1f}/T  ({rp_acum-ppto_acum:+.1f})", delta_color="inverse")
-
 
 # ── SIDEBAR ────────────────────────────────────────────────────────────────────
 with st.sidebar:
