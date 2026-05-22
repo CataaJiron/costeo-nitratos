@@ -673,6 +673,7 @@ elif pagina == "Sensibilidad":
  
         st.divider()
  
+ 
         # ─── GASTOS POZAS ─────────────────────────────────────────────────────
         st.markdown("#### 💰 Gastos Pozas (KUS) → USD/T sobre NPT3+NPT4")
         st.caption("Gasto (KUS)  |  — denominador: prod total —  |  USD/T resultante")
@@ -684,8 +685,8 @@ elif pagina == "Sensibilidad":
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
  
-        tot_pozas = V['G_POZAS_NV']+V['G_POZAS_CS']+V['G_POZAS_PB']+V['DEPR_POZAS_CS']
-        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['DEPR_POZAS_CS']:.0f} KUS fija): **${tot_pozas:.0f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
+        tot_pozas = V['G_POZAS_NV']+V['G_POZAS_CS']+V['G_POZAS_PB']+V[''G_DEPRECIACION_CS'']
+        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['G_DEPRECIACION_CS']:.0f} KUS fija): **${tot_pozas:.0f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
  
         st.divider()
  
