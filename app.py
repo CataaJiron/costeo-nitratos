@@ -818,6 +818,11 @@ elif pagina == "Sensibilidad":
  
         st.divider()
         if st.button("🔄 Restablecer valores PPTO", use_container_width=True):
+            # Limpiar los estados de todos los inputs
+            keys_to_delete = [k for k in st.session_state if k.startswith("ui_")]
+            for k in keys_to_delete:
+                del st.session_state[k]
+            # Resetear los valores
             st.session_state['sv']     = copy.deepcopy(BASE)
             st.session_state['sv_mes'] = mes
             st.rerun()
