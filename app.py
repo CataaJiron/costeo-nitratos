@@ -389,7 +389,7 @@ elif pagina == "Analisis mensual":
 
     def highlight(row):
         styles = [''] * len(row)
-        if row['Tipo'] == 'Real + Proy':
+        if row['Tipo'] == 'R+P':
             for i, col in enumerate(df_tabla.columns):
                 if col in MESES or col == 'Acum Dic':
                     try:
