@@ -559,12 +559,9 @@ elif pagina == "Sensibilidad":
         c11 = precio_tpte * fc_sales
 
         # 1.2 Pozas: usar total directo de la tabla
-        # 1.2 Pozas — si algún gasto fue editado, recalcula desde partes; si no, usa total
         pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
-        if pozas_editado:
-            c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
-        else:
-            c12 = v['G_POZAS_TOTAL'] / prod_total if prod_total > 0 else 0.0
+        c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
+
 
         # 1.3 Cristalización
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
@@ -578,10 +575,10 @@ elif pagina == "Sensibilidad":
         c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
 
         # 1.5 Terminados
-        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] +
-               v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
+        Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
+        c15 = Gasto_Total_terminados / prod_term if prod_term > 0 else 0.0        
 
-        # 1.6 Tpte + Puerto
+	# 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
         c_embarque = v['G_EMBARQUE']  / v['TON_EMBARQUE_TOTAL']  if v['TON_EMBARQUE_TOTAL'] > 0  else 0.0
         c_alm      = v['G_ALMACENAJE']/ v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
