@@ -548,6 +548,26 @@ elif pagina == "Sensibilidad":
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
+
+        if v == BASE:  # solo imprime para el base, no para el simulado
+            st.write("DEBUG Tpte Sales:")
+            st.write(f"  NV cat 1: {v['NV cat 1']}")
+            st.write(f"  PB: {v['PB']}")
+            st.write(f"  CS: {v['CS']}")
+            st.write(f"  consumo_sales_total: {consumo_sales_total}")
+            st.write(f"  TON_TPTE_NV: {v['TON_TPTE_NV']}")
+            st.write(f"  TON_TPTE_PB: {v['TON_TPTE_PB']}")
+            st.write(f"  TON_TPTE_CS: {v['TON_TPTE_CS']}")
+            st.write(f"  ton_tpte_total: {ton_tpte_total}")
+            st.write(f"  G_TPTE_NV: {v['G_TPTE_NV']}")
+            st.write(f"  G_TPTE_PB: {v['G_TPTE_PB']}")
+            st.write(f"  G_CAMINOS_NV: {v['G_CAMINOS_NV']}")
+            st.write(f"  gasto_tpte_total: {gasto_tpte_total}")
+            st.write(f"  precio_tpte: {precio_tpte}")
+            st.write(f"  fc_sales: {fc_sales}")
+            st.write(f"  prod_total: {prod_total}")
+
+
         # 1.1 Tpte Sales: precio (USD/TNitr) × fc_sales (NaNO3/Ton)
         # precio está en USD/TNitr sales, fc_sales en KTon NaNO3 / Kton prod
         # resultado: USD/T
