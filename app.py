@@ -488,15 +488,15 @@ elif pagina == "Sensibilidad":
         'TON_EMBARQUE_GRANEL':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel','Kton'),
 
 
-        # Transporte camiones — gasto (KUS) y toneladas (Kton) por separado
+        # Transporte camiones — gasto (KUS) y toneladas (KTon NaNO3) por separado
         'G_TPTE_CAM':    _r('GASTO','TRANSPORTE','Tpte Camiones Terminados', 'KUS'),
         'TON_TPTE_CAM':  _r('TRANSPORTE','TRANSPORTE','Tpte Camiones Terminados','kTon'),
-        'G_TPTE_NV':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales NV', 'KUS'),
-        'TON_TPTE_NV':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales NV a CS (Cat 1 + Cat 3)', 'kTon'),
-        'G_TPTE_PB':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales PB', 'KUS'),
-        'TON_TPTE_PB':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS', 'kTon'),
-        'G_CAMINOS_NV':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Op Canchas + Caminos NV', 'KUS'),
-        'TON_TPTE_CS':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'kTon'),        
+        'G_TPTE_NV':     _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales NV', 'KUS'),
+        'TON_TPTE_NV':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales NV a CS (Cat 1 + Cat 3)', 'KTon NaNO3'),
+        'G_TPTE_PB':     _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales PB', 'KUS'),
+        'TON_TPTE_PB':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS', 'KTon NaNO3'),
+        'G_CAMINOS_NV':  _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Op Canchas + Caminos NV', 'KUS'),
+        'TON_TPTE_CS':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'KTon NaNO3'),
 
 
         # FC KCl (adimensional: KTon KCl / Kton prod)
@@ -538,7 +538,8 @@ elif pagina == "Sensibilidad":
         'GEN_FE':       _r('PERDIDAS','PERDIDAS','Generación Producto FE (Terminados)'),
         'GEN_Perdidas':       _r('PERDIDAS','PERDIDAS','Generación Perdidas / Costras (Terminados)'),
         'GEN_Perdidas_Puerto':   _r('PERDIDAS','PERDIDAS', 'Perdidas / FE puerto y cancha'),
-        'GEN_Perdidas_Degradacion':   _r('Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha', 'Perdidas y degradaciones puerto y cancha'),
+        'PCT_FE':        _r('Perdidas F/E','Perdidas F/E','Perdidas F/E', '%'),
+        'GEN_Perdidas_Degradacion':   _r('Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha', 'Perdidas y degradaciones puerto y cancha', '%'),
         'OTROS':         gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
     }
  
@@ -548,60 +549,58 @@ elif pagina == "Sensibilidad":
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
-        # 1.1 Tpte Sales
-        # Precio por ruta = Gasto KUS / Ton por ruta
-        precio_nv = v['G_TPTE_NV'] / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
-        precio_pb = v['G_TPTE_PB'] / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
+        # 1.1 Tpte Sales: precio promedio ponderado × FC consumo sales
+        # precio por ruta (KUS / KTon NaNO3)
+        precio_nv = v['G_TPTE_NV']    / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
+        precio_pb = v['G_TPTE_PB']    / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
         precio_cs = v['G_CAMINOS_NV'] / v['TON_TPTE_CS'] if v['TON_TPTE_CS'] > 0 else 0.0
-
-        # Precio promedio ponderado por consumo de sales
-        consumo_nv = v['NV cat 1']
-        consumo_pb = v['PB']
-        consumo_cs = v['CS']
+        consumo_nv    = v['NV cat 1']
+        consumo_pb    = v['PB']
+        consumo_cs    = v['CS']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
-
-        precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
-        fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
+        precio_prom   = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
+        fc_sales      = consumo_total / prod_total if prod_total > 0 else 0.0
         c11 = precio_prom * fc_sales
 
-        # 1.2 Pozas: usar total directo de la tabla
-        #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
-        Gasto_pozas_Total =  (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['G_DEPRECIACION_CS'])
-        c12 = Gasto_pozas_Total / prod_total if prod_total > 0 else 0.0
+        # 1.2 Pozas = (G_NV + G_CS + G_PB + Dep_CS) / prod_total
+        c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['G_DEPRECIACION_CS']) / prod_total if prod_total > 0 else 0.0
 
-        # 1.3 Cristalización
+        # 1.3 Cristalización = (G_NPT3 + G_NPT4 + Dep_NPT3 + Dep_NPT4) / prod_total
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
 
-        # 1.4 KCl
-        cons_mop90 = (v['FC_MOP90_NPT3'] * npt3) + (v['FC_MOP90_NPT4'] * npt4)
-        cons_mop70 = (v['FC_MOP70_NPT3'] * npt3) + (v['FC_MOP70_NPT4'] * npt4)
-        cons_ss    = (v['FC_SS_NPT3'] * npt3)    + (v['FC_SS_NPT4'] * npt4)
-        cons_total = cons_mop90 + cons_mop70 + cons_ss
+        # 1.4 KCl = costo_total_kcl / prod_total
+        cons_mop90      = (v['FC_MOP90_NPT3'] * npt3) + (v['FC_MOP90_NPT4'] * npt4)
+        cons_mop70      = (v['FC_MOP70_NPT3'] * npt3) + (v['FC_MOP70_NPT4'] * npt4)
+        cons_ss         = (v['FC_SS_NPT3']    * npt3) + (v['FC_SS_NPT4']    * npt4)
         costo_total_kcl = (v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)
         c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
 
-        # 1.5 Terminados
-        Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
-        c15 = Gasto_Total_terminados / prod_term if prod_term > 0 else 0.0
+        # 1.5 Terminados = gasto_total_terminados / prod_term
+        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] +
+               v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
 
         # 1.6 Tpte + Puerto
-        c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
-        c_embarque = v['G_EMBARQUE']  / v[ 'TON_EMBARQUE_GRANEL']  if v[ 'TON_EMBARQUE_GRANEL'] > 0  else 0.0
-        c_alm      = v['G_ALMACENAJE']/ v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
+        c_tpte     = v['G_TPTE_CAM']   / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0      else 0.0
+        c_embarque = v['G_EMBARQUE']   / v['TON_EMBARQUE_GRANEL'] if v['TON_EMBARQUE_GRANEL'] > 0 else 0.0
+        c_alm      = v['G_ALMACENAJE'] / v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0     else 0.0
         vol_d      = v['TON_EMBARQUE_TOTAL'] + v['TON_DESPACHO']
-        c_dist     = v['G_DIST_T']    / vol_d                    if vol_d > 0                    else 0.0
-        dep_puerto = v['DEPR_PUERTO'] / vol_d                    if vol_d > 0                    else 0.0
+        c_dist     = v['G_DIST_T']     / vol_d                    if vol_d > 0                   else 0.0
+        dep_puerto = v['DEPR_PUERTO']  / vol_d                    if vol_d > 0                   else 0.0
         c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
 
-        # 1.7 Perdidas FE
-        Op_dep = c11 + c12 + c13 + c14
-        Perd_FE_pct = (v["GEN_FE"] - v["GEN_Perdidas"]) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * Perd_FE_pct
-        base_deg = Op_dep + Perdidas_FE + c15
-        Perd_Puerto = v['GEN_Perdidas_Degradacion'] / base_deg if base_deg > 0 else 0.0
-        c17 = Perdidas_FE + (Perd_Puerto * base_deg)
+        # 1.7 Pérdidas F/E
+        # Op_dep = c11+c12+c13+c14
+        # Pérdidas Terminados = Op_dep × pct_fe  (pct_fe desde tabla Perdidas F/E %)
+        # Pérdidas Puerto = pct_deg × (Op_dep + Perd_term + c15)
+        Op_dep      = c11 + c12 + c13 + c14
+        pct_fe      = v['PCT_FE']       # % desde tabla
+        pct_deg     = v['GEN_Perdidas_Degradacion']  # % desde tabla
+        perd_term   = Op_dep * pct_fe
+        base_deg    = Op_dep + perd_term + c15
+        perd_puerto = pct_deg * base_deg
+        c17 = perd_term + perd_puerto
 
-        # 1.8 Distributivos
+        # 1.8 Distributivos + Depreciación = (Dist_Nitratos + Dep_Comun) / prod_total
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
 
         c19 = v['OTROS']
@@ -617,7 +616,7 @@ elif pagina == "Sensibilidad":
             '1.8 Distributivos': c18,
             '1.9 Otros':         c19,
         }
-        return sum(comp.values()), comp 
+        return sum(comp.values()), comp
     # ── Session state ─────────────────────────────────────────────────────────
     if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes:
         st.session_state['sv']     = copy.deepcopy(BASE)
@@ -899,5 +898,5 @@ elif pagina == "Sensibilidad":
             yaxis=dict(autorange='reversed'),
             legend=dict(orientation='h', y=1.05),
         )
-        st.plotly_chart(fig, use_container_width=True) 
+        st.plotly_chart(fig, use_container_width=True)
 
