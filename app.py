@@ -585,16 +585,17 @@ elif pagina == "Sensibilidad":
     k3.metric("Nuevo costo estimado", f"${costo_nuevo:.1f}/T",
               delta=f"{impacto:+.1f}", delta_color="inverse")
 
-        if detalle:
+    if detalle:
         st.subheader("Detalle del impacto")
-        df_d = pd.DataFrame(detalle, columns=["Componente", "Detalle cálculo", "US$/T"])
+        df_d = pd.DataFrame(detalle, columns=["Variable","Cambio","Impacto US$/T"])
         def col_imp(val):
             if isinstance(val, float):
                 return "color: red" if val > 0 else "color: green"
             return ""
         st.dataframe(
             df_d.style
-                .map(col_imp, subset=["US$/T"])
-                .format({"US$/T": "{:.1f}"}),
+                .map(col_imp, subset=["Impacto US$/T"])
+                .format({"Impacto US$/T": "{:.1f}"}),
             use_container_width=True, hide_index=True
         )
+
