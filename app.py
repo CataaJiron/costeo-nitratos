@@ -710,8 +710,8 @@ elif pagina == "Sensibilidad":
                 V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_term_v:.2f}" if prod_term_v > 0 else "-")
-        tot_term = V['G_PRIL']+V['G_DTP']+V['G_SECADO']+V['G_TPTE_INT']+V['DEPR_PRIL']+V['DEPR_DTP']+V['DEPR_SECADO']
-        st.caption(f"📌 Total Terminados (incl. depr+tpte int. ${V['DEPR_PRIL']+V['DEPR_DTP']+V['DEPR_SECADO']+V['G_TPTE_INT']:.0f} KUS fija): **${tot_term:.0f} KUS** → **${tot_term/prod_term_v:.2f} USD/T**" if prod_term_v > 0 else "")
+        tot_term = V['G_PRIL']+V['G_DTP']+V['G_SECADO']+V['G_TPTE_INT']+V['DEP_PRIL']+V['DEP_DTP']+V['DEP_SECADO']
+        st.caption(f"📌 Total Terminados (incl. depr+tpte int. ${V['DEP_PRIL']+V['DEP_DTP']+V['DEP_SECADO']+V['G_TPTE_INT']:.0f} KUS fija): **${tot_term:.0f} KUS** → **${tot_term/prod_term_v:.2f} USD/T**" if prod_term_v > 0 else "")
  
         st.divider()
  
