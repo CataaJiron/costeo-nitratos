@@ -418,7 +418,6 @@ elif pagina == "Sensibilidad":
     import copy
  
     st.title(f"Simulador de Sensibilidad — {MESES[mes] if 'mes' in dir() else ''}")
- 
     mes = botones_mes("sens")
     st.divider()
  
@@ -428,192 +427,167 @@ elif pagina == "Sensibilidad":
         st.stop()
     fecha = fechas_sorted[mes]
  
-    # ── helpers ──────────────────────────────────────────────────────────────
     def _r(area, subarea, concepto, medida=None, nth=0):
-        mask = (
-            (df['Fecha']    == fecha) &
-            (df['AREA']     == area)  &
-            (df['SUBAREA']  == subarea) &
-            (df['CONCEPTO'] == concepto) &
-            (df['Tipo']     == 'Puntual') &
-            (df['Tipo_2']   == 'PPTO')
-        )
-        if medida:
-            mask = mask & (df['Medida'] == medida)
+        mask = (df['Fecha']==fecha)&(df['AREA']==area)&(df['SUBAREA']==subarea)&(df['CONCEPTO']==concepto)&(df['Tipo']=='Puntual')&(df['Tipo_2']=='PPTO')
+        if medida: mask = mask & (df['Medida']==medida)
         r = df[mask]['GASTO/COSTO']
-        return float(r.values[nth]) if len(r) > nth else 0.0
+        return float(r.values[nth]) if len(r)>nth else 0.0
  
     def _area(area):
-        mask = (df['Fecha']==fecha)&(df['AREA']==area)&(df['Tipo']=='Puntual')&(df['Tipo_2']=='PPTO')
-        r = df[mask]['GASTO/COSTO']
+        mask=(df['Fecha']==fecha)&(df['AREA']==area)&(df['Tipo']=='Puntual')&(df['Tipo_2']=='PPTO')
+        r=df[mask]['GASTO/COSTO']
         return float(r.values[0]) if not r.empty else 0.0
  
-    # ── Valores PPTO base ─────────────────────────────────────────────────────
     BASE = {
         # Producción NPT3 (Kton)
-        'KNO3_T_NPT3':   _r('PRODUCCION','NPT3','- KNO3 T NPT III'),
-        'KNO3_R_NPT3':   _r('PRODUCCION','NPT3','- KNO3 R NPT III'),
+        'KNO3_T_NPT3':    _r('PRODUCCION','NPT3','- KNO3 T NPT III'),
+        'KNO3_R_NPT3':    _r('PRODUCCION','NPT3','- KNO3 R NPT III'),
         # Producción NPT4 (Kton)
-        'KNO3_L_NPT4':   _r('PRODUCCION','NPT4','- KNO3 L NPT II/IV'),
-        'CSSI_NPT4':     _r('PRODUCCION','NPT4','- CSSI NPT II/IV'),
-        'CSSR_NPT4':     _r('PRODUCCION','NPT4','- CSSR NPT II/IV'),
+        'KNO3_L_NPT4':    _r('PRODUCCION','NPT4','- KNO3 L NPT II/IV'),
+        'CSSI_NPT4':      _r('PRODUCCION','NPT4','- CSSI NPT II/IV'),
+        'CSSR_NPT4':      _r('PRODUCCION','NPT4','- CSSR NPT II/IV'),
         # Producción Terminados (Kton)
-        'PRIL_DTP':      _r('PRODUCCION','TERMINADOS','PRILADO + DTP'),
-        'SECADO':        _r('PRODUCCION','TERMINADOS','SECADO'),
-        # Gastos Pozas (KUS)
-        'G_POZAS_NV':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV'),
-        'G_POZAS_CS':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS'),
-        'G_POZAS_PB':    _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB'),
-        # Gastos Plantas (KUS)
-        'G_PRIL':        _r('GASTO','TERMINADOS','Gasto Planta Prilado CS'),
-        'G_DTP':         _r('GASTO','TERMINADOS','Gasto Planta DTP'),
-        'G_SECADO':      _r('GASTO','TERMINADOS','Gasto Planta Secado KNO3'),
-        'G_NPT3':        _r('GASTO','CRISTALIZACION','Gasto NPT III + Korda'),
-        'G_NPT4':        _r('GASTO','CRISTALIZACION','Gasto NPT IV'),
-        # Puerto — gastos (KUS) y toneladas (Kton) por separado
-        'G_EMBARQUE':    _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage','KUS'),
-        'TON_EMBARQUE':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage','Kton', nth=1),  # granel real
-        'G_ALMACENAJE':  _r('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral','KUS'),
-        'TON_ALMACENAJE':_r('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral','Kton'),
-        'G_DIST_T':      _r('Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral','KUS'),
-        'TON_DESPACHO':  _r('Distributivos Trimestral','DISTRIBUTIVOS','Despacho Camiones y contenedores','Kton'),
-        # Transporte camiones — gasto (KUS) y toneladas (Kton) por separado
-        'G_TPTE_CAM':    _r('GASTO','TRANSPORTE','Tpte Camiones Terminados'),
-        'TON_TPTE_CAM':  _r('TRANSPORTE','TRANSPORTE','Tpte Camiones Terminados','kTon'),
-        # FC KCl (adimensional: KTon KCl / Kton prod)
-        'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
-        'FC_MOP70_NPT3': _r('KCl','CONSUMO NPT3','MOP 70', nth=0),
-        'FC_SS_NPT3':    _r('KCl','CONSUMO NPT3','SS', nth=0),
-        'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
-        'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
-        'FC_SS_NPT4':    _r('KCl','CONSUMO NPT4','SS', nth=0),
-        # Precio KCl (US$/T)
-        'P_MOP90':       _r('KCl','Costo Promedio KCl','MOP 90'),
-        'P_MOP70':       _r('KCl','Costo Promedio KCl','MOP 70'),
-        'P_SS':          _r('KCl','Costo Promedio KCl','SS'),
-        # FC NaNO3 y precio transporte sales
-        'FC_SALES':      _r('TRANSPORTE DE SALES','- Factor Consumo de Sales','- Factor Consumo de Sales'),
-        'P_TPTE_SALES':  _r('TRANSPORTE DE SALES','Total Transporte de Sales (promedio)','Total Transporte de Sales (promedio)'),
-        # Depreciaciones (fijas, no editables)
-        'DEPR_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas CS'),
-        'DEPR_PRIL':     _r('GASTO','TERMINADOS','Depreciación Planta Prilado CS'),
-        'DEPR_DTP':      _r('GASTO','TERMINADOS','Depreciación Planta DTP'),
-        'DEPR_SECADO':   _r('GASTO','TERMINADOS','Depreciación Planta Secado KNO3'),
-        'DEPR_NPT3':     _r('GASTO','CRISTALIZACION','Depreciación NPT III'),
-        'DEPR_NPT4':     _r('GASTO','CRISTALIZACION','Depreciación NPT IV'),
+        'PRIL_DTP':       _r('PRODUCCION','TERMINADOS','PRILADO + DTP'),
+        'SECADO':         _r('PRODUCCION','TERMINADOS','SECADO'),
+        # Gastos Pozas (KUS) — editables
+        'G_POZAS_NV':     _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas NV'),
+        'G_POZAS_CS':     _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas CS'),
+        'G_POZAS_PB':     _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Operación Pozas PB'),
+        'DEPR_POZAS_CS':  _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Depreciación Pozas CS'),
+        # Gastos Cristalización (KUS) — editables
+        'G_NPT3':         _r('GASTO','CRISTALIZACION','Gasto NPT III + Korda'),
+        'G_NPT4':         _r('GASTO','CRISTALIZACION','Gasto NPT IV'),
+        'DEPR_NPT3':      _r('GASTO','CRISTALIZACION','Depreciación NPT III'),
+        'DEPR_NPT4':      _r('GASTO','CRISTALIZACION','Depreciación NPT IV'),
+        # Gastos Terminados (KUS) — editables
+        'G_PRIL':         _r('GASTO','TERMINADOS','Gasto Planta Prilado CS'),
+        'G_DTP':          _r('GASTO','TERMINADOS','Gasto Planta DTP'),
+        'G_SECADO':       _r('GASTO','TERMINADOS','Gasto Planta Secado KNO3'),
+        'DEPR_PRIL':      _r('GASTO','TERMINADOS','Depreciación Planta Prilado CS'),
+        'DEPR_DTP':       _r('GASTO','TERMINADOS','Depreciación Planta DTP'),
+        'DEPR_SECADO':    _r('GASTO','TERMINADOS','Depreciación Planta Secado KNO3'),
+        'G_TPTE_INT':     _r('GASTO','TERMINADOS','Gasto Transporte Intermedios '),
+        # Puerto — KUS y Kton por separado
+        'G_EMBARQUE':     _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage','KUS'),
+        'TON_EMBARQUE':   _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel + Demurrage','Kton', nth=1),
+        'G_ALMACENAJE':   _r('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral','KUS'),
+        'TON_ALMACENAJE': _r('Almacenaje Trimestral','ALMACENAJE','Almacenaje Trimestral','Kton'),
+        'G_DIST_T':       _r('Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral','KUS'),
+        'TON_DESPACHO':   _r('Distributivos Trimestral','DISTRIBUTIVOS','Despacho Camiones y contenedores','Kton'),
         'DEPR_PUERTO_USDPT': _r('DEPRECIACION','PUERTO','Depreciacion Puerto','US$/T'),
-        'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios '),
-        'DIST_NITRATOS': _area('Distributivos Nitratos'),
-        'DEPR_COM':      _area('Depreciación Costo Comun'),
-        # Perdidas FE (fijas)
-        'PERD_FE':       _r('Perdidas F/E','Perdidas F/E','Perdidas F/E'),
-        'PERD_PUERTO':   _r('- Perdidas y FE (Puerto/Cancha)',
-                            '- Perdidas y FE (Puerto/Cancha)',
-                            '- Perdidas y FE (Puerto/Cancha)'),
-        'OTROS':         gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
+        # Transporte camiones — KUS y Kton
+        'G_TPTE_CAM':     _r('GASTO','TRANSPORTE','Tpte Camiones Terminados'),
+        'TON_TPTE_CAM':   _r('TRANSPORTE','TRANSPORTE','Tpte Camiones Terminados','kTon'),
+        # Transporte Sales — NV y PB en KUS, toneladas NaNO3 por origen
+        'G_TPTE_NV':      _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV'),
+        'G_OP_NV':        _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Op Canchas + Caminos NV'),
+        'G_TPTE_PB':      _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB'),
+        'TON_SALES_NV':   _r('TRANSPORTE DE SALES','Consumo Total de Sales','- NV cat 1'),
+        'TON_SALES_PB':   _r('TRANSPORTE DE SALES','Consumo Total de Sales','- PB'),
+        'TON_SALES_CS':   _r('TRANSPORTE DE SALES','Consumo Total de Sales','- CS'),
+        # FC KCl (adimensional)
+        'FC_MOP90_NPT3':  _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
+        'FC_MOP70_NPT3':  _r('KCl','CONSUMO NPT3','MOP 70', nth=0),
+        'FC_SS_NPT3':     _r('KCl','CONSUMO NPT3','SS', nth=0),
+        'FC_MOP90_NPT4':  _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
+        'FC_MOP70_NPT4':  _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
+        'FC_SS_NPT4':     _r('KCl','CONSUMO NPT4','SS', nth=0),
+        # Precio KCl (US$/T)
+        'P_MOP90':        _r('KCl','Costo Promedio KCl','MOP 90'),
+        'P_MOP70':        _r('KCl','Costo Promedio KCl','MOP 70'),
+        'P_SS':           _r('KCl','Costo Promedio KCl','SS'),
+        # Fijos
+        'DIST_NITRATOS':  _area('Distributivos Nitratos'),
+        'DEPR_COM':       _area('Depreciación Costo Comun'),
+        'PERD_FE':        _r('Perdidas F/E','Perdidas F/E','Perdidas F/E'),
+        'PERD_PUERTO':    _r('- Perdidas y FE (Puerto/Cancha)','- Perdidas y FE (Puerto/Cancha)','- Perdidas y FE (Puerto/Cancha)'),
+        'OTROS':          gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
     }
  
-    # ── Recálculo ─────────────────────────────────────────────────────────────
     def recalcular(v):
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
-        # 1.1 Tpte Sales = precio × FC
-        c11 = v['P_TPTE_SALES'] * v['FC_SALES']
+        # 1.1 Tpte Sales
+        # precio_prom = (gasto_NV + op_NV + gasto_PB) / ton_total_sales
+        ton_total_sales = v['TON_SALES_NV'] + v['TON_SALES_PB'] + v['TON_SALES_CS']
+        precio_sales = (v['G_TPTE_NV'] + v['G_OP_NV'] + v['G_TPTE_PB']) / ton_total_sales if ton_total_sales > 0 else 0.0
+        fc_sales = ton_total_sales / prod_total if prod_total > 0 else 0.0
+        c11 = precio_sales * fc_sales
  
-        # 1.2 Pozas = (gasto NV+CS+PB + depr) / prod_total
+        # 1.2 Pozas = (NV+CS+PB+DepPozasCS) / prod_total
         c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
  
-        # 1.3 Cristalización = (gasto NPT3+NPT4 + depr) / prod_total
+        # 1.3 Cristalización = (NPT3+NPT4+DeprNPT3+DeprNPT4) / prod_total
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEPR_NPT3'] + v['DEPR_NPT4']) / prod_total if prod_total > 0 else 0.0
  
-        # 1.4 KCl = fc_total × costo_promedio
+        # 1.4 KCl
         cons_mop90 = v['FC_MOP90_NPT3']*npt3 + v['FC_MOP90_NPT4']*npt4
         cons_mop70 = v['FC_MOP70_NPT3']*npt3 + v['FC_MOP70_NPT4']*npt4
         cons_ss    = v['FC_SS_NPT3']*npt3    + v['FC_SS_NPT4']*npt4
         cons_total = cons_mop90 + cons_mop70 + cons_ss
-        costo_prom_kcl = (v['P_MOP90']*cons_mop90 + v['P_MOP70']*cons_mop70 + v['P_SS']*cons_ss) / cons_total if cons_total > 0 else 0.0
-        fc_kcl_total   = cons_total / prod_total if prod_total > 0 else 0.0
-        c14 = fc_kcl_total * costo_prom_kcl
+        costo_prom = (v['P_MOP90']*cons_mop90 + v['P_MOP70']*cons_mop70 + v['P_SS']*cons_ss) / cons_total if cons_total > 0 else 0.0
+        fc_kcl     = cons_total / prod_total if prod_total > 0 else 0.0
+        c14 = fc_kcl * costo_prom
  
-        # 1.5 Terminados = gasto_total / prod_terminados
-        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT']
-               + v['DEPR_PRIL'] + v['DEPR_DTP'] + v['DEPR_SECADO']) / prod_term if prod_term > 0 else 0.0
+        # 1.5 Terminados = (gastos+deprs+tpte_int) / prod_term
+        c15 = (v['G_PRIL']+v['G_DTP']+v['G_SECADO']+v['G_TPTE_INT']
+               +v['DEPR_PRIL']+v['DEPR_DTP']+v['DEPR_SECADO']) / prod_term if prod_term > 0 else 0.0
  
         # 1.6 Tpte + Puerto
-        c_tpte     = v['G_TPTE_CAM']   / v['TON_TPTE_CAM']  if v['TON_TPTE_CAM']  > 0 else 0.0
-        c_embarque = v['G_EMBARQUE']    / v['TON_EMBARQUE']  if v['TON_EMBARQUE']  > 0 else 0.0
-        c_alm      = v['G_ALMACENAJE']  / v['TON_ALMACENAJE']if v['TON_ALMACENAJE']> 0 else 0.0
-        vol_dist   = v['TON_EMBARQUE']  + v['TON_DESPACHO']
-        c_dist     = v['G_DIST_T']      / vol_dist            if vol_dist           > 0 else 0.0
-        c16 = c_tpte + c_embarque + c_alm + c_dist + v['DEPR_PUERTO_USDPT']
+        c_tpte = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']  if v['TON_TPTE_CAM']  > 0 else 0.0
+        c_emb  = v['G_EMBARQUE']   / v['TON_EMBARQUE']  if v['TON_EMBARQUE']  > 0 else 0.0
+        c_alm  = v['G_ALMACENAJE'] / v['TON_ALMACENAJE']if v['TON_ALMACENAJE']> 0 else 0.0
+        vol_d  = v['TON_EMBARQUE'] + v['TON_DESPACHO']
+        c_dist = v['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
+        c16 = c_tpte + c_emb + c_alm + c_dist + v['DEPR_PUERTO_USDPT']
  
-        # 1.7 Perdidas FE (fijas)
+        # 1.7 Perdidas (fijas)
         c17 = v['PERD_FE'] + v['PERD_PUERTO']
  
-        # 1.8 Distributivos + Depreciación
+        # 1.8 Distributivos
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
  
-        c19 = v['OTROS']
- 
         comp = {
-            '1.1 Tpte Sales':    c11,
-            '1.2 Op. Pozas':     c12,
-            '1.3 Cristalización':c13,
-            '1.4 KCl':           c14,
-            '1.5 Terminados':    c15,
-            '1.6 Tpte+Puerto':   c16,
-            '1.7 Pérdidas F/E':  c17,
-            '1.8 Distributivos': c18,
-            '1.9 Otros':         c19,
+            '1.1 Tpte Sales':     c11,
+            '1.2 Op. Pozas':      c12,
+            '1.3 Cristalización': c13,
+            '1.4 KCl':            c14,
+            '1.5 Terminados':     c15,
+            '1.6 Tpte+Puerto':    c16,
+            '1.7 Pérdidas F/E':   c17,
+            '1.8 Distributivos':  c18,
+            '1.9 Otros':          v['OTROS'],
         }
         return sum(comp.values()), comp
  
-    # ── Session state ─────────────────────────────────────────────────────────
     if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes:
         st.session_state['sv']     = copy.deepcopy(BASE)
         st.session_state['sv_mes'] = mes
     V = st.session_state['sv']
  
-    # ── UI: inputs + resultados ───────────────────────────────────────────────
     col_inp, col_res = st.columns([3, 2], gap="large")
  
     with col_inp:
  
-        # helper para mostrar fila "USD | Ton | => USD/T"
-        def fila_usdton(label_usd, key_usd, label_ton, key_ton, fmt_usd="%.1f", fmt_ton="%.3f", step_usd=10.0, step_ton=0.1, usdpt_label="=> USD/T"):
-            c1, c2, c3 = st.columns([2, 2, 1])
-            with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}")
-            with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}")
-            with c3:
-                ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
-                st.metric(usdpt_label, f"${ratio:.2f}")
- 
-        # ─── PRODUCCIÓN ───────────────────────────────────────────────────────
+        # ── PRODUCCIÓN ───────────────────────────────────────────────────────
         st.markdown("#### 🏭 Producción (Kton)")
- 
         pc1, pc2 = st.columns(2)
         with pc1:
             st.caption("NPT3")
             V['KNO3_T_NPT3'] = st.number_input("T NPT3", value=round(V['KNO3_T_NPT3'],3), step=0.1, format="%.3f", key="ui_T3")
             V['KNO3_R_NPT3'] = st.number_input("R NPT3", value=round(V['KNO3_R_NPT3'],3), step=0.1, format="%.3f", key="ui_R3")
             npt3_v = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
-            st.metric("TOTAL NPT3", f"{npt3_v:.3f} Kton",
-                      delta=f"{npt3_v - (BASE['KNO3_T_NPT3']+BASE['KNO3_R_NPT3']):+.3f}",
-                      delta_color="off")
+            st.metric("TOTAL NPT3", f"{npt3_v:.3f} Kton", delta=f"{npt3_v-(BASE['KNO3_T_NPT3']+BASE['KNO3_R_NPT3']):+.3f}", delta_color="off")
         with pc2:
             st.caption("NPT4")
             V['KNO3_L_NPT4'] = st.number_input("L NPT4",    value=round(V['KNO3_L_NPT4'],3), step=0.1, format="%.3f", key="ui_L4")
             V['CSSI_NPT4']   = st.number_input("CSSI NPT4", value=round(V['CSSI_NPT4'],3),   step=0.1, format="%.3f", key="ui_CSSI")
             V['CSSR_NPT4']   = st.number_input("CSSR NPT4", value=round(V['CSSR_NPT4'],3),   step=0.1, format="%.3f", key="ui_CSSR")
             npt4_v = V['KNO3_L_NPT4'] + V['CSSI_NPT4'] + V['CSSR_NPT4']
-            st.metric("TOTAL NPT4", f"{npt4_v:.3f} Kton",
-                      delta=f"{npt4_v - (BASE['KNO3_L_NPT4']+BASE['CSSI_NPT4']+BASE['CSSR_NPT4']):+.3f}",
-                      delta_color="off")
+            st.metric("TOTAL NPT4", f"{npt4_v:.3f} Kton", delta=f"{npt4_v-(BASE['KNO3_L_NPT4']+BASE['CSSI_NPT4']+BASE['CSSR_NPT4']):+.3f}", delta_color="off")
  
         pt1, pt2 = st.columns(2)
         with pt1:
@@ -623,111 +597,139 @@ elif pagina == "Sensibilidad":
         with pt2:
             st.caption(" ")
             prod_term_v  = V['PRIL_DTP'] + V['SECADO']
-            prod_total_v = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
-            st.metric("Total Terminados", f"{prod_term_v:.3f} Kton",
-                      delta=f"{prod_term_v - (BASE['PRIL_DTP']+BASE['SECADO']):+.3f}", delta_color="off")
-            st.metric("Total NPT3+NPT4",  f"{prod_total_v:.3f} Kton",
-                      delta=f"{prod_total_v - (BASE['KNO3_T_NPT3']+BASE['KNO3_R_NPT3']+BASE['KNO3_L_NPT4']+BASE['CSSI_NPT4']+BASE['CSSR_NPT4']):+.3f}",
-                      delta_color="off")
+            prod_total_v = npt3_v + npt4_v
+            st.metric("Total Terminados", f"{prod_term_v:.3f} Kton", delta=f"{prod_term_v-(BASE['PRIL_DTP']+BASE['SECADO']):+.3f}", delta_color="off")
+            st.metric("Total NPT3+NPT4",  f"{prod_total_v:.3f} Kton", delta=f"{prod_total_v-(BASE['KNO3_T_NPT3']+BASE['KNO3_R_NPT3']+BASE['KNO3_L_NPT4']+BASE['CSSI_NPT4']+BASE['CSSR_NPT4']):+.3f}", delta_color="off")
  
         st.divider()
  
-        # ─── GASTOS POZAS ─────────────────────────────────────────────────────
+        # ── GASTOS POZAS ─────────────────────────────────────────────────────
         st.markdown("#### 💰 Gastos Pozas (KUS) → USD/T sobre NPT3+NPT4")
-        st.caption("Gasto (KUS)  |  — denominador: prod total —  |  USD/T resultante")
- 
-        for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB")]:
+        for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB"), ("Depr. CS", "DEPR_POZAS_CS")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
+                V[key] = st.number_input(f"Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
- 
         tot_pozas = V['G_POZAS_NV']+V['G_POZAS_CS']+V['G_POZAS_PB']+V['DEPR_POZAS_CS']
-        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['DEPR_POZAS_CS']:.0f} KUS fija): **${tot_pozas:.0f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
+        st.caption(f"📌 Total: **${tot_pozas:.0f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
  
         st.divider()
  
-        # ─── GASTOS PLANTAS ───────────────────────────────────────────────────
+        # ── GASTOS PLANTAS ───────────────────────────────────────────────────
         st.markdown("#### 🏗️ Gastos Plantas (KUS)")
  
         st.caption("Cristalización → USD/T sobre NPT3+NPT4")
-        for lbl, key in [("NPT3 (+ Korda)", "G_NPT3"), ("NPT4", "G_NPT4")]:
+        for lbl, key in [("NPT3 + Korda", "G_NPT3"), ("NPT4", "G_NPT4"), ("Depr. NPT3", "DEPR_NPT3"), ("Depr. NPT4", "DEPR_NPT4")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
+                V[key] = st.number_input(f"Crist. {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
         tot_crist = V['G_NPT3']+V['G_NPT4']+V['DEPR_NPT3']+V['DEPR_NPT4']
-        st.caption(f"📌 Total Crist (incl. depr. ${V['DEPR_NPT3']+V['DEPR_NPT4']:.0f} KUS fija): **${tot_crist:.0f} KUS** → **${tot_crist/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
+        st.caption(f"📌 Total Cristalización: **${tot_crist:.0f} KUS** → **${tot_crist/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
  
         st.caption("Terminados → USD/T sobre Pril+DTP+Secado")
-        for lbl, key in [("Prilado CS", "G_PRIL"), ("DTP", "G_DTP"), ("Secado KNO3", "G_SECADO")]:
+        for lbl, key in [("Prilado CS", "G_PRIL"), ("DTP", "G_DTP"), ("Secado KNO3", "G_SECADO"),
+                         ("Depr. Prilado", "DEPR_PRIL"), ("Depr. DTP", "DEPR_DTP"), ("Depr. Secado", "DEPR_SECADO")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
+                V[key] = st.number_input(f"Term. {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_term_v:.2f}" if prod_term_v > 0 else "-")
         tot_term = V['G_PRIL']+V['G_DTP']+V['G_SECADO']+V['G_TPTE_INT']+V['DEPR_PRIL']+V['DEPR_DTP']+V['DEPR_SECADO']
-        st.caption(f"📌 Total Terminados (incl. depr+tpte int. ${V['DEPR_PRIL']+V['DEPR_DTP']+V['DEPR_SECADO']+V['G_TPTE_INT']:.0f} KUS fija): **${tot_term:.0f} KUS** → **${tot_term/prod_term_v:.2f} USD/T**" if prod_term_v > 0 else "")
+        st.caption(f"📌 Total Terminados (incl. Tpte Int. ${V['G_TPTE_INT']:.0f} KUS fijo): **${tot_term:.0f} KUS** → **${tot_term/prod_term_v:.2f} USD/T**" if prod_term_v > 0 else "")
  
         st.divider()
  
-        # ─── PUERTO ───────────────────────────────────────────────────────────
-        st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
+        # ── PUERTO ───────────────────────────────────────────────────────────
+        st.markdown("#### 🚢 Puerto — KUS | Kton | USD/T")
  
-        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE",
-                    "Embarque Granel (Kton)",    "TON_EMBARQUE",
-                    step_ton=0.1)
-        fila_usdton("Almacenaje (KUS)",          "G_ALMACENAJE",
-                    "Almacenaje (Kton)",          "TON_ALMACENAJE",
-                    step_ton=1.0)
+        for lbl, key_usd, key_ton in [
+            ("Embarque+Demurrage", "G_EMBARQUE",   "TON_EMBARQUE"),
+            ("Almacenaje",         "G_ALMACENAJE", "TON_ALMACENAJE"),
+        ]:
+            c1, c2, c3 = st.columns([2, 2, 1])
+            with c1: V[key_usd] = st.number_input(f"{lbl} (KUS)", value=round(V[key_usd],1), step=10.0, format="%.1f", key=f"ui_{key_usd}")
+            with c2: V[key_ton] = st.number_input(f"{lbl} (Kton)", value=round(V[key_ton],3), step=0.1, format="%.3f", key=f"ui_{key_ton}")
+            with c3: st.metric("USD/T", f"${V[key_usd]/V[key_ton]:.2f}" if V[key_ton]>0 else "-")
  
         c1, c2, c3 = st.columns([2, 2, 1])
-        with c1:
-            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key="ui_G_DIST_T")
-        with c2:
-            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key="ui_TON_DESPACHO")
+        with c1: V['G_DIST_T']   = st.number_input("Distributivos (KUS)",     value=round(V['G_DIST_T'],1),   step=10.0, format="%.1f", key="ui_G_DIST_T")
+        with c2: V['TON_DESPACHO']= st.number_input("Despacho Cam. (Kton)",   value=round(V['TON_DESPACHO'],3),step=0.1, format="%.3f", key="ui_TON_DESPACHO")
         with c3:
             vol_d = V['TON_EMBARQUE'] + V['TON_DESPACHO']
-            ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
-            st.metric("=> USD/T", f"${ratio_d:.2f}")
- 
-        st.caption(f"ℹ️ Distributivos: denominador = Embarque Granel + Despacho Camiones = {vol_d:.2f} Kton")
+            st.metric("USD/T", f"${V['G_DIST_T']/vol_d:.2f}" if vol_d>0 else "-")
+        st.caption(f"ℹ️ Dist. denominador = Embarque + Despacho = {vol_d:.2f} Kton")
  
         st.divider()
  
-        # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
+        # ── TRANSPORTE CAMIONES ──────────────────────────────────────────────
         st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
-        fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
-                    "Tpte Camiones (Kton)", "TON_TPTE_CAM",
-                    step_ton=0.1)
+        c1, c2, c3 = st.columns([2, 2, 1])
+        with c1: V['G_TPTE_CAM']   = st.number_input("Tpte Camiones (KUS)",  value=round(V['G_TPTE_CAM'],1),  step=10.0, format="%.1f", key="ui_G_TPTE_CAM")
+        with c2: V['TON_TPTE_CAM'] = st.number_input("Tpte Camiones (Kton)", value=round(V['TON_TPTE_CAM'],3),step=0.1,  format="%.3f", key="ui_TON_TPTE_CAM")
+        with c3: st.metric("USD/T", f"${V['G_TPTE_CAM']/V['TON_TPTE_CAM']:.2f}" if V['TON_TPTE_CAM']>0 else "-")
  
         st.divider()
  
-        # ─── FC KCl ───────────────────────────────────────────────────────────
-        st.markdown("#### ⚗️ Factor Consumo KCl (KTon KCl / Kton prod)")
+        # ── TRANSPORTE DE SALES ──────────────────────────────────────────────
+        st.markdown("#### 🧂 Transporte de Sales")
+        st.caption("Gastos (KUS) y toneladas NaNO3 (KTon) por origen")
  
+        for lbl, key_usd, key_ton in [
+            ("NV (Tpte)",         "G_TPTE_NV",  "TON_SALES_NV"),
+            ("NV (Op. Canchas)",  "G_OP_NV",    None),
+            ("PB",                "G_TPTE_PB",  "TON_SALES_PB"),
+        ]:
+            if key_ton:
+                c1, c2, c3 = st.columns([2, 2, 1])
+                with c1: V[key_usd] = st.number_input(f"Sales {lbl} (KUS)", value=round(V[key_usd],1), step=10.0, format="%.1f", key=f"ui_{key_usd}")
+                with c2: V[key_ton] = st.number_input(f"Ton {lbl} (KTon)",  value=round(V[key_ton],3), step=0.1,  format="%.3f", key=f"ui_{key_ton}")
+                with c3:
+                    p = (V[key_usd]) / V[key_ton] if V[key_ton]>0 else 0.0
+                    st.metric("USD/TNitr", f"${p:.2f}")
+            else:
+                c1, _ = st.columns([2, 3])
+                with c1: V[key_usd] = st.number_input(f"Sales {lbl} (KUS)", value=round(V[key_usd],1), step=10.0, format="%.1f", key=f"ui_{key_usd}")
+ 
+        c1, c2 = st.columns(2)
+        with c1: V['TON_SALES_CS'] = st.number_input("Ton CS (KTon NaNO3)", value=round(V['TON_SALES_CS'],3), step=0.1, format="%.3f", key="ui_TON_SALES_CS")
+ 
+        # Calcular precio promedio y FC automáticamente
+        ton_total_s = V['TON_SALES_NV'] + V['TON_SALES_PB'] + V['TON_SALES_CS']
+        precio_prom_s = (V['G_TPTE_NV']+V['G_OP_NV']+V['G_TPTE_PB']) / ton_total_s if ton_total_s > 0 else 0.0
+        fc_sales_calc = ton_total_s / prod_total_v if prod_total_v > 0 else 0.0
+        c11_preview   = precio_prom_s * fc_sales_calc
+ 
+        st.info(
+            f"**Precio prom.:** ${precio_prom_s:.4f} USD/TNitr  |  "
+            f"**FC:** {fc_sales_calc:.4f} NaNO3/Ton  |  "
+            f"**=> 1.1:** ${c11_preview:.4f} USD/T"
+        )
+ 
+        st.divider()
+ 
+        # ── FC KCl ───────────────────────────────────────────────────────────
+        st.markdown("#### ⚗️ Factor Consumo KCl (KTon KCl / Kton prod)")
         npt3_v2 = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
         npt4_v2 = V['KNO3_L_NPT4'] + V['CSSI_NPT4'] + V['CSSR_NPT4']
  
         st.caption("NPT3")
-        fck1, fck2, fck3 = st.columns(3)
-        with fck1: V['FC_MOP90_NPT3'] = st.number_input("MOP 90 NPT3", value=float(f"{V['FC_MOP90_NPT3']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP90_NPT3")
-        with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP70_NPT3")
-        with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key="ui_FC_SS_NPT3")
- 
+        fk1, fk2, fk3 = st.columns(3)
+        with fk1: V['FC_MOP90_NPT3'] = st.number_input("MOP 90 NPT3", value=float(f"{V['FC_MOP90_NPT3']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP90_NPT3")
+        with fk2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP70_NPT3")
+        with fk3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key="ui_FC_SS_NPT3")
         cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])*npt3_v2
-        st.caption(f"Consumo KCl NPT3: {cons3:.2f} KTon")
+        st.caption(f"Consumo KCl NPT3: {cons3:.3f} KTon")
  
         st.caption("NPT4")
-        fck4, fck5, fck6 = st.columns(3)
-        with fck4: V['FC_MOP90_NPT4'] = st.number_input("MOP 90 NPT4", value=float(f"{V['FC_MOP90_NPT4']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP90_NPT4")
-        with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP70_NPT4")
-        with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key="ui_FC_SS_NPT4")
- 
+        fk4, fk5, fk6 = st.columns(3)
+        with fk4: V['FC_MOP90_NPT4'] = st.number_input("MOP 90 NPT4", value=float(f"{V['FC_MOP90_NPT4']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP90_NPT4")
+        with fk5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP70_NPT4")
+        with fk6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key="ui_FC_SS_NPT4")
         cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])*npt4_v2
-        st.caption(f"Consumo KCl NPT4: {cons4:.2f} KTon")
+        st.caption(f"Consumo KCl NPT4: {cons4:.3f} KTon")
  
         st.caption("Precio KCl (US$/T)")
         pk1, pk2, pk3 = st.columns(3)
@@ -735,16 +737,13 @@ elif pagina == "Sensibilidad":
         with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key="ui_P_MOP70")
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key="ui_P_SS")
  
-        st.divider()
- 
-        # ─── FC NaNO3 / Tpte Sales ────────────────────────────────────────────
-        st.markdown("#### 🧂 Transporte de Sales")
-        fs1, fs2 = st.columns(2)
-        with fs1:
-            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key="ui_P_TPTE_SALES")
-        with fs2:
-            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key="ui_FC_SALES")
-        st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
+        cons_tot = cons3 + cons4
+        fc_kcl_tot = cons_tot / prod_total_v if prod_total_v > 0 else 0.0
+        cp_kcl = ((V['P_MOP90']*(V['FC_MOP90_NPT3']*npt3_v2+V['FC_MOP90_NPT4']*npt4_v2)
+                  +V['P_MOP70']*(V['FC_MOP70_NPT3']*npt3_v2+V['FC_MOP70_NPT4']*npt4_v2)
+                  +V['P_SS']*(V['FC_SS_NPT3']*npt3_v2+V['FC_SS_NPT4']*npt4_v2))
+                 / cons_tot) if cons_tot > 0 else 0.0
+        st.info(f"**FC total:** {fc_kcl_tot:.4f}  |  **Costo prom. KCl:** ${cp_kcl:.2f} USD/T  |  **=> 1.4:** ${fc_kcl_tot*cp_kcl:.4f} USD/T")
  
         st.divider()
         if st.button("🔄 Restablecer valores PPTO", use_container_width=True):
@@ -759,52 +758,50 @@ elif pagina == "Sensibilidad":
         delta_total = costo_sim - costo_base
  
         st.markdown(f"#### 📊 Resultado — {MESES[mes]}")
-        st.metric("PPTO Base",       f"${costo_base:.2f} / T")
-        st.metric("Simulado",        f"${costo_sim:.2f} / T",
+        st.metric("PPTO Base",  f"${costo_base:.2f} / T")
+        st.metric("Simulado",   f"${costo_sim:.2f} / T",
                   delta=f"{delta_total:+.2f} USD/T", delta_color="inverse")
  
         st.divider()
         st.markdown("**Detalle por componente**")
- 
         rows = []
         for k in comp_base:
             b, s = comp_base[k], comp_sim[k]
             rows.append({"Componente": k, "PPTO": round(b,2), "Sim": round(s,2), "Δ": round(s-b,2)})
         df_det = pd.DataFrame(rows)
  
-        def _col_delta(val):
-            if isinstance(val, float):
+        def _cd(val):
+            if isinstance(val, (int, float)):
                 if val > 0: return 'color:#D83030;font-weight:bold'
                 if val < 0: return 'color:#2ECC71;font-weight:bold'
             return ''
  
         st.dataframe(
-            df_det.style
-                .map(_col_delta, subset=["Δ"])
+            df_det.style.map(_cd, subset=["Δ"])
                 .format({"PPTO":"{:.2f}", "Sim":"{:.2f}", "Δ":"{:+.2f}"}),
             use_container_width=True, hide_index=True, height=360,
         )
  
-
         st.divider()
         st.markdown("**PPTO vs Simulado**")
-        fig = go.Figure()
         nombres = list(comp_base.keys())
         v_base  = [comp_base[k] for k in nombres]
         v_sim   = [comp_sim[k]  for k in nombres]
-        fig.add_trace(go.Bar(name="PPTO",     x=v_base, y=nombres, orientation='h',
-                             marker_color='#152578', text=[f"${v:.1f}" for v in v_base],
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name="PPTO", x=v_base, y=nombres, orientation='h',
+                             marker_color='#152578',
+                             text=[f"${v:.1f}" for v in v_base],
                              textposition='outside', textfont_size=9))
-        fig.add_trace(go.Bar(name="Simulado", x=v_sim,  y=nombres, orientation='h',
+        fig.add_trace(go.Bar(name="Simulado", x=v_sim, y=nombres, orientation='h',
                              marker_color=['#D83030' if s>b else '#2ECC71' for b,s in zip(v_base,v_sim)],
                              text=[f"${v:.1f}" for v in v_sim],
                              textposition='outside', textfont_size=9))
         fig.update_layout(
             barmode='group', height=360,
-            margin=dict(l=120, r=60, t=10, b=10),
+            margin=dict(l=130, r=60, t=10, b=10),
             plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
             xaxis=dict(gridcolor='#333333'),
             yaxis=dict(autorange='reversed'),
             legend=dict(orientation='h', y=1.05),
         )
-        st.plotly_chart(fig, use_container_width=True) 
+        st.plotly_chart(fig, use_container_width=True)
