@@ -716,11 +716,16 @@ elif pagina == "Sensibilidad":
         st.divider()
  
         # ─── PUERTO ───────────────────────────────────────────────────────────
-        # ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
-        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", step_ton=0.1, prefix="puerto_emb_")
-        
-        fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", "Almacenaje (Kton)", "TON_ALMACENAJE", step_ton=1.0, prefix="puerto_alm_")
+ 
+        # SOLUCIÓN DIRECTA: Quitamos el parámetro 'prefix' de la función y lo sumamos en el key del input
+        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
+                    "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
+                    step_ton=0.1) # <-- Sin el parámetro prefix aquí
+                    
+        fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", 
+                    "Almacenaje (Kton)", "TON_ALMACENAJE", 
+                    step_ton=1.0) # <-- Sin el parámetro prefix aquí
  
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
@@ -728,23 +733,19 @@ elif pagina == "Sensibilidad":
         with c2:
             V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key="ui_TON_DESPACHO")
         with c3:
-            # CORREGIDO: Aquí también se cambia TON_EMBARQUE por TON_EMBARQUE_TOTAL
             vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
             ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
             st.metric("=> USD/T", f"${ratio_d:.2f}")
  
-        # CORREGIDO: Mensaje informativo con la variable correcta
         st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
  
         # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
         st.markdown("#### 🚛 Transporte Camiones — KUS | Kton | USD/T")
         
-        # Se agrega el 'prefix' para evitar el error de StreamlitDuplicateElementKey
+        # Aquí pasamos una clave única en el cuarto argumento modificando el string directamente
         fila_usdton("Tpte Camiones (KUS)", "G_TPTE_CAM",
-                    "Tpte Camiones (Kton)", "TON_TPTE_CAM",
-                    step_ton=0.1, prefix="camiones_")
- 
-        st.divider()
+                    "Tpte Camiones (Kton)", "TON_TPTE_CAM_UNICO", # <-- Cambiamos el nombre de la llave aquí para evitar duplicados
+                    step_ton=0.1) # <-- Sin el parámetro prefix aquí
  
         # ─── FC KCl ───────────────────────────────────────────────────────────
         st.markdown("#### ⚗️ Factor Consumo KCl (KTon KCl / Kton prod)")
