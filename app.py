@@ -148,28 +148,55 @@ if pagina == "Dashboard":
     kpis_row(df, mes, tipo)
     st.divider()
 
-    # Grafico PPTO vs Real+Proy
+    # Grafico PPTO vs Real+Proy — barras agrupadas con delta encima
     ppto_s = total_serie(df, tipo, 'PPTO')
     rp_s   = total_rp_serie(df, tipo)
 
+    deltas = [rp - ppto for rp, ppto in zip(rp_s, ppto_s)]
+
     fig = go.Figure()
+
     fig.add_trace(go.Bar(
-        name="PPTO", x=MESES, y=ppto_s,
+        name="PPTO",
+        x=MESES, y=ppto_s,
         marker_color='#B5D4F4',
-        text=[f"${v:.0f}" for v in ppto_s], textposition="outside", textfont_size=10,
+        text=[f"${v:.0f}" for v in ppto_s],
+        textposition="outside",
+        textfont_size=10,
     ))
-    fig.add_trace(go.Scatter(
-        name="Real + Proyección", x=MESES, y=rp_s,
-        mode="lines+markers",
-        line=dict(color="#D85A30", width=2.5),
-        marker=dict(size=8, color="#D85A30"),
-        text=[f"${v:.0f}" for v in rp_s], textposition="top center", textfont_size=10,
+
+    fig.add_trace(go.Bar(
+        name="Real + Proyección",
+        x=MESES, y=rp_s,
+        marker_color='#D85A30',
+        text=[f"${v:.0f}" for v in rp_s],
+        textposition="outside",
+        textfont_size=10,
     ))
+
+    # Anotaciones de delta encima de cada par de barras
+    annotations = []
+    for i, (mes_label, delta) in enumerate(zip(MESES, deltas)):
+        color  = "#D85A30" if delta > 0 else "#2ECC71"
+        symbol = "▲" if delta > 0 else "▼"
+        annotations.append(dict(
+            x=mes_label,
+            y=max(ppto_s[i], rp_s[i]) * 1.13,  # un poco arriba de la barra más alta
+            text=f"{symbol} {delta:+.1f}",
+            showarrow=False,
+            font=dict(size=11, color=color, family="Arial Black"),
+            xanchor="center",
+        ))
+
     fig.update_layout(
+        barmode="group",
         title=f"PPTO vs Real + Proyección — {modo} US$/T",
-        height=360, legend=dict(orientation="h", y=1.12),
-        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=60,b=20),
+        height=400,
+        legend=dict(orientation="h", y=1.12),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        margin=dict(t=60, b=20),
+        annotations=annotations,
     )
     fig.update_yaxes(gridcolor="#f0f0f0")
     st.plotly_chart(fig, use_container_width=True)
