@@ -177,7 +177,7 @@ if pagina == "Dashboard":
     # Anotaciones de delta encima de cada par de barras
     annotations = []
     for i, (mes_label, delta) in enumerate(zip(MESES, deltas)):
-        color  = "#D85A30" if delta > 0 else "#2ECC71"
+        color  = "#D83030" if delta > 0 else "#80BC00"
         symbol = "▲" if delta > 0 else "▼"
         annotations.append(dict(
             x=mes_label,
@@ -198,7 +198,7 @@ if pagina == "Dashboard":
         margin=dict(t=60, b=20),
         annotations=annotations,
     )
-    fig.update_yaxes(gridcolor="#f0f0f0")
+    fig.update_yaxes(gridcolor="#f0f0f08f")
     st.plotly_chart(fig, use_container_width=True)
 
     # Barras apiladas composición
@@ -208,27 +208,51 @@ if pagina == "Dashboard":
     with col_tab1:
         st.caption("PPTO")
         fig2 = go.Figure()
+        totales_ppto = [0] * len(MESES)
         for (sa, c, nombre), color in zip(COSTOS, COLORES):
             s = gs(df, 'COSTO TOTAL', sa, c, tipo, 'PPTO')
+            totales_ppto = [t + v for t, v in zip(totales_ppto, s)]
             fig2.add_trace(go.Bar(name=nombre, x=MESES, y=s, marker_color=color))
-        fig2.update_layout(barmode="stack", height=320,
-                           legend=dict(orientation="h", y=-0.35, font_size=10),
-                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                           margin=dict(t=10,b=10))
-        fig2.update_yaxes(gridcolor="#f0f0f0")
+
+        fig2.update_layout(
+            barmode="stack", height=320,
+            legend=dict(orientation="h", y=-0.35, font_size=10),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(t=30, b=10),
+            annotations=[dict(
+                x=mes, y=total * 1.02,
+                text=f"${total:.0f}",
+                showarrow=False,
+                font=dict(size=10, color="white"),
+                xanchor="center", yanchor="bottom"
+            ) for mes, total in zip(MESES, totales_ppto)]
+        )
+        fig2.update_yaxes(gridcolor="#f0f0f08f")
         st.plotly_chart(fig2, use_container_width=True)
 
     with col_tab2:
         st.caption("Real + Proyección")
         fig3 = go.Figure()
+        totales_rp = [0] * len(MESES)
         for (sa, c, nombre), color in zip(COSTOS, COLORES):
             s = rp_serie(df, 'COSTO TOTAL', sa, c, tipo)
+            totales_rp = [t + v for t, v in zip(totales_rp, s)]
             fig3.add_trace(go.Bar(name=nombre, x=MESES, y=s, marker_color=color))
-        fig3.update_layout(barmode="stack", height=320,
-                           legend=dict(orientation="h", y=-0.35, font_size=10),
-                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                           margin=dict(t=10,b=10))
-        fig3.update_yaxes(gridcolor="#f0f0f0")
+
+        fig3.update_layout(
+            barmode="stack", height=320,
+            legend=dict(orientation="h", y=-0.35, font_size=10),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            margin=dict(t=30, b=10),
+            annotations=[dict(
+                x=mes, y=total * 1.02,
+                text=f"${total:.0f}",
+                showarrow=False,
+                font=dict(size=10, color="white"),
+                xanchor="center", yanchor="bottom"
+            ) for mes, total in zip(MESES, totales_rp)]
+        )
+        fig3.update_yaxes(gridcolor="#f0f0f08f")
         st.plotly_chart(fig3, use_container_width=True)
 
 
