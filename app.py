@@ -522,7 +522,7 @@ elif pagina == "Sensibilidad":
 
         # Depreciaciones (fijas, no editables)
 
-        'DEPR_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Depreciación CS'),
+        'DEP_POZAS_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Depreciación CS'),
         'DEP_PRIL':        _r('GASTO','TERMINADOS','Gasto Depreciación Prilado CS'),
         'DEP_DTP':         _r('GASTO','TERMINADOS','Gasto Depreciación DTP'),
         'DEP_SECADO':      _r('GASTO','TERMINADOS','Gasto Depreciación Secado KNO3'),
@@ -559,8 +559,9 @@ elif pagina == "Sensibilidad":
         c11 = precio_tpte * fc_sales
 
         # 1.2 Pozas: usar total directo de la tabla
-        pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
-        c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEPR_POZAS_CS']) / prod_total if prod_total > 0 else 0.0
+        #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
+        Gasto_pozas_Total =  (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['DEP_POZAS_CS'])
+        c12 = Gasto_pozas_Total / prod_total if prod_total > 0 else 0.0
 
 
         # 1.3 Cristalización
@@ -580,7 +581,7 @@ elif pagina == "Sensibilidad":
 
         # 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
-        c_embarque = v['G_EMBARQUE']  / v['TON_EMBARQUE_TOTAL']  if v['TON_EMBARQUE_TOTAL'] > 0  else 0.0
+        c_embarque = v['G_EMBARQUE']  / v[ 'TON_EMBARQUE_GRANEL']  if v[ 'TON_EMBARQUE_GRANEL'] > 0  else 0.0
         c_alm      = v['G_ALMACENAJE']/ v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
         vol_d      = v['TON_EMBARQUE_TOTAL'] + v['TON_DESPACHO']
         c_dist     = v['G_DIST_T']    / vol_d                    if vol_d > 0                    else 0.0
