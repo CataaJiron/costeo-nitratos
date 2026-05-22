@@ -548,15 +548,21 @@ elif pagina == "Sensibilidad":
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
-        # 1.1 Tpte Sales: precio (USD/TNitr) × fc_sales (NaNO3/Ton)
-        # precio está en USD/TNitr sales, fc_sales en KTon NaNO3 / Kton prod
-        # resultado: USD/T
-        consumo_sales_total = (v['NV cat 1'] + v['PB'] + v['CS'])
-        ton_tpte_total = (v["TON_TPTE_NV"] + v["TON_TPTE_PB"] + v["TON_TPTE_CS"])
-        gasto_tpte_total = (v["G_TPTE_NV"] + v["G_TPTE_PB"] + v["G_CAMINOS_NV"])
-        precio_tpte = gasto_tpte_total / ton_tpte_total if ton_tpte_total > 0 else 0.0
-        fc_sales = (consumo_sales_total / prod_total) if prod_total > 0 else 0.0
-        c11 = fc_sales * ton_tpte_total
+        # 1.1 Tpte Sales
+        # Precio por ruta = Gasto KUS / Ton por ruta
+        precio_nv = v['G_TPTE_NV'] / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
+        precio_pb = v['G_TPTE_PB'] / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
+        precio_cs = v['G_CAMINOS_NV'] / v['TON_TPTE_CS'] if v['TON_TPTE_CS'] > 0 else 0.0
+
+        # Precio promedio ponderado por consumo de sales
+        consumo_nv = v['NV cat 1']
+        consumo_pb = v['PB']
+        consumo_cs = v['CS']
+        consumo_total = consumo_nv + consumo_pb + consumo_cs
+
+        precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
+        fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
+        c11 = precio_prom * fc_sales
 
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
