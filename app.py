@@ -780,7 +780,7 @@ elif pagina == "Sensibilidad":
  
         st.dataframe(
             df_det.style
-                .applymap(_col_delta, subset=["Δ"])
+                .map(_col_delta, subset=["Δ"])
                 .format({"PPTO":"{:.2f}", "Sim":"{:.2f}", "Δ":"{:+.2f}"}),
             use_container_width=True, hide_index=True, height=360,
         )
