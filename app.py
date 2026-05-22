@@ -718,13 +718,9 @@ elif pagina == "Sensibilidad":
         # ─── PUERTO ───────────────────────────────────────────────────────────
         # ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
-        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
-            "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
-            step_ton=0.1, prefix="puerto_emb_")
+        fila_usdton("Embarque+Demurrage (KUS)", "G_EMBARQUE", "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", step_ton=0.1, prefix="puerto_emb_")
         
-        fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", 
-            "Almacenaje (Kton)", "TON_ALMACENAJE", 
-            step_ton=1.0, prefix="puerto_alm_")
+        fila_usdton("Almacenaje (KUS)", "G_ALMACENAJE", "Almacenaje (Kton)", "TON_ALMACENAJE", step_ton=1.0, prefix="puerto_alm_")
  
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
