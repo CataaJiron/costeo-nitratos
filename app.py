@@ -652,7 +652,7 @@ elif pagina == "Sensibilidad PPTO":
             V[k] = val
     
     # Sincronizar inputs con V (para que el reset funcione)
-    for k in V:
+    # for k in V:
   #      ui_key = f"ui_{k}"
  #       if ui_key in st.session_state:
 #            st.session_state[ui_key] = V[k]
