@@ -646,16 +646,13 @@ elif pagina == "Sensibilidad PPTO":
         st.session_state['sv']      = copy.deepcopy(BASE)
         st.session_state['sv_mes']  = mes
         st.session_state['sv_tipo'] = tipo_sens
-    if 'ppto_rc' not in st.session_state:
-        st.session_state['ppto_rc'] = 0
-    rc = st.session_state['ppto_rc']
     V = st.session_state['sv']
     for k, val in BASE.items():
         if k not in V:
             V[k] = val
     
     # Sincronizar inputs con V (para que el reset funcione)
-   # for k in V:
+    for k in V:
   #      ui_key = f"ui_{k}"
  #       if ui_key in st.session_state:
 #            st.session_state[ui_key] = V[k]
@@ -669,9 +666,9 @@ elif pagina == "Sensibilidad PPTO":
         def fila_usdton(label_usd, key_usd, label_ton, key_ton, fmt_usd="%.1f", fmt_ton="%.3f", step_usd=10.0, step_ton=0.1, usdpt_label="=> USD/T"):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric(usdpt_label, f"${ratio:.2f}")
@@ -682,17 +679,17 @@ elif pagina == "Sensibilidad PPTO":
         pc1, pc2 = st.columns(2)
         with pc1:
             st.caption("NPT3")
-            V['KNO3_T_NPT3'] = st.number_input("T NPT3", value=round(V['KNO3_T_NPT3'],3), step=0.1, format="%.3f", key="ui_T3_{rc}")
-            V['KNO3_R_NPT3'] = st.number_input("R NPT3", value=round(V['KNO3_R_NPT3'],3), step=0.1, format="%.3f", key="ui_R3_{rc}")
+            V['KNO3_T_NPT3'] = st.number_input("T NPT3", value=round(V['KNO3_T_NPT3'],3), step=0.1, format="%.3f", key=f"ui_T3_{rc}")
+            V['KNO3_R_NPT3'] = st.number_input("R NPT3", value=round(V['KNO3_R_NPT3'],3), step=0.1, format="%.3f", key=f"ui_R3_{rc}")
             npt3_v = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
             st.metric("TOTAL NPT3", f"{npt3_v:.3f} Kton",
                       delta=f"{npt3_v - (BASE['KNO3_T_NPT3']+BASE['KNO3_R_NPT3']):+.3f}",
                       delta_color="off")
         with pc2:
             st.caption("NPT4")
-            V['KNO3_L_NPT4'] = st.number_input("L NPT4",    value=round(V['KNO3_L_NPT4'],3), step=0.1, format="%.3f", key="ui_L4_{rc}")
-            V['CSSI_NPT4']   = st.number_input("CSSI NPT4", value=round(V['CSSI_NPT4'],3),   step=0.1, format="%.3f", key="ui_CSSI_{rc}")
-            V['CSSR_NPT4']   = st.number_input("CSSR NPT4", value=round(V['CSSR_NPT4'],3),   step=0.1, format="%.3f", key="ui_CSSR_{rc}")
+            V['KNO3_L_NPT4'] = st.number_input("L NPT4",    value=round(V['KNO3_L_NPT4'],3), step=0.1, format="%.3f", key=f"ui_L4_{rc}")
+            V['CSSI_NPT4']   = st.number_input("CSSI NPT4", value=round(V['CSSI_NPT4'],3),   step=0.1, format="%.3f", key=f"ui_CSSI_{rc}")
+            V['CSSR_NPT4']   = st.number_input("CSSR NPT4", value=round(V['CSSR_NPT4'],3),   step=0.1, format="%.3f", key=f"ui_CSSR_{rc}")
             npt4_v = V['KNO3_L_NPT4'] + V['CSSI_NPT4'] + V['CSSR_NPT4']
             st.metric("TOTAL NPT4", f"{npt4_v:.3f} Kton",
                       delta=f"{npt4_v - (BASE['KNO3_L_NPT4']+BASE['CSSI_NPT4']+BASE['CSSR_NPT4']):+.3f}",
@@ -701,8 +698,8 @@ elif pagina == "Sensibilidad PPTO":
         pt1, pt2 = st.columns(2)
         with pt1:
             st.caption("Terminados")
-            V['PRIL_DTP'] = st.number_input("PRILADO + DTP", value=round(V['PRIL_DTP'],3), step=0.1, format="%.3f", key="ui_PRIL_{rc}")
-            V['SECADO']   = st.number_input("SECADO",        value=round(V['SECADO'],3),   step=0.1, format="%.3f", key="ui_SEC_{rc}")
+            V['PRIL_DTP'] = st.number_input("PRILADO + DTP", value=round(V['PRIL_DTP'],3), step=0.1, format="%.3f", key=f"ui_PRIL_{rc}")
+            V['SECADO']   = st.number_input("SECADO",        value=round(V['SECADO'],3),   step=0.1, format="%.3f", key=f"ui_SEC_{rc}")
         with pt2:
             st.caption(" ")
             prod_term_v  = V['PRIL_DTP'] + V['SECADO']
@@ -723,7 +720,7 @@ elif pagina == "Sensibilidad PPTO":
         for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
+                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
  
@@ -739,7 +736,7 @@ elif pagina == "Sensibilidad PPTO":
         for lbl, key in [("NPT3 (+ Korda)", "G_NPT3"), ("NPT4", "G_NPT4")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
+                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
         tot_crist = V['G_NPT3']+V['G_NPT4']+V['DEP_NPT3']+V['DEP_NPT4']
@@ -749,7 +746,7 @@ elif pagina == "Sensibilidad PPTO":
         for lbl, key in [("Prilado CS", "G_PRIL"), ("DTP", "G_DTP"), ("Secado KNO3", "G_SECADO")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
+                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_term_v:.2f}" if prod_term_v > 0 else "-")
         tot_term = V['G_PRIL']+V['G_DTP']+V['G_SECADO']+V['G_TPTE_INT']+V['DEP_PRIL']+V['DEP_DTP']+V['DEP_SECADO']
@@ -764,9 +761,9 @@ elif pagina == "Sensibilidad PPTO":
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
@@ -783,9 +780,9 @@ elif pagina == "Sensibilidad PPTO":
         # 3. Inputs manuales y cálculo de Distributivos (CORREGIDO AQUÍ)
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
-            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key="ui_G_DIST_T_{rc}")
+            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rc}")
         with c2:
-            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key="ui_TON_DESPACHO_{rc}")
+            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rc}")
         with c3:
             # Calculamos las variables en el flujo global para que el caption de abajo las pueda leer
             vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
@@ -803,9 +800,9 @@ elif pagina == "Sensibilidad PPTO":
         def fila_usdton_camiones(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
@@ -824,27 +821,27 @@ elif pagina == "Sensibilidad PPTO":
  
         st.caption("NPT3")
         fck1, fck2, fck3 = st.columns(3)
-        with fck1: V['FC_MOP90_NPT3'] = st.number_input("MOP 90 NPT3", value=float(f"{V['FC_MOP90_NPT3']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP90_NPT3_{rc}")
-        with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP70_NPT3_{rc}")
-        with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key="ui_FC_SS_NPT3_{rc}")
+        with fck1: V['FC_MOP90_NPT3'] = st.number_input("MOP 90 NPT3", value=float(f"{V['FC_MOP90_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP90_NPT3_{rc}")
+        with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT3_{rc}")
+        with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT3_{rc}")
  
         cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])*npt3_v2
         st.caption(f"Consumo KCl NPT3: {cons3:.2f} KTon")
  
         st.caption("NPT4")
         fck4, fck5, fck6 = st.columns(3)
-        with fck4: V['FC_MOP90_NPT4'] = st.number_input("MOP 90 NPT4", value=float(f"{V['FC_MOP90_NPT4']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP90_NPT4_{rc}")
-        with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key="ui_FC_MOP70_NPT4_{rc}")
-        with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key="ui_FC_SS_NPT4_{rc}")
+        with fck4: V['FC_MOP90_NPT4'] = st.number_input("MOP 90 NPT4", value=float(f"{V['FC_MOP90_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP90_NPT4_{rc}")
+        with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT4_{rc}")
+        with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT4_{rc}")
  
         cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])*npt4_v2
         st.caption(f"Consumo KCl NPT4: {cons4:.2f} KTon")
  
         st.caption("Precio KCl (US$/T)")
         pk1, pk2, pk3 = st.columns(3)
-        with pk1: V['P_MOP90'] = st.number_input("MOP 90", value=round(V['P_MOP90'],2), step=1.0, format="%.2f", key="ui_P_MOP90_{rc}")
-        with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key="ui_P_MOP70_{rc}")
-        with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key="ui_P_SS_{rc}")
+        with pk1: V['P_MOP90'] = st.number_input("MOP 90", value=round(V['P_MOP90'],2), step=1.0, format="%.2f", key=f"ui_P_MOP90_{rc}")
+        with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key=f"ui_P_MOP70_{rc}")
+        with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rc}")
  
         st.divider()
  
@@ -852,17 +849,18 @@ elif pagina == "Sensibilidad PPTO":
         st.markdown("#### 🧂 Transporte de Sales")
         fs1, fs2 = st.columns(2)
         with fs1:
-            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key="ui_P_TPTE_SALES_{rc}")
+            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rc}")
         with fs2:
-            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key="ui_FC_SALES_{rc}")
+            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rc}")
         st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
  
         st.divider()
         if st.button(f"🔄 Restablecer valores PPTO ({modo_sens})", use_container_width=True):
-            st.session_state['ppto_rc'] = st.session_state.get('ppto_rc', 0) + 1
-            st.session_state['sv']      = copy.deepcopy(BASE)
-            st.session_state['sv_mes']  = mes
-            st.session_state['sv_tipo'] = tipo_sens
+            # Borrar TODAS las keys del session state que sean de esta página
+            keys_to_delete = [k for k in st.session_state.keys() 
+                             if k.startswith("ui_") or k in ('sv', 'sv_mes', 'sv_tipo')]
+            for k in keys_to_delete:
+                del st.session_state[k]
             st.rerun()
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
