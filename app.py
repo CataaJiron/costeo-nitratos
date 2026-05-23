@@ -841,15 +841,13 @@ elif pagina == "Sensibilidad PPTO":
         st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
  
         st.divider()
-        if st.button(f"🔄 Restablecer valores PPTO ({modo_sens})", use_container_width=True):
-            st.session_state['sv']      = copy.deepcopy(BASE)
-            st.session_state['sv_mes']  = mes
-            st.session_state['reset']   = True
-            # Borrar todos los ui_ para forzar re-render
+        if st.button(f"🔄 Restablecer valores R+P ({modo_sens})", use_container_width=True):
             for k in list(st.session_state.keys()):
-                if k.startswith("ui_"):
+                if k.startswith("rp_"):
                     del st.session_state[k]
+            st.session_state['sv_rp_reset'] = True
             st.rerun()
+
     if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes or st.session_state.get('sv_tipo') != tipo_sens:
         st.session_state['sv']      = copy.deepcopy(BASE)
         st.session_state['sv_mes']  = mes
@@ -1305,9 +1303,7 @@ elif pagina == "Sensibilidad R+P":
             for k in list(st.session_state.keys()):
                 if k.startswith("rp_"):
                     del st.session_state[k]
-            st.session_state[sv_key]       = copy.deepcopy(BASE)
-            st.session_state['sv_rp_mes']  = mes
-            st.session_state['sv_rp_tipo'] = tipo_sens
+            st.session_state['sv_rp_reset'] = True
             st.rerun()
 
     with col_res:
