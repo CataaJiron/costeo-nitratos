@@ -1415,6 +1415,7 @@ elif pagina == "Asistente":
         with st.chat_message("assistant"):
             with st.spinner("Analizando..."):
                 try:
+                    api_key = cargar_api_key() or st.secrets.get("ANTHROPIC_API_KEY", "")
                     client = anthropic.Anthropic()
                     response = client.messages.create(
                         model="claude-sonnet-4-20250514",
