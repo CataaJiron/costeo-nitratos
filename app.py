@@ -851,16 +851,13 @@ elif pagina == "Sensibilidad PPTO":
                     del st.session_state[k]
             st.rerun()
     if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes or st.session_state.get('sv_tipo') != tipo_sens:
-        st.session_state['sv']     = copy.deepcopy(BASE)
-        st.session_state['sv_mes'] = mes
-    
-    # ← AGREGA ESTO
-    if st.session_state.get('reset'):
-        st.session_state['sv']    = copy.deepcopy(BASE)
-        st.session_state['reset'] = False
-
+        st.session_state['sv']      = copy.deepcopy(BASE)
+        st.session_state['sv_mes']  = mes
+        st.session_state['sv_tipo'] = tipo_sens
     V = st.session_state['sv']
-
+    for k, val in BASE.items():
+        if k not in V or (V.get(k, 0) == 0 and val != 0):
+            V[k] = val
 
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
@@ -1128,11 +1125,11 @@ elif pagina == "Sensibilidad R+P":
 
     # ── Session state ─────────────────────────────────────────────────────────
     sv_key = 'sv_rp'
-    if sv_key not in st.session_state or st.session_state.get('sv_rp_mes') != mes or st.session_state.get('sv_rp_tipo') != tipo_sens:
-        st.session_state[sv_key]        = copy.deepcopy(BASE)
-        st.session_state['sv_rp_mes']   = mes
-        st.session_state['sv_rp_tipo']  = tipo_sens
-    V = st.session_state[sv_key]
+    if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes or st.session_state.get('sv_tipo') != tipo_sens:
+        st.session_state['sv']      = copy.deepcopy(BASE)
+        st.session_state['sv_mes']  = mes
+        st.session_state['sv_tipo'] = tipo_sens
+    V = st.session_state['sv']
     for k, val in BASE.items():
         if k not in V or (V.get(k, 0) == 0 and val != 0):
             V[k] = val
