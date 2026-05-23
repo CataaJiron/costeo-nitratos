@@ -886,7 +886,7 @@ elif pagina == "Sensibilidad PPTO":
         def _col_delta(val):
             if isinstance(val, float):
                 if val > 0: return 'color:#D83030;font-weight:bold'
-                if val < 0: return 'color:#2ECC71;font-weight:bold'
+                if val < 0: return 'color:#80BC00;font-weight:bold'
             return ''
  
         st.dataframe(
@@ -907,7 +907,7 @@ elif pagina == "Sensibilidad PPTO":
                              marker_color='#152578', text=[f"${v:.1f}" for v in v_base],
                              textposition='outside', textfont_size=9))
         fig.add_trace(go.Bar(name="Simulado", x=v_sim,  y=nombres, orientation='h',
-                             marker_color=['#D83030' if s>b else '#2ECC71' for b,s in zip(v_base,v_sim)],
+                             marker_color=['#D83030' if s>b else '#80BC00' for b,s in zip(v_base,v_sim)],
                              text=[f"${v:.1f}" for v in v_sim],
                              textposition='outside', textfont_size=9))
         fig.update_layout(
@@ -1332,7 +1332,7 @@ elif pagina == "Sensibilidad R+P":
         def _col_delta(val):
             if isinstance(val, float):
                 if val > 0: return 'color:#D83030;font-weight:bold'
-                if val < 0: return 'color:#2ECC71;font-weight:bold'
+                if val < 0: return 'color:#80BC00;font-weight:bold'
             return ''
         st.dataframe(
             df_det.style.map(_col_delta, subset=["Δ"])
@@ -1346,10 +1346,10 @@ elif pagina == "Sensibilidad R+P":
         v_base  = [comp_base[k] for k in nombres]
         v_sim   = [comp_sim[k]  for k in nombres]
         fig.add_trace(go.Bar(name="R+P",      x=v_base, y=nombres, orientation='h',
-                             marker_color='#80BC00', text=[f"${v:.1f}" for v in v_base],
+                             marker_color='#152578', text=[f"${v:.1f}" for v in v_base],
                              textposition='outside', textfont_size=9))
         fig.add_trace(go.Bar(name="Simulado", x=v_sim,  y=nombres, orientation='h',
-                             marker_color=['#D83030' if s>b else '#2ECC71' for b,s in zip(v_base,v_sim)],
+                             marker_color=['#D83030' if s>b else '#80BC00' for b,s in zip(v_base,v_sim)],
                              text=[f"${v:.1f}" for v in v_sim],
                              textposition='outside', textfont_size=9))
         fig.update_layout(
