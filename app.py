@@ -634,7 +634,7 @@ elif pagina == "Sensibilidad PPTO":
             '1.7 Pérdidas F/E':  c17,
             '1.8 Distributivos': c18,
             '1.9 Otros':         c19,
-            'TOTAL_COSTO': TOTAL_COSTO
+#            'TOTAL_COSTO': TOTAL_COSTO
         }
         return sum(comp.values()), comp
 
@@ -1123,7 +1123,7 @@ elif pagina == "Sensibilidad R+P":
             '1.7 Pérdidas F/E':  c17,
             '1.8 Distributivos': c18,
             '1.9 Otros':         c19,
-            'TOTAL_COSTO': TOTAL_COSTO
+            #'TOTAL_COSTO': TOTAL_COSTO
         }
         return sum(comp.values()), comp
 
