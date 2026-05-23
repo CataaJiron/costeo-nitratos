@@ -618,7 +618,7 @@ elif pagina == "Sensibilidad PPTO":
         Op_dep = c11 + c12 + c13 + c14
         Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
         Perdidas_FE = Op_dep * Perd_FE_pct
-        base_comun = (Op_dep + Perd_FE_pct + c15)
+        base_comun = (Op_dep + Perdidas_FE + c15)
         prod_con_perdidas =  prod_total + v['GEN_Perdidas_Puerto'] + v["GEN_FE"] + v["GEN_Perdidas"]
         Per_Deg_PTOC = -(v['GEN_Perdidas_Puerto'] / (prod_con_perdidas - v["GEN_FE"] - v["GEN_Perdidas"]))
         Perd_Puerto = Per_Deg_PTOC * base_comun
