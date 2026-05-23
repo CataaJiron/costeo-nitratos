@@ -891,7 +891,7 @@ elif pagina == "Sensibilidad PPTO":
             for k in keys_to_delete:
                 del st.session_state[k]
             st.rerun()
-
+ 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
     with col_res:
         costo_base, comp_base = recalcular(BASE)
