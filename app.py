@@ -864,7 +864,6 @@ elif pagina == "Sensibilidad PPTO":
             st.session_state['sv_tipo'] = tipo_sens
             st.rerun()
 
-
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
     with col_res:
         costo_base, comp_base = recalcular(BASE)
