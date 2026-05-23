@@ -881,7 +881,8 @@ elif pagina == "Sensibilidad PPTO":
             with c2:
                 V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f", key=f"ui_ts_{key_ton}_{rc}")
             with c3:
-                ratio = V[key_g] / V[key_ton] if V[key_ton] > 0 else 0.0
+                ton_total = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
+                ratio = V[key_g] / ton_total if ton_total > 0 else 0.0
                 st.metric("USD/KTon", f"${ratio:.2f}")
 
         fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
