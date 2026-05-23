@@ -621,7 +621,8 @@ elif pagina == "Sensibilidad PPTO":
 
         c19 = v['OTROS']
 
-        TOTAL_COSTO = C11 + C12 + C13 + C14 + C15 + C16 + C17 + C18 + C19
+
+        TOTAL_COSTO = c11 + c12 + c13 + c14 + c15 + c16 + c17 + c18 + c19
 
         comp = {
             '1.1 Tpte Sales':    c11,
@@ -1110,7 +1111,7 @@ elif pagina == "Sensibilidad R+P":
 
         c19 = v['OTROS']
 
-        TOTAL_COSTO = C11 + C12 + C13 + C14 + C15 + C16 + C17 + C18 + C19
+        TOTAL_COSTO = c11 + c12 + c13 + c14 + c15 + c16 + c17 + c18 + c19
 
         comp = {
             '1.1 Tpte Sales':    c11,
