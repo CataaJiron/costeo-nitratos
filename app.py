@@ -558,13 +558,13 @@ elif pagina == "Sensibilidad PPTO":
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
         # 1.1 Tpte Sales
-        # 1.1 Tpte Sales
         # Precio por ruta = Gasto KUS / Ton por ruta
 
         Ton_total_trans = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
         precio_nv = v['G_TPTE_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
         precio_pb = v['G_TPTE_PB'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
         precio_cs = v['G_CAMINOS_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
+        precio_total_transporte = precio_cs + precio_nv + precio_pb
 
         # Precio promedio ponderado por consumo de sales
         consumo_nv = v['NV cat 1']
@@ -572,9 +572,9 @@ elif pagina == "Sensibilidad PPTO":
         consumo_cs = v['CS']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
 
-        precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
+        #precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
         fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
-        c11 = precio_prom * fc_sales
+        c11 = precio_total_transporte * fc_sales
 
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
