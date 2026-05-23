@@ -856,12 +856,11 @@ elif pagina == "Sensibilidad PPTO":
  
         st.divider()
         if st.button(f"🔄 Restablecer valores PPTO ({modo_sens})", use_container_width=True):
-            for k in list(st.session_state.keys()):
-                if k.startswith("ui_"):
-                    del st.session_state[k]
-            st.session_state['sv']      = copy.deepcopy(BASE)
-            st.session_state['sv_mes']  = mes
-            st.session_state['sv_tipo'] = tipo_sens
+            # Borrar TODAS las keys del session state que sean de esta página
+            keys_to_delete = [k for k in st.session_state.keys() 
+                             if k.startswith("ui_") or k in ('sv', 'sv_mes', 'sv_tipo')]
+            for k in keys_to_delete:
+                del st.session_state[k]
             st.rerun()
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
