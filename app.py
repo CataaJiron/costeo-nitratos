@@ -856,8 +856,8 @@ elif pagina == "Sensibilidad PPTO":
                 ratio = V[key_g] / V[key_ton] if V[key_ton] > 0 else 0.0
                 st.metric("USD/KTon", f"${ratio:.2f}")
 
-        fila_tpte("NV → CS",   "TON_TPTE_NV")
-        fila_tpte("PB → CS",   "TON_TPTE_PB")
+        fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
+        fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
         #fila_tpte("Caminos NV", "G_CAMINOS_NV", "TON_TPTE_CS")
 
         st.caption("Consumo Sales por origen (KTon NaNO3)")
