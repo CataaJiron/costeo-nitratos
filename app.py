@@ -563,7 +563,7 @@ elif pagina == "Sensibilidad PPTO":
 
         Ton_total_trans = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
         precio_nv = v['G_TPTE_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
-        precio_pb = v['G_TPTE_PB'] /_Ton_total_trans if Ton_total_trans > 0 else 0.0
+        precio_pb = v['G_TPTE_PB'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
         precio_cs = v['G_CAMINOS_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
 
         # Precio promedio ponderado por consumo de sales
