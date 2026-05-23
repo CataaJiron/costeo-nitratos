@@ -1074,12 +1074,12 @@ elif pagina == "Sensibilidad R+P":
         'TON_TPTE_CS':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'KTon NaNO3'),
 
         # FC KCl (adimensional: KTon KCl / Kton prod)
-        'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
-        'FC_MOP70_NPT3': _r('KCl','CONSUMO NPT3','MOP 70', nth=0),
-        'FC_SS_NPT3':    _r('KCl','CONSUMO NPT3','SS', nth=0),
-        'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
-        'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
-        'FC_SS_NPT4':    _r('KCl','CONSUMO NPT4','SS', nth=0),
+        'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=1),
+        'FC_MOP70_NPT3': _r('KCl','CONSUMO NPT3','MOP 70', nth=1),
+        'FC_SS_NPT3':    _r('KCl','CONSUMO NPT3','SS', nth=1),
+        'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=1),
+        'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=1),
+        'FC_SS_NPT4':    _r('KCl','CONSUMO NPT4','SS', nth=1),
         
         # Precio KCl (US$/T)
         'P_MOP90':       _r('KCl','Costo Promedio KCl','MOP 90'),
