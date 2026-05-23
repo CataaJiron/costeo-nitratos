@@ -666,9 +666,9 @@ elif pagina == "Sensibilidad PPTO":
         def fila_usdton(label_usd, key_usd, label_ton, key_ton, fmt_usd="%.1f", fmt_ton="%.3f", step_usd=10.0, step_ton=0.1, usdpt_label="=> USD/T"):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}_{rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}_{rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric(usdpt_label, f"${ratio:.2f}")
@@ -720,7 +720,7 @@ elif pagina == "Sensibilidad PPTO":
         for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
+                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
  
@@ -736,7 +736,7 @@ elif pagina == "Sensibilidad PPTO":
         for lbl, key in [("NPT3 (+ Korda)", "G_NPT3"), ("NPT4", "G_NPT4")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
+                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
         tot_crist = V['G_NPT3']+V['G_NPT4']+V['DEP_NPT3']+V['DEP_NPT4']
@@ -746,7 +746,7 @@ elif pagina == "Sensibilidad PPTO":
         for lbl, key in [("Prilado CS", "G_PRIL"), ("DTP", "G_DTP"), ("Secado KNO3", "G_SECADO")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}")
+                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_term_v:.2f}" if prod_term_v > 0 else "-")
         tot_term = V['G_PRIL']+V['G_DTP']+V['G_SECADO']+V['G_TPTE_INT']+V['DEP_PRIL']+V['DEP_DTP']+V['DEP_SECADO']
@@ -761,9 +761,9 @@ elif pagina == "Sensibilidad PPTO":
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
@@ -800,9 +800,9 @@ elif pagina == "Sensibilidad PPTO":
         def fila_usdton_camiones(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}_{rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}_{rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
