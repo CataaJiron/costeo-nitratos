@@ -646,20 +646,17 @@ elif pagina == "Sensibilidad PPTO":
         st.session_state['sv']      = copy.deepcopy(BASE)
         st.session_state['sv_mes']  = mes
         st.session_state['sv_tipo'] = tipo_sens
+        st.session_state['ppto_rc'] = st.session_state.get('ppto_rc', 0) + 1
+    if 'ppto_rc' not in st.session_state:
+        st.session_state['ppto_rc'] = 0
+    rc = st.session_state['ppto_rc']
     V = st.session_state['sv']
     for k, val in BASE.items():
         if k not in V:
             V[k] = val
-    
-    # Sincronizar inputs con V (para que el reset funcione)
-    # for k in V:
-  #      ui_key = f"ui_{k}"
- #       if ui_key in st.session_state:
-#            st.session_state[ui_key] = V[k]
- 
+
     # ── UI: inputs + resultados ───────────────────────────────────────────────
     col_inp, col_res = st.columns([3, 2], gap="large")
- 
     with col_inp:
  
         # helper para mostrar fila "USD | Ton | => USD/T"
