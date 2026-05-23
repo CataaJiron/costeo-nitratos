@@ -493,16 +493,15 @@ elif pagina == "Sensibilidad PPTO":
         'TON_EMBARQUE_GRANEL':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel','Kton'),
 
 
-        # Transporte camiones — gasto (KUS) y toneladas (Kton) por separado
+        # Transporte camiones — gasto (KUS) y toneladas por separado
         'G_TPTE_CAM':    _r('GASTO','TRANSPORTE','Tpte Camiones Terminados', 'KUS'),
         'TON_TPTE_CAM':  _r('TRANSPORTE','TRANSPORTE','Tpte Camiones Terminados','kTon'),
-        'G_TPTE_NV':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales NV', 'KUS'),
-        'TON_TPTE_NV':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales NV a CS (Cat 1 + Cat 3)', 'kTon'),
-        'G_TPTE_PB':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Transporte Sales PB', 'KUS'),
-        'TON_TPTE_PB':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS', 'kTon'),
-        'G_CAMINOS_NV':    _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB ','- Op Canchas + Caminos NV', 'KUS'),
-        'TON_TPTE_CS':    _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'kTon'),        
-
+        'G_TPTE_NV':     _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV', 'KUS'),
+        'TON_TPTE_NV':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales NV a CS (Cat 1 + Cat 3)', 'KTon NaNO3'),
+        'G_TPTE_PB':     _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales PB', 'KUS'),
+        'TON_TPTE_PB':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS', 'KTon NaNO3'),
+        'G_CAMINOS_NV':  _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Op Canchas + Caminos NV', 'KUS'),
+        'TON_TPTE_CS':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'KTon NaNO3'),
 
         # FC KCl (adimensional: KTon KCl / Kton prod)
         'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
