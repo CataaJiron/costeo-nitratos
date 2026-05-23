@@ -614,22 +614,14 @@ elif pagina == "Sensibilidad PPTO":
         dep_puerto = v['DEPR_PUERTO'] / vol_d                    if vol_d > 0                    else 0.0
         c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
 
-        # 1.7 Perdidas FE
-        #Op_dep = c11 + c12 + c13 + c14
-        #Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
-        #Perdidas_FE = Op_dep * Perd_FE_pct 
-        #Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
-        #Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
-        #c17 = Perdidas_FE + Perd_Puerto
+        #1.7 Perdidas FE
+        Op_dep = c11 + c12 + c13 + c14
+        Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
+        Perdidas_FE = Op_dep * Perd_FE_pct 
+        Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
+        Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
+        c17 = Perdidas_FE + Perd_Puerto
 
-        # 1.7 Perdidas FE
-        Op_dep      = c11 + c12 + c13 + c14
-        pct_fe      = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * pct_fe
-        base_deg    = Op_dep + Perdidas_FE + c15
-        pct_deg     = -v['GEN_Perdidas_Puerto'] / (prod_total - v["GEN_FE"] - v["GEN_Perdidas"]) if (prod_total - v["GEN_FE"] - v["GEN_Perdidas"]) != 0 else 0.0
-        Perd_Puerto = pct_deg * base_deg
-        c17         = Perdidas_FE + Perd_Puerto        
 
         # 1.8 Distributivos
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
