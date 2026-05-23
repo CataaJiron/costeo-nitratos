@@ -947,9 +947,8 @@ elif pagina == "Sensibilidad PPTO":
                 .format({"PPTO":"{:.2f}", "Sim":"{:.2f}", "Δ":"{:+.2f}"}),
             use_container_width=True, hide_index=True, height=360,
         )
- 
-
         st.divider()
+
         st.markdown("**PPTO vs Simulado**")
         fig = go.Figure()
         nombres = list(comp_base.keys())
@@ -1500,12 +1499,13 @@ elif pagina == "Sensibilidad R+P":
                   delta=f"{delta_total:+.2f} USD/T", delta_color="inverse")
  
         st.divider()
+        
         st.markdown("**Detalle por componente**")
  
         rows = []
         for k in comp_base:
             b, s = comp_base[k], comp_sim[k]
-            rows.append({"Componente": k, "R+P": round(b,2), "Sim": round(s,2), "Δ": round(s-b,2)})
+            rows.append({"Componente": k, "REAL+PROY": round(b,2), "Sim": round(s,2), "Δ": round(s-b,2)})
         df_det = pd.DataFrame(rows)
  
         def _col_delta(val):
@@ -1520,7 +1520,6 @@ elif pagina == "Sensibilidad R+P":
                 .format({"REAL+PROY":"{:.2f}", "Sim":"{:.2f}", "Δ":"{:+.2f}"}),
             use_container_width=True, hide_index=True, height=360,
         )
-
         st.divider()
         
         st.markdown("**R+P vs Simulado**")
