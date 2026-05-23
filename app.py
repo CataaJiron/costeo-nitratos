@@ -1160,7 +1160,7 @@ elif pagina == "Sensibilidad R+P":
         cons_mop70 = (v['FC_MOP70_NPT3'] * npt3) + (v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4'])
         cons_ss    = (v['FC_SS_NPT3'] * npt3)  + (v['FC_SS_NPT4'] * v['KNO3_L_NPT4'])
         cons_total = cons_mop90 + cons_mop70 + cons_ss
-        costo_total_kcl = (((v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)) / cons_total)
+        costo_total_kcl = (v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)
         c14 = costo_total_kcl / prod_sin_Sod if prod_sin_Sod > 0 else 0.0
 
         # 1.5 Terminados
