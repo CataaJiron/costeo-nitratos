@@ -615,12 +615,21 @@ elif pagina == "Sensibilidad PPTO":
         c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
 
         # 1.7 Perdidas FE
-        Op_dep = c11 + c12 + c13 + c14
-        Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * Perd_FE_pct 
-        Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
-        Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
-        c17 = Perdidas_FE + Perd_Puerto
+        #Op_dep = c11 + c12 + c13 + c14
+        #Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
+        #Perdidas_FE = Op_dep * Perd_FE_pct 
+        #Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
+        #Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
+        #c17 = Perdidas_FE + Perd_Puerto
+
+        # 1.7 Perdidas FE
+        Op_dep      = c11 + c12 + c13 + c14
+        pct_fe      = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
+        Perdidas_FE = Op_dep * pct_fe
+        base_deg    = Op_dep + Perdidas_FE + c15
+        pct_deg     = -v['GEN_Perdidas_Puerto'] / (prod_total - v["GEN_FE"] - v["GEN_Perdidas"]) if (prod_total - v["GEN_FE"] - v["GEN_Perdidas"]) != 0 else 0.0
+        Perd_Puerto = pct_deg * base_deg
+        c17         = Perdidas_FE + Perd_Puerto        
 
         # 1.8 Distributivos
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
@@ -872,8 +881,7 @@ elif pagina == "Sensibilidad PPTO":
             with c2:
                 V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f", key=f"ui_ts_{key_ton}_{rc}")
             with c3:
-                ton_total = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
-                ratio = V[key_g] / ton_total if ton_total > 0 else 0.0
+                ratio = V[key_g] / V[key_ton] if V[key_ton] > 0 else 0.0
                 st.metric("USD/KTon", f"${ratio:.2f}")
 
         fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
