@@ -1247,9 +1247,9 @@ elif pagina == "Sensibilidad R+P":
         def fila_usdton(label_usd, key_usd, label_ton, key_ton, fmt_usd="%.1f", fmt_ton="%.3f", step_usd=10.0, step_ton=0.1, usdpt_label="=> USD/T"):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=step_usd, format=fmt_usd, key=f"ui_{key_usd}_{rp_rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format=fmt_ton, key=f"ui_{key_ton}_{rp_rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric(usdpt_label, f"${ratio:.2f}")
@@ -1260,17 +1260,17 @@ elif pagina == "Sensibilidad R+P":
         pc1, pc2 = st.columns(2)
         with pc1:
             st.caption("NPT3")
-            V['KNO3_T_NPT3'] = st.number_input("T NPT3", value=round(V['KNO3_T_NPT3'],3), step=0.1, format="%.3f", key=f"ui_T3_{rc}")
-            V['KNO3_R_NPT3'] = st.number_input("R NPT3", value=round(V['KNO3_R_NPT3'],3), step=0.1, format="%.3f", key=f"ui_R3_{rc}")
+            V['KNO3_T_NPT3'] = st.number_input("T NPT3", value=round(V['KNO3_T_NPT3'],3), step=0.1, format="%.3f", key=f"ui_T3_{rp_rc}")
+            V['KNO3_R_NPT3'] = st.number_input("R NPT3", value=round(V['KNO3_R_NPT3'],3), step=0.1, format="%.3f", key=f"ui_R3_{rp_rc}")
             npt3_v = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
             st.metric("TOTAL NPT3", f"{npt3_v:.3f} Kton",
                       delta=f"{npt3_v - (BASE['KNO3_T_NPT3']+BASE['KNO3_R_NPT3']):+.3f}",
                       delta_color="off")
         with pc2:
             st.caption("NPT4")
-            V['KNO3_L_NPT4'] = st.number_input("L NPT4",    value=round(V['KNO3_L_NPT4'],3), step=0.1, format="%.3f", key=f"ui_L4_{rc}")
-            V['CSSI_NPT4']   = st.number_input("CSSI NPT4", value=round(V['CSSI_NPT4'],3),   step=0.1, format="%.3f", key=f"ui_CSSI_{rc}")
-            V['CSSR_NPT4']   = st.number_input("CSSR NPT4", value=round(V['CSSR_NPT4'],3),   step=0.1, format="%.3f", key=f"ui_CSSR_{rc}")
+            V['KNO3_L_NPT4'] = st.number_input("L NPT4",    value=round(V['KNO3_L_NPT4'],3), step=0.1, format="%.3f", key=f"ui_L4_{rp_rc}")
+            V['CSSI_NPT4']   = st.number_input("CSSI NPT4", value=round(V['CSSI_NPT4'],3),   step=0.1, format="%.3f", key=f"ui_CSSI_{rp_rc}")
+            V['CSSR_NPT4']   = st.number_input("CSSR NPT4", value=round(V['CSSR_NPT4'],3),   step=0.1, format="%.3f", key=f"ui_CSSR_{rp_rc}")
             npt4_v = V['KNO3_L_NPT4'] + V['CSSI_NPT4'] + V['CSSR_NPT4']
             st.metric("TOTAL NPT4", f"{npt4_v:.3f} Kton",
                       delta=f"{npt4_v - (BASE['KNO3_L_NPT4']+BASE['CSSI_NPT4']+BASE['CSSR_NPT4']):+.3f}",
@@ -1279,8 +1279,8 @@ elif pagina == "Sensibilidad R+P":
         pt1, pt2 = st.columns(2)
         with pt1:
             st.caption("Terminados")
-            V['PRIL_DTP'] = st.number_input("PRILADO + DTP", value=round(V['PRIL_DTP'],3), step=0.1, format="%.3f", key=f"ui_PRIL_{rc}")
-            V['SECADO']   = st.number_input("SECADO",        value=round(V['SECADO'],3),   step=0.1, format="%.3f", key=f"ui_SEC_{rc}")
+            V['PRIL_DTP'] = st.number_input("PRILADO + DTP", value=round(V['PRIL_DTP'],3), step=0.1, format="%.3f", key=f"ui_PRIL_{rp_rc}")
+            V['SECADO']   = st.number_input("SECADO",        value=round(V['SECADO'],3),   step=0.1, format="%.3f", key=f"ui_SEC_{rp_rc}")
         with pt2:
             st.caption(" ")
             prod_term_v  = V['PRIL_DTP'] + V['SECADO']
@@ -1302,7 +1302,7 @@ elif pagina == "Sensibilidad R+P":
         for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
+                V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rp_rc}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
  
@@ -1319,7 +1319,7 @@ elif pagina == "Sensibilidad R+P":
         for lbl, key in [("NPT3 (+ Korda)", "G_NPT3"), ("NPT4", "G_NPT4")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
+                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rp_rc}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
         tot_crist = V['G_NPT3']+V['G_NPT4']+V['DEP_NPT3']+V['DEP_NPT4']
@@ -1329,7 +1329,7 @@ elif pagina == "Sensibilidad R+P":
         for lbl, key in [("Prilado CS", "G_PRIL"), ("DTP", "G_DTP"), ("Secado KNO3", "G_SECADO")]:
             c1, c2 = st.columns([3, 1])
             with c1:
-                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rc}")
+                V[key] = st.number_input(f"Gasto {lbl} (KUS)", value=round(V[key],1), step=10.0, format="%.1f", key=f"ui_{key}_{rp_rc}")
             with c2:
                 st.metric("USD/T", f"${V[key]/prod_term_v:.2f}" if prod_term_v > 0 else "-")
         tot_term = V['G_PRIL']+V['G_DTP']+V['G_SECADO']+V['G_TPTE_INT']+V['DEP_PRIL']+V['DEP_DTP']+V['DEP_SECADO']
@@ -1346,9 +1346,9 @@ elif pagina == "Sensibilidad R+P":
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rp_rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rp_rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
@@ -1365,9 +1365,9 @@ elif pagina == "Sensibilidad R+P":
         # 3. Inputs manuales y cálculo de Distributivos (CORREGIDO AQUÍ)
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
-            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rc}")
+            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rp_rc}")
         with c2:
-            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rc}")
+            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rp_rc}")
         with c3:
             # Calculamos las variables en el flujo global para que el caption de abajo las pueda leer
             vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
@@ -1385,9 +1385,9 @@ elif pagina == "Sensibilidad R+P":
         def fila_usdton_camiones(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_camiones_{key_usd}_{rp_rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_camiones_{key_ton}_{rp_rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
@@ -1407,35 +1407,35 @@ elif pagina == "Sensibilidad R+P":
  
         st.caption("NPT3")
         fck1, fck2, fck3 = st.columns(3)
-        with fck1: V['FC_MOP90_NPT3'] = st.number_input("MOP 90 NPT3", value=float(f"{V['FC_MOP90_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP90_NPT3_{rc}")
-        with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT3_{rc}")
-        with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT3_{rc}")
+        with fck1: V['FC_MOP90_NPT3'] = st.number_input("MOP 90 NPT3", value=float(f"{V['FC_MOP90_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP90_NPT3_{rp_rc}")
+        with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT3_{rp_rc}")
+        with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT3_{rp_rc}")
  
         cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])*npt3_v2
         st.caption(f"Consumo KCl NPT3: {cons3:.2f} KTon")
  
         st.caption("NPT4")
         fck4, fck5, fck6 = st.columns(3)
-        with fck4: V['FC_MOP90_NPT4'] = st.number_input("MOP 90 NPT4", value=float(f"{V['FC_MOP90_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP90_NPT4_{rc}")
-        with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT4_{rc}")
-        with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT4_{rc}")
+        with fck4: V['FC_MOP90_NPT4'] = st.number_input("MOP 90 NPT4", value=float(f"{V['FC_MOP90_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP90_NPT4_{rp_rc}")
+        with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT4_{rp_rc}")
+        with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT4_{rp_rc}")
  
         cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])*npt4_v2
         st.caption(f"Consumo KCl NPT4: {cons4:.2f} KTon")
  
         st.caption("Precio KCl (US$/T)")
         pk1, pk2, pk3 = st.columns(3)
-        with pk1: V['P_MOP90'] = st.number_input("MOP 90", value=round(V['P_MOP90'],2), step=1.0, format="%.2f", key=f"ui_P_MOP90_{rc}")
-        with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key=f"ui_P_MOP70_{rc}")
-        with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rc}")
+        with pk1: V['P_MOP90'] = st.number_input("MOP 90", value=round(V['P_MOP90'],2), step=1.0, format="%.2f", key=f"ui_P_MOP90_{rp_rc}")
+        with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key=f"ui_P_MOP70_{rp_rc}")
+        with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rp_rc}")
  
         st.divider()
         # ─── FC NaNO3────────────────────────────────────────────
         st.markdown("#### 🧂Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
         cs1, cs2, cs3 = st.columns(3)
-        with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rc}")
-        with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rc}")
-        with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key=f"ui_ts_CS_{rc}")
+        with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rp_rc}")
+        with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rp_rc}")
+        with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key=f"ui_ts_CS_{rp_rc}")
 
         consumo_tot_v = V['NV cat 1'] + V['PB'] + V['CS']
         prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
@@ -1454,9 +1454,9 @@ elif pagina == "Sensibilidad R+P":
         def fila_tpte(label, key_g, key_ton):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_g]   = st.number_input(f"{label} (KUS)",  value=round(V[key_g], 1),   step=10.0, format="%.1f", key=f"ui_ts_{key_g}_{rc}")
+                V[key_g]   = st.number_input(f"{label} (KUS)",  value=round(V[key_g], 1),   step=10.0, format="%.1f", key=f"ui_ts_{key_g}_{rp_rc}")
             with c2:
-                V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f", key=f"ui_ts_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f", key=f"ui_ts_{key_ton}_{rp_rc}")
             with c3:
                 ton_total = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
                 ratio = V[key_g] / ton_total if ton_total > 0 else 0.0
@@ -1466,7 +1466,7 @@ elif pagina == "Sensibilidad R+P":
         fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
         c1, c2 = st.columns([3, 1])
         with c1:
-            V['G_CAMINOS_NV'] = st.number_input("Caminos NV (KUS)", value=round(V['G_CAMINOS_NV'],1), step=10.0, format="%.1f", key=f"ui_ts_G_CAMINOS_NV_{rc}")
+            V['G_CAMINOS_NV'] = st.number_input("Caminos NV (KUS)", value=round(V['G_CAMINOS_NV'],1), step=10.0, format="%.1f", key=f"ui_ts_G_CAMINOS_NV_{rp_rc}")
         with c2:
             ton_total = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
             ratio_cam = V['G_CAMINOS_NV'] / ton_total if ton_total > 0 else 0.0
@@ -1474,9 +1474,9 @@ elif pagina == "Sensibilidad R+P":
 
         fs1, fs2 = st.columns(2)
         with fs1:
-            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rc}")
+            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rp_rc}")
         with fs2:
-            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rc}")
+            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rp_rc}")
         st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
         st.divider()
 
