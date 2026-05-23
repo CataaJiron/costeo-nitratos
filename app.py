@@ -554,6 +554,7 @@ elif pagina == "Sensibilidad PPTO":
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
+        prod_sin_Sod = npt3 + v['KNO3_L_NPT4']
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
         # 1.1 Tpte Sales
@@ -591,7 +592,7 @@ elif pagina == "Sensibilidad PPTO":
         cons_ss    = (v['FC_SS_NPT3'] * npt3)    + (v['FC_SS_NPT4'] * v['KNO3_L_NPT4'])
         cons_total = cons_mop90 + cons_mop70 + cons_ss
         costo_total_kcl = (v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)
-        c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
+        c14 = costo_total_kcl / prod_sin_Sod if prod_sin_Sod > 0 else 0.0
 
         # 1.5 Terminados
        # Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
