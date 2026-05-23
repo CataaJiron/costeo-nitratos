@@ -1481,13 +1481,13 @@ elif pagina == "Sensibilidad R+P":
         st.divider()
 
         
-        if st.button(f"🔄 Restablecer valores de REAL+PROY ({modo_sens})", use_container_width=True):
-            # Borrar TODAS las keys del session state que sean de esta página
-            keys_to_delete = [k for k in st.session_state.keys() 
-                             if k.startswith("ui_") or k in ('sv', 'sv_mes', 'sv_tipo')]
-            for k in keys_to_delete:
-                del st.session_state[k]
-            st.rerun()
+        if st.button(f"🔄 Restablecer valores REAL+PROY  ({modo_sens})", use_container_width=True):
+            st.session_state['rp_rc'] = st.session_state.get('rp_rc', 0) + 1
+            st.session_state['sv']      = copy.deepcopy(BASE)
+            st.session_state['sv_mes']  = mes
+            st.session_state['sv_tipo'] = tipo_sens
+            st.rerun() 
+
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
     with col_res:
         costo_base, comp_base = recalcular(BASE)
