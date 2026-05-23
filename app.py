@@ -122,7 +122,7 @@ with st.sidebar:
     st.divider()
     archivo = st.file_uploader("Cargar Planilla costeo 2026.xlsx", type=["xlsx"])
     st.divider()
-    pagina = st.radio("", ["Dashboard", "Analisis mensual", "Sensibilidad PPTO", "Sensibilidad R+P"],
+    pagina = st.radio("", ["Dashboard", "Analisis mensual", "Sensibilidad PPTO", "Sensibilidad R+P", "Asistente"],
                       label_visibility="collapsed")
 
 if not archivo:
@@ -1361,3 +1361,85 @@ elif pagina == "Sensibilidad R+P":
             legend=dict(orientation='h', y=1.05),
         )
         st.plotly_chart(fig, use_container_width=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ASISTENTE
+# ══════════════════════════════════════════════════════════════════════════════
+elif pagina == "Asistente":
+    st.title("🤖 Asistente de Costeo Nitratos")
+    st.caption("Pregunta sobre costos, producción o cualquier dato de la planilla 2026")
+
+    # ── Preparar contexto con todos los datos ────────────────────────────────
+    def build_context():
+        lines = ["# Datos Costeo Nitratos 2026\n"]
+        for tipo in ["Puntual", "Acumulado"]:
+            lines.append(f"\n## {tipo}")
+            # PPTO
+            ppto = total_serie(df, tipo, 'PPTO')
+            rp   = total_rp_serie(df, tipo)
+            lines.append(f"### Costo Total USD/T")
+            lines.append("Mes | PPTO | Real+Proy")
+            lines.append("---|---|---")
+            for i, m in enumerate(MESES):
+                lines.append(f"{m} | {ppto[i]:.1f} | {rp[i]:.1f}")
+            # Por componente
+            lines.append(f"\n### Por componente ({tipo})")
+            for sa, c, nombre in COSTOS:
+                s_p = gs(df, 'COSTO TOTAL', sa, c, tipo, 'PPTO')
+                s_r = rp_serie(df, 'COSTO TOTAL', sa, c, tipo)
+                lines.append(f"\n**{nombre}** (USD/T)")
+                lines.append("Mes | PPTO | R+P")
+                lines.append("---|---|---")
+                for i, m in enumerate(MESES):
+                    lines.append(f"{m} | {s_p[i]:.1f} | {s_r[i]:.1f}")
+        return "\n".join(lines)
+
+    context = build_context()
+
+    # ── Chat ─────────────────────────────────────────────────────────────────
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+
+    # Mostrar historial
+    for msg in st.session_state["messages"]:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Input usuario
+    if prompt := st.chat_input("Pregunta algo sobre los datos..."):
+        st.session_state["messages"].append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Llamar a Claude
+        with st.chat_message("assistant"):
+            with st.spinner("Analizando..."):
+                try:
+                    client = anthropic.Anthropic()
+                    response = client.messages.create(
+                        model="claude-sonnet-4-20250514",
+                        max_tokens=1024,
+                        system=f"""Eres un asistente experto en costos de producción de nitratos.
+Tienes acceso a todos los datos de la planilla de costeo 2026.
+Responde en español, de forma clara y concisa.
+Cuando menciones números usa siempre la unidad (USD/T, Kton, KUS).
+
+DATOS DISPONIBLES:
+{context}""",
+                        messages=[
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state["messages"]
+                        ]
+                    )
+                    answer = response.content[0].text
+                except Exception as e:
+                    answer = f"Error al conectar con el asistente: {e}"
+
+                st.markdown(answer)
+                st.session_state["messages"].append({"role": "assistant", "content": answer})
+
+    # Botón limpiar
+    if st.session_state["messages"]:
+        if st.button("🗑️ Limpiar conversación"):
+            st.session_state["messages"] = []
+            st.rerun()
