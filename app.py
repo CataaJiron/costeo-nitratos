@@ -560,9 +560,11 @@ elif pagina == "Sensibilidad PPTO":
         # 1.1 Tpte Sales
         # 1.1 Tpte Sales
         # Precio por ruta = Gasto KUS / Ton por ruta
-        precio_nv = v['G_TPTE_NV'] / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
-        precio_pb = v['G_TPTE_PB'] / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
-        precio_cs = v['G_CAMINOS_NV'] / v['TON_TPTE_CS'] if v['TON_TPTE_CS'] > 0 else 0.0
+
+        Ton_total_trans = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] v['TON_TPTE_CS']
+        precio_nv = v['G_TPTE_NV'] / Ton_total_trans if vTon_total_trans > 0 else 0.0
+        precio_pb = v['G_TPTE_PB'] /_Ton_total_trans if Ton_total_trans > 0 else 0.0
+        precio_cs = v['G_CAMINOS_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
 
         # Precio promedio ponderado por consumo de sales
         consumo_nv = v['NV cat 1']
