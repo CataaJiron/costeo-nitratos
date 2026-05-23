@@ -1097,9 +1097,12 @@ elif pagina == "Sensibilidad R+P":
 
         # 1.1 Tpte Sales
         # Precio por ruta = Gasto KUS / Ton por ruta
-        precio_nv = v['G_TPTE_NV'] / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
-        precio_pb = v['G_TPTE_PB'] / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
-        precio_cs = v['G_CAMINOS_NV'] / v['TON_TPTE_CS'] if v['TON_TPTE_CS'] > 0 else 0.0
+
+        Ton_total_trans = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
+        precio_nv = v['G_TPTE_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
+        precio_pb = v['G_TPTE_PB'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
+        precio_cs = v['G_CAMINOS_NV'] / Ton_total_trans if Ton_total_trans > 0 else 0.0
+        precio_total_transporte = precio_cs + precio_nv + precio_pb
 
         # Precio promedio ponderado por consumo de sales
         consumo_nv = v['NV cat 1']
@@ -1107,9 +1110,9 @@ elif pagina == "Sensibilidad R+P":
         consumo_cs = v['CS']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
 
-        precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
+        #precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
         fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
-        c11 = precio_prom * fc_sales
+        c11 = precio_total_transporte * fc_sales
 
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
@@ -1152,9 +1155,11 @@ elif pagina == "Sensibilidad R+P":
         # 1.7 Perdidas FE
         Op_dep = c11 + c12 + c13 + c14
         Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * Perd_FE_pct 
-        Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
-        Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
+        Perdidas_FE = Op_dep * Perd_FE_pct
+        base_comun = (Op_dep + Perdidas_FE + c15)
+        prod_con_perdidas =  prod_total + v['GEN_Perdidas_Puerto'] + v["GEN_FE"] + v["GEN_Perdidas"]
+        Per_Deg_PTOC = -(v['GEN_Perdidas_Puerto'] / (prod_con_perdidas - v["GEN_FE"] - v["GEN_Perdidas"]))
+        Perd_Puerto = Per_Deg_PTOC * base_comun
         c17 = Perdidas_FE + Perd_Puerto
 
         # 1.8 Distributivos
