@@ -648,8 +648,14 @@ elif pagina == "Sensibilidad PPTO":
         st.session_state['sv_tipo'] = tipo_sens
     V = st.session_state['sv']
     for k, val in BASE.items():
-        if k not in V:  # ← solo agrega claves nuevas, no sobreescribe
+        if k not in V:
             V[k] = val
+    
+    # Sincronizar inputs con V (para que el reset funcione)
+    for k in V:
+        ui_key = f"ui_{k}"
+        if ui_key in st.session_state:
+            st.session_state[ui_key] = V[k]
  
     # ── UI: inputs + resultados ───────────────────────────────────────────────
     col_inp, col_res = st.columns([3, 2], gap="large")
