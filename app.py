@@ -841,21 +841,26 @@ elif pagina == "Sensibilidad PPTO":
         st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
  
         st.divider()
-        if st.button(f"🔄 Restablecer valores R+P ({modo_sens})", use_container_width=True):
+        if st.button(f"🔄 Restablecer valores PPTO ({modo_sens})", use_container_width=True):
+            st.session_state['sv']      = copy.deepcopy(BASE)
+            st.session_state['sv_mes']  = mes
+            st.session_state['reset']   = True
+            # Borrar todos los ui_ para forzar re-render
             for k in list(st.session_state.keys()):
-                if k.startswith("rp_"):
+                if k.startswith("ui_"):
                     del st.session_state[k]
-            st.session_state['sv_rp_reset'] = True
             st.rerun()
-
     if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes or st.session_state.get('sv_tipo') != tipo_sens:
-        st.session_state['sv']      = copy.deepcopy(BASE)
-        st.session_state['sv_mes']  = mes
-        st.session_state['sv_tipo'] = tipo_sens
+        st.session_state['sv']     = copy.deepcopy(BASE)
+        st.session_state['sv_mes'] = mes
+    
+    # ← AGREGA ESTO
+    if st.session_state.get('reset'):
+        st.session_state['sv']    = copy.deepcopy(BASE)
+        st.session_state['reset'] = False
+
     V = st.session_state['sv']
-    for k, val in BASE.items():
-        if k not in V or (V.get(k, 0) == 0 and val != 0):
-            V[k] = val
+
 
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
@@ -1123,11 +1128,11 @@ elif pagina == "Sensibilidad R+P":
 
     # ── Session state ─────────────────────────────────────────────────────────
     sv_key = 'sv_rp'
-    if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes or st.session_state.get('sv_tipo') != tipo_sens:
-        st.session_state['sv']      = copy.deepcopy(BASE)
-        st.session_state['sv_mes']  = mes
-        st.session_state['sv_tipo'] = tipo_sens
-    V = st.session_state['sv']
+    if sv_key not in st.session_state or st.session_state.get('sv_rp_mes') != mes or st.session_state.get('sv_rp_tipo') != tipo_sens:
+        st.session_state[sv_key]        = copy.deepcopy(BASE)
+        st.session_state['sv_rp_mes']   = mes
+        st.session_state['sv_rp_tipo']  = tipo_sens
+    V = st.session_state[sv_key]
     for k, val in BASE.items():
         if k not in V or (V.get(k, 0) == 0 and val != 0):
             V[k] = val
@@ -1303,7 +1308,9 @@ elif pagina == "Sensibilidad R+P":
             for k in list(st.session_state.keys()):
                 if k.startswith("rp_"):
                     del st.session_state[k]
-            st.session_state['sv_rp_reset'] = True
+            st.session_state[sv_key]       = copy.deepcopy(BASE)
+            st.session_state['sv_rp_mes']  = mes
+            st.session_state['sv_rp_tipo'] = tipo_sens
             st.rerun()
 
     with col_res:
