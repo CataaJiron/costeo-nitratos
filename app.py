@@ -111,11 +111,11 @@ def kpis_row(df, mes, tipo):
     k1, k2, k3, k4 = st.columns(4)
     k1.metric(f"PPTO {MESES[mes]} ({tipo})", f"${ppto_m:.1f}/T",
               delta=f"Real/Proy: ${rp_m:.1f}/T  ({rp_m-ppto_m:+.1f})", delta_color="inverse")
-    k4.metric(f"REAL + PROY {MESES[mes]} ({tipo})", f"${rp_m:.1f}/T",
+    k2.metric(f"REAL + PROY {MESES[mes]} ({tipo})", f"${rp_m:.1f}/T",
               delta=f"Real/Proy: ${rp_m:.1f}/T  ({rp_m-ppto_m:+.1f})", delta_color="inverse")
-    k2.metric(f"Acumulado Ene-{MESES[mes]} PPTO", f"${ppto_acum:.1f}/T",
+    k3.metric(f"Acumulado Ene-{MESES[mes]} PPTO", f"${ppto_acum:.1f}/T",
               delta=f"R+P: ${rp_acum:.1f}/T  ({rp_acum-ppto_acum:+.1f})", delta_color="inverse")
-    k3.metric("Acumulado Ene-Dic PPTO", f"${ppto_dic:.1f}/T",
+    k4.metric("Acumulado Ene-Dic PPTO", f"${ppto_dic:.1f}/T",
               delta=f"R+P: ${rp_dic:.1f}/T  ({rp_dic-ppto_dic:+.1f})", delta_color="inverse")
 
     
