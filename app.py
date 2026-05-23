@@ -584,8 +584,13 @@ elif pagina == "Sensibilidad":
         c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
 
         # 1.5 Terminados
-        Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
-        c15 = Gasto_Total_terminados / prod_term if prod_term > 0 else 0.0
+        #Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
+        G_Prilado = v['G_PRIL'] / prod_term if prod_term > 0 else 0.0
+        G_DTP = v['G_DTP'] / prod_term if prod_term > 0 else 0.0
+        G_Sec = v['G_SECADO'] / prod_term if prod_term > 0 else 0.0
+        Tpte_inter = v['G_TPTE_INT'] / prod_term if prod_term > 0 else 0.0
+        G_Dep =  (v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
+        c15 = G_Prilado + G_DTP + G_Sec + G_Dep + Tpte_inter
 
         # 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
