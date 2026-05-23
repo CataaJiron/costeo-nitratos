@@ -541,6 +541,7 @@ elif pagina == "Sensibilidad":
         'GEN_Perdidas_Degradacion':   _r('Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha', 'Perdidas y degradaciones puerto y cancha'),
         'OTROS':         gv(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes,'Puntual','PPTO'),
     }
+    st.write("G_TPTE_INT BASE:", BASE['G_TPTE_INT'])  # ← agrega aquí
  
     def recalcular(v):
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
