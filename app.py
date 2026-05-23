@@ -534,7 +534,7 @@ elif pagina == "Sensibilidad PPTO":
         'DEP_NPT3':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT III'),
         'DEP_NPT4':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT IV'),
         'DEPR_PUERTO': _r('DEPRECIACION','PUERTO','Depreciacion Puerto','KUS'),
-        'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios '),
+        'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios'),
         'DIST_NITRATOS': _area('Distributivos Nitratos'),
         'DEPR_COM':      _area('Depreciación Costo Comun'),
 
@@ -554,6 +554,7 @@ elif pagina == "Sensibilidad PPTO":
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
         # 1.1 Tpte Sales
+        # 1.1 Tpte Sales
         # Precio por ruta = Gasto KUS / Ton por ruta
         precio_nv = v['G_TPTE_NV'] / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
         precio_pb = v['G_TPTE_PB'] / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
@@ -572,7 +573,11 @@ elif pagina == "Sensibilidad PPTO":
         # 1.2 Pozas: usar total directo de la tabla
         #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
         Gasto_pozas_Total =  (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['G_DEPRECIACION_CS'])
-        c12 = Gasto_pozas_Total / prod_total if prod_total > 0 else 0.0
+        Pozas_NV = v['G_POZAS_NV'] / prod_total if prod_total > 0 else 0.0
+        Pozas_PB = v['G_POZAS_PB'] / prod_total if prod_total > 0 else 0.0
+        Pozas_CS = v['G_POZAS_CS'] / prod_total if prod_total > 0 else 0.0
+        Dep_CS =  v['G_DEPRECIACION_CS'] / prod_total if prod_total > 0 else 0.0
+        c12 = Pozas_NV + Pozas_PB + Pozas_CS + Dep_CS
 
         # 1.3 Cristalización
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
@@ -586,8 +591,13 @@ elif pagina == "Sensibilidad PPTO":
         c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
 
         # 1.5 Terminados
-        Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
-        c15 = Gasto_Total_terminados / prod_term if prod_term > 0 else 0.0
+       # Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
+        G_Prilado = v['G_PRIL'] / prod_term if prod_term > 0 else 0.0
+        G_DTP = v['G_DTP'] / prod_term if prod_term > 0 else 0.0
+        G_Sec = v['G_SECADO'] / prod_term if prod_term > 0 else 0.0
+        Tpte_inter = v['G_TPTE_INT'] / prod_term if prod_term > 0 else 0.0
+        G_Dep =  (v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
+        c15 = G_Prilado + G_DTP + G_Sec + G_Dep + Tpte_inter
 
         # 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
@@ -600,16 +610,18 @@ elif pagina == "Sensibilidad PPTO":
 
         # 1.7 Perdidas FE
         Op_dep = c11 + c12 + c13 + c14
-        Perd_FE_pct = (v["GEN_FE"] - v["GEN_Perdidas"]) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * Perd_FE_pct
-        base_deg = Op_dep + Perdidas_FE + c15
-        Perd_Puerto = v['GEN_Perdidas_Degradacion'] / base_deg if base_deg > 0 else 0.0
-        c17 = Perdidas_FE + (Perd_Puerto * base_deg)
+        Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
+        Perdidas_FE = Op_dep * Perd_FE_pct 
+        Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
+        Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
+        c17 = Perdidas_FE + Perd_Puerto
 
         # 1.8 Distributivos
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
 
         c19 = v['OTROS']
+
+        TOTAL_COSTO = C11 + C12 + C13 + C14 + C15 + C16 + C17 + C18 + C19
 
         comp = {
             '1.1 Tpte Sales':    c11,
@@ -621,8 +633,10 @@ elif pagina == "Sensibilidad PPTO":
             '1.7 Pérdidas F/E':  c17,
             '1.8 Distributivos': c18,
             '1.9 Otros':         c19,
+            'TOTAL_COSTO': TOTAL_COSTO
         }
-        return sum(comp.values()), comp 
+        return sum(comp.values()), comp
+
     # ── Session state ─────────────────────────────────────────────────────────
     if 'sv' not in st.session_state or st.session_state.get('sv_mes') != mes or st.session_state.get('sv_tipo') != tipo_sens:
         st.session_state['sv']     = copy.deepcopy(BASE)
@@ -1029,47 +1043,74 @@ elif pagina == "Sensibilidad R+P":
         prod_total = npt3 + npt4
         prod_term  = v['PRIL_DTP'] + v['SECADO']
 
+        # 1.1 Tpte Sales
+        # Precio por ruta = Gasto KUS / Ton por ruta
         precio_nv = v['G_TPTE_NV'] / v['TON_TPTE_NV'] if v['TON_TPTE_NV'] > 0 else 0.0
         precio_pb = v['G_TPTE_PB'] / v['TON_TPTE_PB'] if v['TON_TPTE_PB'] > 0 else 0.0
         precio_cs = v['G_CAMINOS_NV'] / v['TON_TPTE_CS'] if v['TON_TPTE_CS'] > 0 else 0.0
+
+        # Precio promedio ponderado por consumo de sales
         consumo_nv = v['NV cat 1']
         consumo_pb = v['PB']
         consumo_cs = v['CS']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
-        precio_prom = (precio_nv*consumo_nv + precio_pb*consumo_pb + precio_cs*consumo_cs) / consumo_total if consumo_total > 0 else 0.0
+
+        precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
         fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
         c11 = precio_prom * fc_sales
 
-        c12 = (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['G_DEPRECIACION_CS']) / prod_total if prod_total > 0 else 0.0
+        # 1.2 Pozas: usar total directo de la tabla
+        #pozas_editado = any(v[k] != BASE[k] for k in ['G_POZAS_NV','G_POZAS_CS','G_POZAS_PB'])
+        Gasto_pozas_Total =  (v['G_POZAS_NV'] + v['G_POZAS_CS'] + v['G_POZAS_PB'] + v['G_DEPRECIACION_CS'])
+        Pozas_NV = v['G_POZAS_NV'] / prod_total if prod_total > 0 else 0.0
+        Pozas_PB = v['G_POZAS_PB'] / prod_total if prod_total > 0 else 0.0
+        Pozas_CS = v['G_POZAS_CS'] / prod_total if prod_total > 0 else 0.0
+        Dep_CS =  v['G_DEPRECIACION_CS'] / prod_total if prod_total > 0 else 0.0
+        c12 = Pozas_NV + Pozas_PB + Pozas_CS + Dep_CS
 
+        # 1.3 Cristalización
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
 
-        cons_mop90 = (v['FC_MOP90_NPT3']*npt3) + (v['FC_MOP90_NPT4']*npt4)
-        cons_mop70 = (v['FC_MOP70_NPT3']*npt3) + (v['FC_MOP70_NPT4']*npt4)
-        cons_ss    = (v['FC_SS_NPT3']*npt3)    + (v['FC_SS_NPT4']*npt4)
-        costo_total_kcl = (v['P_MOP90']*cons_mop90) + (v['P_MOP70']*cons_mop70) + (v['P_SS']*cons_ss)
+        # 1.4 KCl
+        cons_mop90 = (v['FC_MOP90_NPT3'] * npt3) + (v['FC_MOP90_NPT4'] * npt4)
+        cons_mop70 = (v['FC_MOP70_NPT3'] * npt3) + (v['FC_MOP70_NPT4'] * npt4)
+        cons_ss    = (v['FC_SS_NPT3'] * npt3)    + (v['FC_SS_NPT4'] * npt4)
+        cons_total = cons_mop90 + cons_mop70 + cons_ss
+        costo_total_kcl = (v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)
         c14 = costo_total_kcl / prod_total if prod_total > 0 else 0.0
 
-        c15 = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] +
-               v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
+        # 1.5 Terminados
+       # Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
+        G_Prilado = v['G_PRIL'] / prod_term if prod_term > 0 else 0.0
+        G_DTP = v['G_DTP'] / prod_term if prod_term > 0 else 0.0
+        G_Sec = v['G_SECADO'] / prod_term if prod_term > 0 else 0.0
+        Tpte_inter = v['G_TPTE_INT'] / prod_term if prod_term > 0 else 0.0
+        G_Dep =  (v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO']) / prod_term if prod_term > 0 else 0.0
+        c15 = G_Prilado + G_DTP + G_Sec + G_Dep + Tpte_inter
 
-        c_tpte     = v['G_TPTE_CAM']   / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
-        c_embarque = v['G_EMBARQUE']   / v['TON_EMBARQUE_GRANEL'] if v['TON_EMBARQUE_GRANEL'] > 0 else 0.0
-        c_alm      = v['G_ALMACENAJE'] / v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
+        # 1.6 Tpte + Puerto
+        c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
+        c_embarque = v['G_EMBARQUE']  / v[ 'TON_EMBARQUE_GRANEL']  if v[ 'TON_EMBARQUE_GRANEL'] > 0  else 0.0
+        c_alm      = v['G_ALMACENAJE']/ v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
         vol_d      = v['TON_EMBARQUE_TOTAL'] + v['TON_DESPACHO']
-        c_dist     = v['G_DIST_T']     / vol_d if vol_d > 0 else 0.0
-        dep_puerto = v['DEPR_PUERTO']  / vol_d if vol_d > 0 else 0.0
+        c_dist     = v['G_DIST_T']    / vol_d                    if vol_d > 0                    else 0.0
+        dep_puerto = v['DEPR_PUERTO'] / vol_d                    if vol_d > 0                    else 0.0
         c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
 
+        # 1.7 Perdidas FE
         Op_dep = c11 + c12 + c13 + c14
         Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * Perd_FE_pct
+        Perdidas_FE = Op_dep * Perd_FE_pct 
         Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
         Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
         c17 = Perdidas_FE + Perd_Puerto
 
+        # 1.8 Distributivos
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
+
         c19 = v['OTROS']
+
+        TOTAL_COSTO = C11 + C12 + C13 + C14 + C15 + C16 + C17 + C18 + C19
 
         comp = {
             '1.1 Tpte Sales':    c11,
@@ -1081,6 +1122,7 @@ elif pagina == "Sensibilidad R+P":
             '1.7 Pérdidas F/E':  c17,
             '1.8 Distributivos': c18,
             '1.9 Otros':         c19,
+            'TOTAL_COSTO': TOTAL_COSTO
         }
         return sum(comp.values()), comp
 
