@@ -529,7 +529,7 @@ elif pagina == "Sensibilidad":
         'DEP_NPT3':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT III'),
         'DEP_NPT4':        _r('GASTO','CRISTALIZACION','Gasto Depreciación NPT IV'),
         'DEPR_PUERTO': _r('DEPRECIACION','PUERTO','Depreciacion Puerto','KUS'),
-        'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios'),
+        'G_TPTE_INT':    _r('GASTO','TERMINADOS','Gasto Transporte Intermedios '),
         'DIST_NITRATOS': _area('Distributivos Nitratos'),
         'DEPR_COM':      _area('Depreciación Costo Comun'),
 
