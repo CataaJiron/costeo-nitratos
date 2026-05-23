@@ -864,7 +864,7 @@ elif pagina == "Sensibilidad PPTO":
 
 
         # ─── FC NaNO3────────────────────────────────────────────
-        st.caption("#### Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
+        st.caption("#### 🧂Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
         cs1, cs2, cs3 = st.columns(3)
         with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rc}")
         with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rc}")
