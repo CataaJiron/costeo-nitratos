@@ -844,25 +844,6 @@ elif pagina == "Sensibilidad PPTO":
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rc}")
  
         st.divider()
- 
-        # ───Tpte Sales ────────────────────────────────────────────
-        st.markdown("#### 🧂 Transporte de Sales")
-
-        def fila_tpte(label, key_g, key_ton):
-            c1, c2, c3 = st.columns([2, 2, 1])
-            with c1:
-                V[key_g]   = st.number_input(f"{label} (KUS)",  value=round(V[key_g], 1),   step=10.0, format="%.1f", key=f"ui_ts_{key_g}_{rc}")
-            with c2:
-                V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f", key=f"ui_ts_{key_ton}_{rc}")
-            with c3:
-                ratio = V[key_g] / V[key_ton] if V[key_ton] > 0 else 0.0
-                st.metric("USD/KTon", f"${ratio:.2f}")
-
-        fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
-        fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
-        #fila_tpte("Caminos NV", "G_CAMINOS_NV", "TON_TPTE_CS")
-        st.divider()
-
         # ─── FC NaNO3────────────────────────────────────────────
         st.markdown("#### 🧂Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
         cs1, cs2, cs3 = st.columns(3)
@@ -879,6 +860,24 @@ elif pagina == "Sensibilidad PPTO":
         precio_prom_v = (precio_nv_v*V['NV cat 1'] + precio_pb_v*V['PB'] + precio_cs_v*V['CS']) / consumo_tot_v if consumo_tot_v > 0 else 0.0
         c11_preview   = precio_prom_v * fc_v
         st.caption(f"FC: {fc_v:.4f} | Precio prom: ${precio_prom_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+        st.divider() 
+
+        # ───Tpte Sales ────────────────────────────────────────────
+        st.markdown("#### 🧂 Transporte de Sales")
+
+        def fila_tpte(label, key_g, key_ton):
+            c1, c2, c3 = st.columns([2, 2, 1])
+            with c1:
+                V[key_g]   = st.number_input(f"{label} (KUS)",  value=round(V[key_g], 1),   step=10.0, format="%.1f", key=f"ui_ts_{key_g}_{rc}")
+            with c2:
+                V[key_ton] = st.number_input(f"{label} (KTon)", value=round(V[key_ton], 3), step=0.1,  format="%.3f", key=f"ui_ts_{key_ton}_{rc}")
+            with c3:
+                ratio = V[key_g] / V[key_ton] if V[key_ton] > 0 else 0.0
+                st.metric("USD/KTon", f"${ratio:.2f}")
+
+        fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
+        fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
+        #fila_tpte("Caminos NV", "G_CAMINOS_NV", "TON_TPTE_CS")
 
         fs1, fs2 = st.columns(2)
         with fs1:
