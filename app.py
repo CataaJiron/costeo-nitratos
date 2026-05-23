@@ -877,7 +877,13 @@ elif pagina == "Sensibilidad PPTO":
 
         fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
         fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
-        #fila_tpte("Caminos NV", "G_CAMINOS_NV", "TON_TPTE_CS")
+        c1, c2 = st.columns([3, 1])
+        with c1:
+            V['G_CAMINOS_NV'] = st.number_input("Caminos NV (KUS)", value=round(V['G_CAMINOS_NV'],1), step=10.0, format="%.1f", key=f"ui_ts_G_CAMINOS_NV_{rc}")
+        with c2:
+            ton_total = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
+            ratio_cam = V['G_CAMINOS_NV'] / ton_total if ton_total > 0 else 0.0
+            st.metric("USD/KTon", f"${ratio_cam:.2f}")
 
         fs1, fs2 = st.columns(2)
         with fs1:
@@ -887,6 +893,7 @@ elif pagina == "Sensibilidad PPTO":
         st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
  
         st.divider()
+        
         if st.button(f"🔄 Restablecer valores PPTO ({modo_sens})", use_container_width=True):
             # Borrar TODAS las keys del session state que sean de esta página
             keys_to_delete = [k for k in st.session_state.keys() 
