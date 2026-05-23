@@ -606,8 +606,6 @@ elif pagina == "Sensibilidad":
 
         c19 = v['OTROS']
 
-        TOTAL_COSTO = C11 + C12 + C13 + C14 + C15 + C16 + C17 + C18 + C19
-
         comp = {
             '1.1 Tpte Sales':    c11,
             '1.2 Op. Pozas':     c12,
@@ -618,7 +616,6 @@ elif pagina == "Sensibilidad":
             '1.7 Pérdidas F/E':  c17,
             '1.8 Distributivos': c18,
             '1.9 Otros':         c19,
-            'TOTAL_COSTO': TOTAL_COSTO
         }
         return sum(comp.values()), comp
 
@@ -627,9 +624,8 @@ elif pagina == "Sensibilidad":
         st.session_state['sv']     = copy.deepcopy(BASE)
         st.session_state['sv_mes'] = mes
     V = st.session_state['sv']
-    # Actualizar claves que estaban en 0 por cache viejo
     for k, val in BASE.items():
-        if k not in V or (V.get(k, 0) == 0 and val != 0):
+        if k not in V:
             V[k] = val
 
     # ── UI: inputs + resultados ───────────────────────────────────────────────
@@ -649,7 +645,7 @@ elif pagina == "Sensibilidad":
                 st.metric(usdpt_label, f"${ratio:.2f}")
  
         # ─── PRODUCCIÓN ───────────────────────────────────────────────────────
-        st.markdown("#### Producción (Kton)")
+        st.markdown("#### 🏭 Producción (Kton)")
  
         pc1, pc2 = st.columns(2)
         with pc1:
