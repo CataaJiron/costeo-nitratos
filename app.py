@@ -861,7 +861,7 @@ elif pagina == "Sensibilidad PPTO":
         fila_tpte("NV → CS",    "G_TPTE_NV",    "TON_TPTE_NV")
         fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
         #fila_tpte("Caminos NV", "G_CAMINOS_NV", "TON_TPTE_CS")
-
+        st.divider()
 
         # ─── FC NaNO3────────────────────────────────────────────
         st.markdown("#### 🧂Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
