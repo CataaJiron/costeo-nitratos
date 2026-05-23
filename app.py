@@ -864,7 +864,7 @@ elif pagina == "Sensibilidad PPTO":
         cs1, cs2, cs3 = st.columns(3)
         with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rc}")
         with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rc}")
-        #with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key=f"ui_ts_CS_{rc}")
+        with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key=f"ui_ts_CS_{rc}")
 
         consumo_tot_v = V['NV cat 1'] + V['PB'] + V['CS']
         prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
