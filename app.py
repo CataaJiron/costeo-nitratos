@@ -603,12 +603,13 @@ elif pagina == "Sensibilidad":
         c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
 
         # 1.7 Perdidas FE
+
         Op_dep = c11 + c12 + c13 + c14
-        Perd_FE_pct = (v["GEN_FE"] - v["GEN_Perdidas"]) / prod_term if prod_term > 0 else 0.0
-        Perdidas_FE = Op_dep * Perd_FE_pct
-        base_deg = Op_dep + Perdidas_FE + c15
-        Perd_Puerto = v['GEN_Perdidas_Degradacion'] / base_deg if base_deg > 0 else 0.0
-        c17 = Perdidas_FE + (Perd_Puerto * base_deg)
+        Perd_FE_pct = (-(v["GEN_FE"] + v["GEN_Perdidas"])) / prod_term if prod_term > 0 else 0.0
+        Perdidas_FE = Op_dep * Perd_FE_pct 
+        Per_Deg_PTOC = -v['GEN_Perdidas_Puerto'] / ((prod_total) - v["GEN_FE"] - v["GEN_Perdidas"])
+        Perd_Puerto = Per_Deg_PTOC * (Op_dep + Perd_FE_pct + c15)
+        c17 = Perdidas_FE + Perd_Puerto
 
         # 1.8 Distributivos
         c18 = (v['DIST_NITRATOS'] + v['DEPR_COM']) / prod_total if prod_total > 0 else 0.0
