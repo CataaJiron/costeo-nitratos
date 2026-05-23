@@ -845,7 +845,7 @@ elif pagina == "Sensibilidad PPTO":
  
         st.divider()
  
-        # ─── FC NaNO3 / Tpte Sales ────────────────────────────────────────────
+        # ───Tpte Sales ────────────────────────────────────────────
         st.markdown("#### 🧂 Transporte de Sales")
 
         def fila_tpte(label, key_g, key_ton):
@@ -862,7 +862,9 @@ elif pagina == "Sensibilidad PPTO":
         fila_tpte("PB → CS",    "G_TPTE_PB",    "TON_TPTE_PB")
         #fila_tpte("Caminos NV", "G_CAMINOS_NV", "TON_TPTE_CS")
 
-        st.caption("Consumo Sales por origen (KTon NaNO3)")
+
+        # ─── FC NaNO3────────────────────────────────────────────
+        st.caption("#### Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
         cs1, cs2, cs3 = st.columns(3)
         with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rc}")
         with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rc}")
