@@ -648,7 +648,7 @@ elif pagina == "Sensibilidad PPTO":
         st.session_state['sv_tipo'] = tipo_sens
     V = st.session_state['sv']
     for k, val in BASE.items():
-        if k not in V or (V.get(k, 0) == 0 and val != 0):
+        if k not in V:  # ← solo agrega claves nuevas, no sobreescribe
             V[k] = val
  
     # ── UI: inputs + resultados ───────────────────────────────────────────────
