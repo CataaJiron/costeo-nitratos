@@ -1062,7 +1062,7 @@ elif pagina == "Sensibilidad R+P":
         'FC_SS_NPT3':    _r('KCl','CONSUMO NPT3','SS',nth=0),
         'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90',nth=0),
         'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70',nth=0),
-        'FC_SS_NPT4':    _r('KCl','CONSUMO NPT4','SS',nth=0),
+        'FC_SS_NPT4':    _r('KCl','Fc KCl NPT4','SS',nth=0),
         'P_MOP90':       _r('KCl','Costo Promedio KCl','MOP 90'),
         'P_MOP70':       _r('KCl','Costo Promedio KCl','MOP 70'),
         'P_SS':          _r('KCl','Costo Promedio KCl','SS'),
@@ -1454,12 +1454,12 @@ elif pagina == "Sensibilidad R+P":
         st.divider()
 
         
-        if st.button(f"🔄 Restablecer valores REAL+PROY  ({modo_sens})", use_container_width=True):
-            st.session_state['rp_rc'] = st.session_state.get('rp_rc', 0) + 1
-            st.session_state['sv']      = copy.deepcopy(BASE)
-            st.session_state['sv_mes']  = mes
-            st.session_state['sv_tipo'] = tipo_sens
-            st.rerun() 
+        if st.button(f"🔄 Restablecer valores REAL+PROY ({modo_sens})", use_container_width=True):
+            st.session_state['rp_rc']      = st.session_state.get('rp_rc', 0) + 1
+            st.session_state[sv_key]       = copy.deepcopy(BASE)
+            st.session_state['sv_rp_mes']  = mes
+            st.session_state['sv_rp_tipo'] = tipo_sens
+            st.rerun()
 
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
     with col_res:
