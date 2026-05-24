@@ -370,20 +370,24 @@ elif pagina == "Analisis mensual":
         s_r = rp_serie(df, 'COSTO TOTAL', sa, c, tipo)
         row = {"Componente": nombre, "Tipo": "PPTO"}
         for i, m in enumerate(MESES): row[m] = round(s_p[i], 1)
-        row["Acum Dic"] = round(sum(s_p) / 12, 1)
+        row["Acum Dic"] = round(gv(df, 'COSTO TOTAL', sa, c, 11, 'Acumulado', 'PPTO'), 1)
         rows.append(row)
         row2 = {"Componente": nombre, "Tipo": "R+P"}
         for i, m in enumerate(MESES): row2[m] = round(s_r[i], 1)
-        row2["Acum Dic"] = round(sum(s_r) / 12, 1)
+        row2["Acum Dic"] = round(rp_val(df, 'COSTO TOTAL', sa, c, 11, 'Acumulado'), 1)
         rows.append(row2)
 
     # Total rows
-    for tipo2, label, fn in [('PPTO','TOTAL PPTO', lambda sa,c,i: gv(df,'COSTO TOTAL',sa,c,i,tipo,'PPTO')),
-                              ('RP',  'TOTAL R+P',  lambda sa,c,i: rp_val(df,'COSTO TOTAL',sa,c,i,tipo))]:
+    for tipo2, label, fn, fn_dic in [
+        ('PPTO','TOTAL PPTO', lambda sa,c,i: gv(df,'COSTO TOTAL',sa,c,i,tipo,'PPTO'),
+                              lambda sa,c:   gv(df,'COSTO TOTAL',sa,c,11,'Acumulado','PPTO')),
+        ('RP',  'TOTAL R+P',  lambda sa,c,i: rp_val(df,'COSTO TOTAL',sa,c,i,tipo),
+                              lambda sa,c:   rp_val(df,'COSTO TOTAL',sa,c,11,'Acumulado'))
+    ]:
         row_t = {"Componente": label, "Tipo": ""}
         for i, m in enumerate(MESES):
             row_t[m] = round(sum(fn(sa,c,i) for sa,c,_ in COSTOS), 1)
-        row_t["Acum Dic"] = round(sum(row_t[m] for m in MESES) / 12, 1)
+        row_t["Acum Dic"] = round(sum(fn_dic(sa,c) for sa,c,_ in COSTOS), 1)
         rows.append(row_t)
 
     df_tabla = pd.DataFrame(rows)
