@@ -785,7 +785,7 @@ elif pagina == "Sensibilidad PPTO":
                 st.metric("=> USD/T", f"${ratio:.2f}")
 
         fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE",
-                           "Embarque Granel (Kton)",    "TON_EMBARQUE_GRANEL","TON_EMBARQUE_ENVASADO",
+                           "Embarque Granel (Kton)",    "TON_EMBARQUE_GRANEL",
                            step_ton=0.1)
 
         # Embarque envasado — editable
