@@ -785,18 +785,18 @@ elif pagina == "Sensibilidad PPTO":
                 st.metric("=> USD/T", f"${ratio:.2f}")
 
         fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE",
-                           "Embarque Granel (Kton)",    "TON_EMBARQUE_GRANEL",
+                           "Embarque Granel (Kton)",    "TON_EMBARQUE_GRANEL","TON_EMBARQUE_ENVASADO"
                            step_ton=0.1)
 
         # Embarque envasado — editable
         c1, c2 = st.columns([3, 1])
         with c1:
-            V['TON_EMBARQUE_ENV'] = st.number_input("Embarque Envasado (Kton)", value=round(V['TON_EMBARQUE_ENV'],3), step=0.1, format="%.3f", key=f"ui_puerto_TON_EMBARQUE_ENV_{rc}")
+            V['TON_EMBARQUE_ENVASADO'] = st.number_input("Embarque Envasado (Kton)", value=round(V['TON_EMBARQUE_ENVASADO'],3), step=0.1, format="%.3f", key=f"ui_puerto_TON_EMBARQUE_ENVASADO_{rc}")
         with c2:
-            ton_emb_total = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENV']
+            ton_emb_total = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENVASADO']
             st.metric("Total Emb.", f"{ton_emb_total:.3f}")
         # Actualizar TON_EMBARQUE_TOTAL como suma
-        V['TON_EMBARQUE_TOTAL'] = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENV']
+        V['TON_EMBARQUE_TOTAL'] = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENVASADO']
 
         fila_usdton_puerto("Almacenaje (KUS)", "G_ALMACENAJE",
                            "Almacenaje (Kton)", "TON_ALMACENAJE",
