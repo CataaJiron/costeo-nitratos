@@ -1332,21 +1332,18 @@ elif pagina == "Sensibilidad R+P":
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rp_rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rp_rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
 
-        fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE",
-                           "Embarque Granel (Kton)",    "TON_EMBARQUE_GRANEL",
-                           step_ton=0.1)
 
         # Embarque envasado — editable
         c1, c2 = st.columns([3, 1])
         with c1:
-            V['TON_EMBARQUE_ENV'] = st.number_input("Embarque Envasado (Kton)", value=round(V['TON_EMBARQUE_ENV'],3), step=0.1, format="%.3f", key=f"ui_puerto_TON_EMBARQUE_ENV_{rc}")
+            V['TON_EMBARQUE_ENV'] = st.number_input("Embarque Envasado (Kton)", value=round(V['TON_EMBARQUE_ENV'],3), step=0.1, format="%.3f", key=f"ui_puerto_TON_EMBARQUE_ENV_{rp_rc}")
         with c2:
             ton_emb_total = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENV']
             st.metric("Total Emb.", f"{ton_emb_total:.3f}")
@@ -1359,9 +1356,9 @@ elif pagina == "Sensibilidad R+P":
 
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
-            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rc}")
+            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rp_rc}")
         with c2:
-            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rc}")
+            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rp_rc}")
         with c3:
             vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
             ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
