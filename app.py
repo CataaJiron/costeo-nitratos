@@ -1061,6 +1061,7 @@ elif pagina == "Sensibilidad R+P":
         'G_DIST_T':      _r('Distributivos Trimestral','DISTRIBUTIVOS','Distributivos Trimestral','KUS'),
         'TON_DESPACHO':  _r('Distributivos Trimestral','DISTRIBUTIVOS','Despacho Camiones y contenedores','Kton'),
         'TON_EMBARQUE_GRANEL': _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel','Kton'),
+        'TON_EMBARQUE_ENV':    _r('Embarque Granel Trimestral','EMBARQUE','Embarque Envasado','Kton'),
         'G_TPTE_CAM':    _r('GASTO','TRANSPORTE','Tpte Camiones Terminados','KUS'),
         'TON_TPTE_CAM':  _r('TRANSPORTE','TRANSPORTE','Tpte Camiones Terminados','kTon'),
         'G_TPTE_NV':     _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Transporte Sales NV','KUS'),
@@ -1161,8 +1162,9 @@ elif pagina == "Sensibilidad R+P":
         # 1.6 Tpte + Puerto
         c_tpte     = v['G_TPTE_CAM']  / v['TON_TPTE_CAM']       if v['TON_TPTE_CAM'] > 0       else 0.0
         c_embarque = v['G_EMBARQUE']  / v[ 'TON_EMBARQUE_GRANEL']  if v[ 'TON_EMBARQUE_GRANEL'] > 0  else 0.0
+        emb_total = v[ 'TON_EMBARQUE_GRANEL'] + v['TON_EMBARQUE_ENV']
         c_alm      = v['G_ALMACENAJE']/ v['TON_ALMACENAJE']      if v['TON_ALMACENAJE'] > 0      else 0.0
-        vol_d      = v['TON_EMBARQUE_TOTAL'] + v['TON_DESPACHO']
+        vol_d      = emb_total + v['TON_DESPACHO']
         c_dist     = v['G_DIST_T']    / vol_d                    if vol_d > 0                    else 0.0
         dep_puerto = v['DEPR_PUERTO'] / vol_d                    if vol_d > 0                    else 0.0
         c16 = c_tpte + c_embarque + c_alm + c_dist + dep_puerto
@@ -1324,42 +1326,47 @@ elif pagina == "Sensibilidad R+P":
 
 
 
-# ─── PUERTO ───────────────────────────────────────────────────────────
+        # ─── PUERTO ───────────────────────────────────────────────────────────
         st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
 
-        # 1. Función local exclusiva para Puerto
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
             c1, c2, c3 = st.columns([2, 2, 1])
             with c1:
-                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rp_rc}")
+                V[key_usd] = st.number_input(label_usd, value=round(V[key_usd], 1), step=10.0, format="%.1f", key=f"ui_puerto_{key_usd}_{rc}")
             with c2:
-                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rp_rc}")
+                V[key_ton] = st.number_input(label_ton, value=round(V[key_ton], 3), step=step_ton, format="%.3f", key=f"ui_puerto_{key_ton}_{rc}")
             with c3:
                 ratio = V[key_usd] / V[key_ton] if V[key_ton] != 0 else 0.0
                 st.metric("=> USD/T", f"${ratio:.2f}")
 
-        # 2. Llamadas a las filas de la tabla
-        fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE", 
-                           "Embarque Granel (Kton)",    "TON_EMBARQUE_TOTAL", 
+        fila_usdton_puerto("Embarque+Demurrage (KUS)", "G_EMBARQUE",
+                           "Embarque Granel (Kton)",    "TON_EMBARQUE_GRANEL",
                            step_ton=0.1)
-                    
-        fila_usdton_puerto("Almacenaje (KUS)", "G_ALMACENAJE", 
-                           "Almacenaje (Kton)", "TON_ALMACENAJE", 
+
+        # Embarque envasado — editable
+        c1, c2 = st.columns([3, 1])
+        with c1:
+            V['TON_EMBARQUE_ENV'] = st.number_input("Embarque Envasado (Kton)", value=round(V['TON_EMBARQUE_ENV'],3), step=0.1, format="%.3f", key=f"ui_puerto_TON_EMBARQUE_ENV_{rc}")
+        with c2:
+            ton_emb_total = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENV']
+            st.metric("Total Emb.", f"{ton_emb_total:.3f}")
+        # Actualizar TON_EMBARQUE_TOTAL como suma
+        V['TON_EMBARQUE_TOTAL'] = V['TON_EMBARQUE_GRANEL'] + V['TON_EMBARQUE_ENV']
+
+        fila_usdton_puerto("Almacenaje (KUS)", "G_ALMACENAJE",
+                           "Almacenaje (Kton)", "TON_ALMACENAJE",
                            step_ton=1.0)
 
-        # 3. Inputs manuales y cálculo de Distributivos (CORREGIDO AQUÍ)
         c1, c2, c3 = st.columns([2, 2, 1])
         with c1:
-            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rp_rc}")
+            V['G_DIST_T'] = st.number_input("Distributivos (KUS)", value=round(V['G_DIST_T'],1), step=10.0, format="%.1f", key=f"ui_G_DIST_T_{rc}")
         with c2:
-            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rp_rc}")
+            V['TON_DESPACHO'] = st.number_input("Despacho Cam. (Kton)", value=round(V['TON_DESPACHO'],3), step=0.1, format="%.3f", key=f"ui_TON_DESPACHO_{rc}")
         with c3:
-            # Calculamos las variables en el flujo global para que el caption de abajo las pueda leer
             vol_d = V['TON_EMBARQUE_TOTAL'] + V['TON_DESPACHO']
             ratio_d = V['G_DIST_T'] / vol_d if vol_d > 0 else 0.0
             st.metric("=> USD/T", f"${ratio_d:.2f}")
- 
-        # Ahora vol_d ya existe aquí afuera y no fallará
+
         st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
  
     # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
