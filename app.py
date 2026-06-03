@@ -67,6 +67,7 @@ def real_proy(tipo2_mes):
     """Returns REAL for early months, PROY for later — combined as 'real+proy'"""
     return tipo2_mes  # handled per month in real_proy_val
 
+
 def rp_val(df, area, subarea, concepto, mes, tipo='Puntual', medida=None):
     """Get Real+Proy value: REAL if exists, else PROY"""
     v = gv(df, area, subarea, concepto, mes, tipo, 'REAL', medida)
@@ -126,7 +127,7 @@ with st.sidebar:
     st.divider()
     archivo = st.file_uploader("Cargar Planilla costeo 2026.xlsx", type=["xlsx"])
     st.divider()
-    pagina = st.radio("", ["Dashboard", "Analisis mensual", "Sensibilidad PPTO", "Sensibilidad R+P", "Asistente"],
+    pagina = st.radio("", ["Dashboard", "Analisis mensual", "Sensibilidad PPTO", "Sensibilidad R+P", "Plan Industrial", "Asistente"], 
                       label_visibility="collapsed")
 
 if not archivo:
@@ -269,7 +270,7 @@ elif pagina == "Analisis mensual":
         modo = st.radio("Vista", ["Puntual","Acumulado"], horizontal=True, label_visibility="collapsed")
     tipo = "Puntual" if modo == "Puntual" else "Acumulado"
 
-    mes = botones_mes("anal")
+    mes = botones_mes("analisis")
     st.divider()
     kpis_row(df, mes, tipo)
     st.divider()
@@ -1597,3 +1598,714 @@ DATOS DISPONIBLES:
         if st.button("🗑️ Limpiar conversación"):
             st.session_state["messages"] = []
             st.rerun()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PLAN INDUSTRIAL
+# ══════════════════════════════════════════════════════════════════════════════
+
+elif pagina == "Plan Industrial":
+    from plan_industrial import render
+    render(df)
+    """
+plan_industrial.py
+ââââââââââââââââââ
+P¡gina "Plan Industrial" para app.py de Costeo Nitratos.
+ 
+INTEGRACIÃN (3 pasos):
+1. En app.py sidebar agrega "Plan Industrial" a la lista del radio:
+       pagina = st.radio("", ["Dashboard","Analisis mensual","Sensibilidad PPTO",
+                              "Sensibilidad R+P","Plan Industrial","Asistente"], ...)
+2. Al final de app.py, antes del elif "Asistente":
+       elif pagina == "Plan Industrial":
+           from plan_industrial import render
+           render(df)
+3. Este archivo va en la misma carpeta que app.py.
+ 
+STANDALONE (prueba sin app.py):
+       streamlit run plan_industrial.py
+"""
+ 
+import streamlit as st
+import plotly.graph_objects as go
+import pandas as pd
+ 
+# ââ Paleta dark âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+BG_DARK  = "#0d1117"
+BG_CARD  = "#161b22"
+BG_CARD2 = "#1c2128"
+BORDER   = "#30363d"
+TEXT_PRI = "#e6edf3"
+TEXT_SEC = "#8b949e"
+C_BLUE   = "#378ADD"
+C_GREEN  = "#80BC00"
+C_RED    = "#D83030"
+C_ORANGE = "#D85A30"
+ 
+COLORES_COMP = [
+    "#5c85d6","#1D9E75","#7F77DD","#E8A838",
+    "#639922","#5DCAA5","#D85A30","#D4537E",
+    "#888780","#B4B2A9",
+]
+ 
+# ââ Datos embebidos del plan âââââââââââââââââââââââââââââââââââââââââââââââââââ
+PERIODOS   = ["2026 (PPTO)","2026 R+P","2027","2028","2029","2030","2031","2032"]
+PERIODOS_S = ["PP'26","Des'26","2027","2028","2029","2030","2031","2032"]
+BASE_IDX   = 0
+ 
+PLAN_COSTOS = {
+    "Transporte":          [32.72,29.46,30.53,28.24,27.83,27.83,31.14,31.14],
+    "Pozas":               [65.93,57.84,60.99,60.91,60.87,60.90,62.15,62.15],
+    "CristalizaciÃ³n":      [121.08,109.36,112.01,112.24,112.24,112.24,113.77,113.77],
+    "KCl":                 [178.76,173.63,183.56,191.10,196.81,199.67,199.49,199.49],
+    "Terminados":          [59.81,54.84,56.15,55.85,55.34,55.28,54.40,54.40],
+    "Tpte CS-TOC":         [11.56,11.09,11.09,11.09,11.09,11.09,11.09,11.09],
+    "Puerto":              [22.59,18.09,19.19,19.07,18.85,18.82,18.45,18.45],
+    "PÃ©rd. y FE":          [13.30,11.25,12.67,12.78,12.80,12.87,12.89,12.89],
+    "Distributivos":       [83.16,77.84,82.37,82.63,82.63,82.63,84.55,84.55],
+    "Ajuste otros gastos": [50.00,50.00,50.00,50.00,50.00,50.00,50.00,50.00],
+}
+ 
+PLAN_PROD = {
+    "NPT III":   [474341,499846,477556,477556,477556,477556,460660,456300],
+    "NPT II-IV": [227610,249353,230390,228190,228190,228190,229030,229030],
+    "Terminados":[666480,725733,669011,674495,684329,685441,702910,732071],
+}
+ 
+PLAN_GASTOS = {
+    "Total Tpte Sales":      [22652,22084,22084,22084,22084,22084,22084,22084],
+    "OperaciÃ³n Pozas":       [46281,43333,43177,42987,42957,42980,42866,42866],
+    "CristalizaciÃ³n":        [84995,81929,79298,79211,79211,79211,78463,78463],
+    "NPT IV":                [28828,27441,26120,26033,26033,26033,26067,26067],
+    "NPT III + Korda":       [39692,38472,37161,37161,37161,37161,36380,36380],
+    "Terminados":            [39864,39799,37564,37674,37870,37893,38240,38240],
+    "Trilado CS":            [5109,12849,11071,11084,11097,11109,11123,11123],
+    "DTP":                   [1710,3718,3429,3430,3431,3432,3433,3433],
+    "Secado KNO3":           [1603,13281,13113,13209,13391,13401,13734,13734],
+    "Puerto + Tpte":         [27415,26506,25938,25999,26108,26120,26314,26314],
+    "Distributivos + Depr.": [58372,58315,58315,58315,58315,58315,58315,58315],
+}
+ 
+PLAN_FC_NANO3 = {
+    "Fc NaNO3 NPT3":       [1.333,1.319,1.333,1.332,1.332,1.332,1.352,1.371],
+    "Fc NaNO3 cat 1 NPT3": [1.183,1.161,1.173,1.302,1.332,1.332,1.193,1.183],
+    "Fc CS NPT3":          [0.050,0.099,0.100,0.030,0.000,0.000,0.150,0.170],
+    "Fc PB NPT3":          [0.099,0.059,0.059,0.000,0.000,0.000,0.009,0.019],
+    "Fc NaNO3 NPT4 LDTP":  [1.918,1.837,1.900,1.900,1.900,1.900,1.900,1.900],
+    "Fc CS NPT4":          [1.198,1.157,1.200,1.200,1.200,1.200,1.200,1.200],
+    "Fc Purga NPT4":       [0.719,0.680,0.700,0.700,0.700,0.700,0.700,0.700],
+    "Fc consumo sales":    [1.294,1.271,1.292,1.242,1.241,1.241,1.274,1.274],
+}
+ 
+PLAN_FC_KCL = {
+    "Fc KCl global NPT3":  [0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000],
+    "Fc KCl fresco NPT3":  [0.871,0.859,0.860,0.860,0.860,0.860,0.860,0.860],
+    "MOP-90":              [0.558,0.538,0.540,0.540,0.540,0.540,0.540,0.540],
+    "MOP-70":              [0.228,0.273,0.240,0.240,0.240,0.240,0.240,0.240],
+    "SS":                  [0.085,0.048,0.080,0.080,0.080,0.080,0.080,0.080],
+    "Fc KCl global NPT4":  [0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000],
+    "Fc KCl fresco NPT4":  [0.289,0.286,0.400,0.600,0.700,0.750,0.700,0.550],
+    "MOP-90 NPT4":         [0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000],
+    "MOP-70 NPT4":         [0.289,0.272,0.400,0.600,0.700,0.750,0.700,0.550],
+    "SS NPT4":             [0.000,0.014,0.000,0.000,0.000,0.000,0.000,0.000],
+}
+ 
+PLAN_COSECHAS = {
+    "Cosecha productiva":   [1791288,2036045,2036045,2036045,1944676,1543981,1558467],
+    "Pozas SV":             [1133015,1486739,1486739,1571694,1484216,1129171,1149942],
+    "Pozas PB":             [118804,85925,85925,0,0,0,0],
+    "Pozas CS":             [539470,463381,463381,451193,460459,414810,408525],
+    "Transporte salar a CS":[550000,550000,550000,550000,550000,550000,550000],
+}
+ 
+PLAN_PROD_TERM = {
+    "ProducciÃ³n terminados":[669011,674495,684329,685441,702910,732071],
+    "ProducciÃ³n Trilado":   [189824,190446,191083,191698,192361,193059],
+    "ProducciÃ³n DTP":       [143209,143817,144428,145042,145659,146278],
+    "ProducciÃ³n Secado":    [479187,484049,493246,493743,510549,539012],
+}
+ 
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# CSS DARK
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+DARK_CSS = f"""
+<style>
+section.main > div {{background:{BG_DARK} !important}}
+.stApp {{background:{BG_DARK} !important}}
+.stTabs [data-baseweb="tab-list"] {{background:{BG_CARD};border-radius:8px;gap:2px}}
+.stTabs [data-baseweb="tab"] {{color:{TEXT_SEC};padding:8px 18px;border-radius:6px}}
+.stTabs [aria-selected="true"] {{background:{BG_CARD2};color:{TEXT_PRI} !important}}
+.stExpander {{background:{BG_CARD} !important;border:1px solid {BORDER} !important;border-radius:8px}}
+.stSelectbox > div > div {{background:{BG_CARD2} !important;color:{TEXT_PRI} !important;border-color:{BORDER} !important}}
+.stNumberInput input {{background:{BG_CARD2} !important;color:{TEXT_PRI} !important;border-color:{BORDER} !important}}
+.stSlider .st-bd {{background:{BORDER}}}
+div[data-testid="metric-container"] {{background:{BG_CARD};border:1px solid {BORDER};border-radius:8px;padding:8px 14px}}
+div[data-testid="metric-container"] label {{color:{TEXT_SEC} !important}}
+div[data-testid="metric-container"] [data-testid="stMetricValue"] {{color:{TEXT_PRI} !important}}
+.plan-tbl {{width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace}}
+.plan-tbl th {{background:#1f2937;color:{TEXT_SEC};padding:4px 7px;border-bottom:1px solid {BORDER};white-space:nowrap;text-align:right}}
+.plan-tbl th:first-child {{text-align:left}}
+.plan-tbl td {{padding:3px 7px;border-bottom:1px solid #21262d;color:{TEXT_PRI};white-space:nowrap;text-align:right}}
+.plan-tbl td:first-child {{text-align:left}}
+.plan-tbl tr:hover td {{background:#1c2128}}
+.plan-tbl .bold {{font-weight:700}}
+.plan-tbl .neu {{color:{TEXT_SEC}}}
+.pos {{color:{C_GREEN} !important;font-weight:600}}
+.neg {{color:{C_RED} !important;font-weight:600}}
+.neu {{color:{TEXT_SEC} !important}}
+</style>
+"""
+ 
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# HELPERS
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+def total_costo(costos, idx):
+    return sum(v[idx] for v in costos.values() if idx < len(v))
+ 
+ 
+def fmt_delta(val, decimals=1, invert=False):
+    """Retorna (texto, clase_css)."""
+    if abs(val) < 0.005:
+        return "â", "neu"
+    sign = "+" if val > 0 else ""
+    txt  = f"{sign}{val:.{decimals}f}"
+    worse = val > 0 if not invert else val < 0
+    return txt, ("neg" if worse else "pos")
+ 
+ 
+def kpi_card(label, value, delta_txt="", delta_cls="neu"):
+    color_map = {"pos": C_GREEN, "neg": C_RED, "neu": TEXT_SEC}
+    dc = color_map.get(delta_cls, TEXT_SEC)
+    delta_html = f'<div style="font-size:11px;color:{dc};margin-top:2px">{delta_txt}</div>' if delta_txt else ""
+    return f"""
+    <div style="background:{BG_CARD};border:1px solid {BORDER};border-radius:10px;
+         padding:10px 14px;text-align:center">
+      <div style="font-size:10px;color:{TEXT_SEC};margin-bottom:4px;font-weight:600">{label}</div>
+      <div style="font-size:19px;font-weight:700;color:{TEXT_PRI}">{value}</div>
+      {delta_html}
+    </div>"""
+ 
+ 
+def tabla_plan_html(data, unidad, decimals=1, bold_rows=None, invert_delta=False,
+                    periodos_mostrar=None):
+    """HTML de tabla con Î vs PPTO 2026."""
+    cols = periodos_mostrar or PERIODOS[1:]
+    ths  = "<th>Concepto</th><th>Und</th>"
+    ths += "".join(f"<th>{p}</th><th>Î</th>" for p in cols)
+ 
+    rows_html = ""
+    for nombre, vals in data.items():
+        is_b  = bold_rows and nombre in bold_rows
+        bcls  = " bold" if is_b else ""
+        base_v = vals[BASE_IDX] if BASE_IDX < len(vals) else 0
+        tds    = f'<td class="{bcls}">{nombre}</td><td class="neu">{unidad}</td>'
+        for p in cols:
+            pidx = PERIODOS.index(p) if p in PERIODOS else -1
+            if pidx < 0 or pidx >= len(vals):
+                tds += "<td>â</td><td>â</td>"
+                continue
+            val   = vals[pidx]
+            delta = val - base_v
+            vstr  = f"{val:,.{decimals}f}"
+            dt, dc = fmt_delta(delta, decimals, invert=invert_delta)
+            tds += f'<td class="{bcls}">{vstr}</td><td class="{dc}" style="font-size:10px">{dt}</td>'
+        rows_html += f"<tr>{tds}</tr>"
+ 
+    return (f'<div style="overflow-x:auto">'
+            f'<table class="plan-tbl"><thead><tr>{ths}</tr></thead>'
+            f'<tbody>{rows_html}</tbody></table></div>')
+ 
+ 
+def mini_panel_detalle(titulo, comp_base, comp_sim):
+    """Mini tabla de componentes para la cuadrÃ­cula del simulador."""
+    filas = ""
+    for k in comp_base:
+        b  = comp_base[k]
+        s  = comp_sim.get(k, b)
+        dt, dc = fmt_delta(s - b)
+        filas += (f'<tr><td style="color:{TEXT_PRI}">{k}</td>'
+                  f'<td style="text-align:right;color:{TEXT_SEC}">{b:.2f}</td>'
+                  f'<td style="text-align:right;color:{TEXT_PRI}">{s:.2f}</td>'
+                  f'<td style="text-align:right" class="{dc}">{dt}</td></tr>')
+    total_b = sum(comp_base.values())
+    total_s = sum(comp_sim.values())
+    dt_t, dc_t = fmt_delta(total_s - total_b)
+    color_title = {"pos": C_GREEN, "neg": C_RED, "neu": TEXT_SEC}[dc_t]
+    return f"""
+    <div style="background:{BG_CARD};border:1px solid {BORDER};border-radius:7px;
+         padding:8px;margin-bottom:6px;overflow-x:auto">
+      <div style="font-size:11px;font-weight:700;color:{TEXT_PRI};margin-bottom:5px">
+        {titulo}
+        <span style="float:right;font-size:10px;color:{color_title}">Î {dt_t}</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:10px">
+        <thead><tr>
+          <th style="color:{TEXT_SEC};text-align:left;padding:2px 4px">Componente</th>
+          <th style="color:{TEXT_SEC};text-align:right;padding:2px 4px">Plan</th>
+          <th style="color:{TEXT_SEC};text-align:right;padding:2px 4px">Sim</th>
+          <th style="color:{TEXT_SEC};text-align:right;padding:2px 4px">Î</th>
+        </tr></thead>
+        <tbody>{filas}</tbody>
+      </table>
+    </div>"""
+ 
+ 
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# GRÃFICOS
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+LAYOUT_DARK = dict(
+    plot_bgcolor=BG_CARD, paper_bgcolor=BG_CARD,
+    font=dict(color=TEXT_PRI, size=11),
+    xaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC)),
+    yaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC)),
+    legend=dict(font=dict(color=TEXT_SEC), bgcolor=BG_CARD, bordercolor=BORDER),
+    margin=dict(t=40, b=30, l=50, r=20),
+)
+ 
+ 
+def fig_linea_costo(sim_vals=None):
+    n    = len(PERIODOS_S)
+    plan = [total_costo(PLAN_COSTOS, i) for i in range(n)]
+    fig  = go.Figure()
+    fig.add_hline(y=plan[0], line_dash="dot", line_color=TEXT_SEC, line_width=1)
+    fig.add_trace(go.Scatter(
+        x=PERIODOS_S, y=plan, name="Plan",
+        mode="lines+markers",
+        line=dict(color=C_BLUE, width=2), marker=dict(size=6),
+    ))
+    if sim_vals:
+        fig.add_trace(go.Scatter(
+            x=PERIODOS_S, y=sim_vals, name="Simulado",
+            mode="lines+markers",
+            line=dict(color=C_ORANGE, width=2, dash="dash"),
+            marker=dict(size=6, symbol="diamond"),
+        ))
+    ymin = min(min(plan), min(sim_vals) if sim_vals else min(plan)) * 0.97
+    ymax = max(max(plan), max(sim_vals) if sim_vals else max(plan)) * 1.03
+    fig.update_layout(
+        title=dict(text="COSTO TOTAL US$/T â EVOLUCIÃN POR AÃO",
+                   font=dict(color=TEXT_SEC, size=11)),
+        height=280, **LAYOUT_DARK,
+        yaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC),
+                   tickprefix="$", range=[ymin, ymax]),
+    )
+    return fig
+ 
+ 
+def fig_desglose_bar(periodo_idx, sim_costos=None):
+    data    = sim_costos or PLAN_COSTOS
+    nombres = list(data.keys())
+    vals    = [data[k][periodo_idx] if periodo_idx < len(data[k]) else 0 for k in nombres]
+    fig = go.Figure(go.Bar(
+        x=vals, y=nombres, orientation="h",
+        marker_color=COLORES_COMP,
+        text=[f"${v:.1f}" for v in vals],
+        textposition="outside", textfont=dict(size=9, color=TEXT_SEC),
+    ))
+    fig.update_layout(
+        title=dict(text="DESGLOSE DE COSTOS â AÃO SELECCIONADO",
+                   font=dict(color=TEXT_SEC, size=11)),
+        height=280, **LAYOUT_DARK,
+        xaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC), tickprefix="$"),
+        yaxis=dict(gridcolor="rgba(0,0,0,0)", tickfont=dict(color=TEXT_PRI),
+                   autorange="reversed"),
+    )
+    return fig
+ 
+ 
+def fig_waterfall(ano_label, ano_idx, sim_costos=None):
+    data   = sim_costos or PLAN_COSTOS
+    base   = total_costo(data, BASE_IDX)
+    deltas = {k: data[k][ano_idx] - data[k][BASE_IDX]
+              for k in data if ano_idx < len(data[k])}
+    total  = total_costo(data, ano_idx)
+    xs     = ["PPTO 2026"] + list(deltas.keys()) + [ano_label]
+    ys     = [base] + list(deltas.values()) + [total]
+    fig = go.Figure(go.Waterfall(
+        orientation="v",
+        measure=["absolute"] + ["relative"] * len(deltas) + ["total"],
+        x=xs, y=ys,
+        text=[f"${v:.1f}" for v in ys],
+        textposition="outside", textfont=dict(size=9, color=TEXT_SEC),
+        connector=dict(line=dict(color=BORDER, width=0.5)),
+        decreasing=dict(marker_color=C_GREEN),
+        increasing=dict(marker_color=C_RED),
+        totals=dict(marker_color=C_BLUE),
+    ))
+    fig.update_layout(
+        title=dict(text=f"Puente PPTO 2026 â {ano_label}",
+                   font=dict(color=TEXT_SEC, size=11)),
+        height=340, **LAYOUT_DARK,
+        xaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC), tickangle=-25),
+        yaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC), tickprefix="$"),
+    )
+    return fig
+ 
+ 
+def fig_comp_h(comp_base, comp_sim, titulo=""):
+    nombres = list(comp_base.keys())
+    vb = [comp_base[k] for k in nombres]
+    vs = [comp_sim.get(k, comp_base[k]) for k in nombres]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        name="Real+PROY / Plan", x=vb, y=nombres, orientation="h",
+        marker_color=C_BLUE,
+        text=[f"${v:.1f}" for v in vb], textposition="outside",
+        textfont=dict(size=9, color=TEXT_SEC),
+    ))
+    fig.add_trace(go.Bar(
+        name="Simulado", x=vs, y=nombres, orientation="h",
+        marker_color=[C_RED if s > b else C_GREEN for b, s in zip(vb, vs)],
+        text=[f"${v:.1f}" for v in vs], textposition="outside",
+        textfont=dict(size=9, color=TEXT_SEC),
+    ))
+    fig.update_layout(
+        title=dict(text=titulo, font=dict(color=TEXT_SEC, size=11)),
+        barmode="group", height=340,
+        **LAYOUT_DARK,
+        margin=dict(l=130, r=70, t=35, b=10),
+        xaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC), tickprefix="$"),
+        yaxis=dict(autorange="reversed", tickfont=dict(color=TEXT_PRI)),
+        legend=dict(orientation="h", y=1.08),
+    )
+    return fig
+ 
+ 
+def fig_tornado(pct):
+    rows = [(k, -vals[BASE_IDX]*pct, vals[BASE_IDX]*pct)
+            for k, vals in PLAN_COSTOS.items()]
+    rows.sort(key=lambda x: x[2])
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        name=f"-{pct*100:.0f}%", x=[r[1] for r in rows], y=[r[0] for r in rows],
+        orientation="h", marker_color=C_GREEN,
+        text=[f"{r[1]:+.1f}" for r in rows],
+        textposition="outside", textfont=dict(size=9, color=TEXT_SEC),
+    ))
+    fig.add_trace(go.Bar(
+        name=f"+{pct*100:.0f}%", x=[r[2] for r in rows], y=[r[0] for r in rows],
+        orientation="h", marker_color=C_RED,
+        text=[f"+{r[2]:.1f}" for r in rows],
+        textposition="outside", textfont=dict(size=9, color=TEXT_SEC),
+    ))
+    fig.update_layout(
+        title=dict(text=f"Sensibilidad Â±{pct*100:.0f}% â Î US$/T",
+                   font=dict(color=TEXT_SEC, size=11)),
+        barmode="overlay", height=380,
+        **LAYOUT_DARK,
+        margin=dict(l=150, r=70, t=40, b=20),
+        xaxis=dict(gridcolor="#21262d", tickfont=dict(color=TEXT_SEC),
+                   zeroline=True, zerolinecolor=TEXT_SEC),
+        yaxis=dict(tickfont=dict(color=TEXT_PRI)),
+    )
+    return fig
+ 
+ 
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# RENDER PRINCIPAL
+# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+def render(df=None):
+    st.html(DARK_CSS)
+ 
+    # TÃ­tulo
+    st.html(f"""
+    <div style="background:{BG_CARD};border-left:4px solid {C_BLUE};
+         padding:14px 20px;margin-bottom:16px;border-radius:0 8px 8px 0">
+      <span style="color:{TEXT_PRI};font-size:26px;font-weight:800;letter-spacing:1px">
+        PLAN INDUSTRIAL
+      </span>
+      <span style="color:{TEXT_SEC};font-size:12px;margin-left:16px">
+        Nitratos 2026â2032 Â· deltas vs PPTO 2026
+      </span>
+    </div>""")
+ 
+    tab_dash, tab_sim, tab_tablas, tab_sens = st.tabs([
+        "ð Dashboard",
+        "ð§ Simulador",
+        "ð Tablas completas",
+        "ð Sensibilidad",
+    ])
+ 
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    # TAB 1 ââ DASHBOARD
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    with tab_dash:
+        # Selector de perÃ­odo como botones
+        st.html(f'<div style="font-size:10px;color:{TEXT_SEC};font-weight:700;'
+                f'letter-spacing:.08em;margin-bottom:6px">PERIODO</div>')
+ 
+        if "dash_per" not in st.session_state:
+            st.session_state["dash_per"] = 0
+ 
+        btn_cols = st.columns(len(PERIODOS))
+        for i, (col, per) in enumerate(zip(btn_cols, PERIODOS)):
+            with col:
+                if st.button(per, key=f"dp_{i}",
+                             type="primary" if i == st.session_state["dash_per"] else "secondary",
+                             use_container_width=True):
+                    st.session_state["dash_per"] = i
+                    st.rerun()
+ 
+        per_idx    = st.session_state["dash_per"]
+        c_sel      = total_costo(PLAN_COSTOS, per_idx)
+        c_base     = total_costo(PLAN_COSTOS, BASE_IDX)
+        dc_t, dcl  = fmt_delta(c_sel - c_base)
+        npt3_v     = PLAN_PROD["NPT III"][per_idx]
+        npt4_v     = PLAN_PROD["NPT II-IV"][per_idx]
+        term_v     = PLAN_PROD["Terminados"][per_idx]
+        dn3, dcn3  = fmt_delta(npt3_v - PLAN_PROD["NPT III"][BASE_IDX], 0, invert=True)
+        dn4, dcn4  = fmt_delta(npt4_v - PLAN_PROD["NPT II-IV"][BASE_IDX], 0, invert=True)
+        dt_, dct_  = fmt_delta(term_v - PLAN_PROD["Terminados"][BASE_IDX], 0, invert=True)
+ 
+        st.html('<div style="height:8px"></div>')
+        kpi_cols = st.columns(5)
+        kpis = [
+            ("PERIODO",         PERIODOS[per_idx], "", "neu"),
+            ("COSTO USD/TON",   f"${c_sel:.0f}",   f"{dc_t} vs PPTO", dcl),
+            ("PROD NPT3",       f"{npt3_v:,} t",   f"{dn3} vs PPTO",  dcn3),
+            ("PROD NPT4",       f"{npt4_v:,} t",   f"{dn4} vs PPTO",  dcn4),
+            ("PROD TERMINADOS", f"{term_v:,} t",   f"{dt_} vs PPTO",  dct_),
+        ]
+        for col, (lbl, val, dtext, dcls) in zip(kpi_cols, kpis):
+            with col:
+                st.html(kpi_card(lbl, val, dtext, dcls))
+ 
+        st.html('<div style="height:10px"></div>')
+ 
+        g1, g2 = st.columns(2)
+        with g1:
+            st.plotly_chart(fig_linea_costo(), use_container_width=True)
+        with g2:
+            c2a, c2b = st.columns([3, 1])
+            with c2a:
+                st.html(f'<div style="font-size:11px;color:{TEXT_SEC};'
+                        f'font-weight:600;margin-bottom:4px">DESGLOSE DE COSTOS â AÃO SELECCIONADO</div>')
+            with c2b:
+                yr_pick = st.selectbox("AÃ±o:", PERIODOS, index=per_idx,
+                                       key="dash_yr_bar", label_visibility="collapsed")
+            st.plotly_chart(fig_desglose_bar(PERIODOS.index(yr_pick)),
+                            use_container_width=True)
+ 
+        # Tabla delta rÃ¡pida
+        st.html(f'<div style="font-size:11px;color:{TEXT_SEC};font-weight:600;'
+                f'margin:8px 0 4px">Indicadores US$/T â Î vs PPTO 2026</div>')
+        cols_mostrar = [p for p in PERIODOS if p != "2026 (PPTO)"]
+        st.html(tabla_plan_html(PLAN_COSTOS, "US$/T", decimals=1,
+                                periodos_mostrar=cols_mostrar))
+ 
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    # TAB 2 ââ SIMULADOR
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    with tab_sim:
+        st.html(f"""
+        <div style="background:{BG_CARD};border-left:4px solid {C_ORANGE};
+             padding:10px 16px;margin-bottom:12px;border-radius:0 8px 8px 0">
+          <span style="font-size:15px;font-weight:700;color:{TEXT_PRI}">
+            SIMULADOR DE SENSIBILIDAD - PLAN INDUSTRIAL
+          </span>
+          <span style="font-size:11px;color:{TEXT_SEC};margin-left:10px">
+            Edita cualquier valor Â· los paneles recalculan en tiempo real Â· Î vs PPTO 2026
+          </span>
+        </div>""")
+ 
+        hc1, hc2 = st.columns([2, 2])
+        with hc1:
+            ano_sim = st.selectbox("AÃ±o a simular",
+                                   [p for p in PERIODOS if p != "2026 (PPTO)"],
+                                   key="sim_ano_sel")
+        with hc2:
+            comp_ref = st.radio("Î comparar contra",
+                                ["PPTO 2026", "AÃ±o anterior"],
+                                horizontal=True, key="sim_ref")
+ 
+        ano_idx      = PERIODOS.index(ano_sim)
+        comp_ref_idx = BASE_IDX if comp_ref == "PPTO 2026" else max(0, ano_idx - 1)
+ 
+        # Session state â copias editables
+        sk = f"simC_{ano_sim}"
+        sp = f"simP_{ano_sim}"
+        if sk not in st.session_state:
+            st.session_state[sk] = {k: list(v) for k, v in PLAN_COSTOS.items()}
+        if sp not in st.session_state:
+            st.session_state[sp] = {k: list(v) for k, v in PLAN_PROD.items()}
+        simC = st.session_state[sk]
+        simP = st.session_state[sp]
+ 
+        # ââ Layout: tabla left | cuadrÃ­cula paneles right ââââââââââââââââââââ
+        col_tabla, col_paneles = st.columns([3, 4], gap="medium")
+ 
+        with col_tabla:
+            st.html(f'<div style="font-size:11px;color:{TEXT_SEC};font-weight:700;'
+                    f'margin-bottom:4px">FC NaNO3</div>')
+            st.html(tabla_plan_html(PLAN_FC_NANO3, "NaNO3/T", decimals=2,
+                                    periodos_mostrar=PERIODOS[2:]))
+            st.html('<div style="height:6px"></div>')
+            st.html(f'<div style="font-size:11px;color:{TEXT_SEC};font-weight:700;'
+                    f'margin-bottom:4px">FC KCl</div>')
+            st.html(tabla_plan_html(PLAN_FC_KCL, "KCl/KNO3", decimals=2,
+                                    periodos_mostrar=PERIODOS[2:]))
+            st.html('<div style="height:6px"></div>')
+            st.html(f'<div style="font-size:11px;color:{TEXT_SEC};font-weight:700;'
+                    f'margin-bottom:4px">Cosechas productivas (ton)</div>')
+            st.html(tabla_plan_html(PLAN_COSECHAS, "ton", decimals=0,
+                                    invert_delta=True, periodos_mostrar=PERIODOS[2:7]))
+            st.html('<div style="height:6px"></div>')
+            st.html(f'<div style="font-size:11px;color:{TEXT_SEC};font-weight:700;'
+                    f'margin-bottom:4px">ProducciÃ³n terminados (ton)</div>')
+            st.html(tabla_plan_html(PLAN_PROD_TERM, "ton", decimals=0,
+                                    invert_delta=True, periodos_mostrar=PERIODOS[2:8]))
+ 
+        with col_paneles:
+            # 6 mini paneles 2Ã3 con costos de cada aÃ±o
+            anos_paneles = ["2027","2028","2029","2030","2031","2032"]
+            r1 = st.columns(3)
+            r2 = st.columns(3)
+            panel_grid = [*r1, *r2]
+            for pc, ap in zip(panel_grid, anos_paneles):
+                with pc:
+                    aidx = PERIODOS.index(ap) if ap in PERIODOS else -1
+                    if aidx < 0:
+                        continue
+                    # comp_b = plan base del aÃ±o; comp_s = simulado si es el aÃ±o editado
+                    cb = {k: PLAN_COSTOS[k][aidx] for k in PLAN_COSTOS}
+                    cs = ({k: simC[k][aidx] for k in simC}
+                          if ap == ano_sim else cb)
+                    st.html(mini_panel_detalle(ap, cb, cs))
+ 
+            st.html('<div style="height:8px"></div>')
+            # ââ Inputs de simulaciÃ³n ââââââââââââââââââââââââââââââââââââââââ
+            st.html(f'<div style="font-size:12px;font-weight:700;color:{TEXT_PRI};'
+                    f'margin-bottom:8px">Editar costos â {ano_sim} (US$/T)</div>')
+ 
+            for nombre in PLAN_COSTOS:
+                ref_v  = PLAN_COSTOS[nombre][comp_ref_idx]
+                plan_v = PLAN_COSTOS[nombre][ano_idx]
+                cur_v  = simC[nombre][ano_idx]
+ 
+                ic1, ic2, ic3 = st.columns([3, 1, 1])
+                with ic1:
+                    nuevo = st.number_input(
+                        nombre, value=float(f"{cur_v:.2f}"),
+                        step=0.5, format="%.2f",
+                        key=f"si_c_{nombre}_{ano_sim}",
+                    )
+                    simC[nombre][ano_idx] = nuevo
+                with ic2:
+                    dv, dc = fmt_delta(nuevo - ref_v)
+                    col_d = C_GREEN if dc == "pos" else (C_RED if dc == "neg" else TEXT_SEC)
+                    st.html(f'<p style="margin-top:28px;color:{col_d};font-size:12px;'
+                            f'font-weight:700">{dv}</p>')
+                with ic3:
+                    st.html(f'<p style="margin-top:28px;color:{TEXT_SEC};font-size:10px">'
+                            f'Plan:<br>{plan_v:.1f}</p>')
+ 
+            st.html(f'<div style="font-size:12px;font-weight:700;color:{TEXT_PRI};'
+                    f'margin:10px 0 6px">Editar producciÃ³n â {ano_sim} (ton)</div>')
+            for grp in ["NPT III","NPT II-IV","Terminados"]:
+                ref_pv = PLAN_PROD[grp][comp_ref_idx]
+                cur_pv = simP[grp][ano_idx]
+                pc1, pc2 = st.columns([3, 1])
+                with pc1:
+                    np_ = st.number_input(grp, value=float(f"{cur_pv:.0f}"),
+                                          step=1000.0, format="%.0f",
+                                          key=f"si_p_{grp}_{ano_sim}")
+                    simP[grp][ano_idx] = np_
+                with pc2:
+                    dv, dc = fmt_delta(np_ - ref_pv, 0, invert=True)
+                    col_d = C_GREEN if dc == "pos" else (C_RED if dc == "neg" else TEXT_SEC)
+                    st.html(f'<p style="margin-top:28px;color:{col_d};font-size:12px;'
+                            f'font-weight:700">{dv}</p>')
+ 
+            if st.button("ð Restablecer", key="reset_sim", use_container_width=True):
+                for k_del in [sk, sp]:
+                    if k_del in st.session_state:
+                        del st.session_state[k_del]
+                st.rerun()
+ 
+        # ââ GrÃ¡fico lÃ­nea temporal + comparativo âââââââââââââââââââââââââââââ
+        sim_line = [total_costo(simC, i) for i in range(len(PERIODOS))]
+        st.plotly_chart(fig_linea_costo(sim_vals=sim_line), use_container_width=True)
+ 
+        wf1, wf2 = st.columns(2)
+        with wf1:
+            st.plotly_chart(fig_waterfall(ano_sim, ano_idx, simC),
+                            use_container_width=True)
+        with wf2:
+            cb = {k: PLAN_COSTOS[k][comp_ref_idx] for k in PLAN_COSTOS}
+            cs = {k: simC[k][ano_idx] for k in simC}
+            st.plotly_chart(fig_comp_h(cb, cs, f"Plan vs Simulado â {ano_sim}"),
+                            use_container_width=True)
+ 
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    # TAB 3 ââ TABLAS COMPLETAS
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    with tab_tablas:
+        secciones = [
+            ("Indicadores de costo (US$/T)", PLAN_COSTOS, "US$/T", 1, False),
+            ("Producciones (ton)", PLAN_PROD, "ton", 0, True),
+            ("FC NaNO3", PLAN_FC_NANO3, "NaNO3/T", 3, False),
+            ("FC KCl", PLAN_FC_KCL, "KCl/KNO3", 3, False),
+            ("Gasto total estimado (KUS)", PLAN_GASTOS, "KUS", 0, False),
+            ("Cosechas productivas (ton)", PLAN_COSECHAS, "ton", 0, True),
+            ("ProducciÃ³n terminados (ton)", PLAN_PROD_TERM, "ton", 0, True),
+        ]
+        cols_all = [p for p in PERIODOS if p != "2026 (PPTO)"]
+        for titulo, data, unidad, decs, inv in secciones:
+            with st.expander(f"â¶  {titulo}", expanded=True):
+                st.html(tabla_plan_html(data, unidad, decimals=decs,
+                                        invert_delta=inv,
+                                        periodos_mostrar=cols_all))
+ 
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    # TAB 4 ââ SENSIBILIDAD
+    # âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    with tab_sens:
+        pc, _ = st.columns([2, 6])
+        with pc:
+            pct = st.slider("VariaciÃ³n Â±%", 1, 30, 10, key="sens_pct_pi") / 100
+ 
+        st.plotly_chart(fig_tornado(pct), use_container_width=True)
+ 
+        # Heatmap delta
+        st.html(f'<div style="font-size:13px;font-weight:600;color:{TEXT_PRI};'
+                f'margin:12px 0 6px">Î US$/T por componente vs PPTO 2026</div>')
+        anos_hm = PERIODOS[1:]
+        matrix  = [
+            [PLAN_COSTOS[k][i] - PLAN_COSTOS[k][BASE_IDX]
+             for i in range(1, len(PERIODOS))]
+            for k in PLAN_COSTOS
+        ]
+        fig_hm = go.Figure(go.Heatmap(
+            z=matrix, x=anos_hm, y=list(PLAN_COSTOS.keys()),
+            colorscale=[[0, C_GREEN],[0.5, BG_CARD2],[1, C_RED]],
+            zmid=0,
+            text=[[f"{v:+.1f}" for v in row] for row in matrix],
+            texttemplate="%{text}", textfont=dict(size=10, color=TEXT_PRI),
+            colorbar=dict(title="Î US$/T", tickfont=dict(color=TEXT_SEC)),
+        ))
+        fig_hm.update_layout(
+            height=360, **LAYOUT_DARK,
+            margin=dict(l=160, r=40, t=30, b=40),
+            xaxis=dict(side="top", tickfont=dict(color=TEXT_SEC)),
+            yaxis=dict(tickfont=dict(color=TEXT_PRI)),
+        )
+        st.plotly_chart(fig_hm, use_container_width=True)
+ 
+        # Waterfall interactivo
+        st.html(f'<div style="font-size:13px;font-weight:600;color:{TEXT_PRI};'
+                f'margin:12px 0 6px">Puente de costo por aÃ±o seleccionado</div>')
+        wf_ano = st.selectbox("AÃ±o destino (vs PPTO 2026)",
+                              PERIODOS[1:], key="wf_ano_sens")
+        wf_idx = PERIODOS.index(wf_ano)
+        st.plotly_chart(fig_waterfall(wf_ano, wf_idx), use_container_width=True)
+ 
+ 
+# ââ Standalone ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+if __name__ == "__main__":
+    st.set_page_config(
+        page_title="Plan Industrial â Nitratos",
+        layout="wide",
+        initial_sidebar_state="collapsed",
+    )
+    render()
+ 
