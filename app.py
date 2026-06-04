@@ -2256,7 +2256,7 @@ elif pagina == "Sensibilidad PLAN INDUSTRIAL":
         st.plotly_chart(fig, use_container_width=True) 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GASTOS POR ÁREA
+# GASTOS POR ÁREA — con desglose interno
 # ══════════════════════════════════════════════════════════════════════════════
 elif pagina == "Gastos por Área":
     st.title("Gastos por Área — KUS")
@@ -2270,134 +2270,299 @@ elif pagina == "Gastos por Área":
     mes = botones_mes("gastos")
     st.divider()
  
-    AREAS_GASTO = [
-        ('Pozas NV',  'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas NV'),
-        ('Pozas PB',  'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas PB'),
-        ('Pozas CS',  'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas CS'),
-        ('NPT3',      'GASTO', 'CRISTALIZACION',                 'Gasto NPT III + Korda'),
-        ('NPT4',      'GASTO', 'CRISTALIZACION',                 'Gasto NPT IV'),
-        ('Prilado',   'GASTO', 'TERMINADOS',                     'Gasto Planta Prilado CS'),
-        ('Secado',    'GASTO', 'TERMINADOS',                     'Gasto Planta Secado KNO3'),
-        ('Puerto',    'Embarque Granel Trimestral', 'EMBARQUE',  'Embarque Granel + Demurrage'),
-    ]
+    # ── Estructura de áreas con su desglose ──────────────────────────────────
+    # (nombre_area, area_total, subarea_total, concepto_total, medida_total,
+    #  [(nombre_item, area_det, subarea_det, concepto_det, medida_det), ...])
  
-    # ── KPIs ─────────────────────────────────────────────────────────────────
-    total_ppto_m = sum(gv(df, a, sa, c, mes, tipo, 'PPTO') for _, a, sa, c in AREAS_GASTO)
-    total_rp_m   = sum(rp_val(df, a, sa, c, mes, tipo)      for _, a, sa, c in AREAS_GASTO)
-    delta_total  = total_rp_m - total_ppto_m
-    k1, k2 = st.columns(2)
-    k1.metric(f"Total PPTO — {MESES[mes]} ({modo})", f"${total_ppto_m:,.0f} KUS")
-    k2.metric(f"Total R+P — {MESES[mes]} ({modo})",  f"${total_rp_m:,.0f} KUS",
-              delta=f"{delta_total:+,.0f} KUS vs PPTO", delta_color="inverse")
+    AREAS_DETALLE = {
+        'Pozas NV': {
+            'total': ('GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas NV', 'KUS'),
+            'items': [
+                ('Remuneración',              'GASTO POZAS', 'POZAS NV', 'REMUNERACION',                  'KUS$'),
+                ('Energía',                   'GASTO POZAS', 'POZAS NV', 'ENERGIA',                       'KUS$'),
+                ('Arrdo y Servicios',         'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios',             'KUS$'),
+                ('Otros',                     'GASTO POZAS', 'POZAS NV', 'Otros',                         'KUS$'),
+                ('Mantención',                'GASTO POZAS', 'POZAS NV', 'Manteción',                     'KUS$'),
+                ('Mant. Directos',            'GASTO POZAS', 'POZAS NV', 'Mant. Pozas-Directos',          'KUS$'),
+                ('Mant. Dist Mantenedores',   'GASTO POZAS', 'POZAS NV', 'Mant. Pozas-Dist Mantenedores', 'KUS$'),
+                ('Arrdo y Serv. Preco',       'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Preco',       'KUS$'),
+                ('Otros Preco',               'GASTO POZAS', 'POZAS NV', 'Otros Preco',                   'KUS$'),
+                ('Arrdo y Serv. Produ',       'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Produ',       'KUS$'),
+                ('Otros Produ',               'GASTO POZAS', 'POZAS NV', 'Otros Produ',                   'KUS$'),
+            ]
+        },
+        'Pozas PB': {
+            'total': ('GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas PB', 'KUS'),
+            'items': [
+                ('Remuneración',              'GASTO POZAS', 'POZAS PB', 'REMUNERACION',                  'KUS$'),
+                ('Materiales y repuestos',    'GASTO POZAS', 'POZAS PB', 'Materiales y repuestos',        'KUS$'),
+                ('Combustibles',              'GASTO POZAS', 'POZAS PB', 'Combustibles',                  'KUS$'),
+                ('Arrdo y Servicios',         'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios',             'KUS$'),
+                ('Mantención',                'GASTO POZAS', 'POZAS PB', 'Manteción',                     'KUS$'),
+                ('Mant. Directos',            'GASTO POZAS', 'POZAS PB', 'Mant. Pozas-Directos',          'KUS$'),
+                ('Mant. Dist Mantenedores',   'GASTO POZAS', 'POZAS PB', 'Mant. Pozas-Dist Mantenedores', 'KUS$'),
+                ('Otros',                     'GASTO POZAS', 'POZAS PB', 'Otros',                         'KUS$'),
+                ('Dist. Generación EE',       'GASTO POZAS', 'POZAS PB', 'Dist. Generación EE',           'KUS$'),
+                ('Arrdo y Serv. Preco',       'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios Preco',       'KUS$'),
+                ('Otros Preco',               'GASTO POZAS', 'POZAS PB', 'Otros Preco',                   'KUS$'),
+                ('Arrdo y Serv. Produ',       'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios Produ',       'KUS$'),
+                ('Otros Produ',               'GASTO POZAS', 'POZAS PB', 'Otros Produ',                   'KUS$'),
+            ]
+        },
+        'Pozas CS': {
+            'total': ('GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas CS', 'KUS'),
+            'items': [
+                ('Remuneración',              'GASTO POZAS', 'POZAS CS', 'REMUNERACION',                  'KUS$'),
+                ('Materiales y repuestos',    'GASTO POZAS', 'POZAS CS', 'Materiales y repuestos',        'KUS$'),
+                ('Energía y Combustibles',    'GASTO POZAS', 'POZAS CS', 'Energia y Combustibles',        'KUS$'),
+                ('Arriendo y Servicios',      'GASTO POZAS', 'POZAS CS', 'Arriendo y Servicios',          'KUS$'),
+                ('Agua',                      'GASTO POZAS', 'POZAS CS', 'Agua',                          'KUS$'),
+                ('Mantención',                'GASTO POZAS', 'POZAS CS', 'Mantención',                    'KUS$'),
+                ('Mant. Directos',            'GASTO POZAS', 'POZAS CS', 'Mant. Pozas-Directos',          'KUS$'),
+                ('Mant. Dist Mantenedores',   'GASTO POZAS', 'POZAS CS', 'Mant. Pozas-Dist Mantenedores', 'KUS$'),
+                ('Otros',                     'GASTO POZAS', 'POZAS CS', 'Otros',                         'KUS$'),
+                ('Arrdo y Serv. Preco',       'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Preco',       'KUS$'),
+                ('Otros Preco',               'GASTO POZAS', 'POZAS CS', 'Otros Preco',                   'KUS$'),
+                ('Arrdo y Serv. Produ',       'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Produ',       'KUS$'),
+                ('Otros Produ',               'GASTO POZAS', 'POZAS CS', 'Otros Produ',                   'KUS$'),
+            ]
+        },
+        'NPT4': {
+            'total': ('GASTO', 'CRISTALIZACION', 'Gasto NPT IV', 'KUS'),
+            'items': [
+                ('Remuneraciones',            'CRISTALIZACIÓN', 'NPT4', 'REMUNERACIONES',              'KUS$'),
+                ('Energía',                   'CRISTALIZACIÓN', 'NPT4', 'ENERGÍA',                     'KUS$'),
+                ('Petroleo/Gas',              'CRISTALIZACIÓN', 'NPT4', 'PETROLEO/GAS',                'KUS$'),
+                ('Maq. Pesada',               'CRISTALIZACIÓN', 'NPT4', 'MAQ. PESADA',                 'KUS$'),
+                ('Agua',                      'CRISTALIZACIÓN', 'NPT4', 'AGUA',                        'KUS$'),
+                ('Ceniza de Soda',            'CRISTALIZACIÓN', 'NPT4', 'Ceniza de Soda',              'KUS$'),
+                ('Otros',                     'CRISTALIZACIÓN', 'NPT4', 'Otros',                       'KUS$'),
+                ('Mantención',                'CRISTALIZACIÓN', 'NPT4', 'Mantención',                  'KUS$'),
+                ('Mant. Directos',            'CRISTALIZACIÓN', 'NPT4', 'Mant npt-Directos',           'KUS$'),
+                ('Mant. Dist Mantenedores',   'CRISTALIZACIÓN', 'NPT4', 'Mant.npt-Dist Mantenedores',  'KUS$'),
+                ('De Korda',                  'CRISTALIZACIÓN', 'NPT4', 'De Korda',                    'KUS$'),
+            ]
+        },
+        'NPT3': {
+            'total': ('GASTO', 'CRISTALIZACION', 'Gasto NPT III + Korda', 'KUS'),
+            'items': [
+                ('Remuneración',              'CRISTALIZACIÓN', 'NPT3', 'REMUNERACION',                       'KUS$'),
+                ('Energía',                   'CRISTALIZACIÓN', 'NPT3', 'Energía',                            'KUS$'),
+                ('Petroleo/Gas',              'CRISTALIZACIÓN', 'NPT3', 'Petroleo/Gas',                       'KUS$'),
+                ('Maq. Pesada',               'CRISTALIZACIÓN', 'NPT3', 'MAQ. PESADA',                        'KUS$'),
+                ('Aguas',                     'CRISTALIZACIÓN', 'NPT3', 'AGUAS',                              'KUS$'),
+                ('Materiales y Repuestos',    'CRISTALIZACIÓN', 'NPT3', 'Materiales y Repuestos',             'KUS$'),
+                ('Arriendo y Servicios',      'CRISTALIZACIÓN', 'NPT3', 'Arriendo y Servicios',               'KUS$'),
+                ('Ceniza de Soda',            'CRISTALIZACIÓN', 'NPT3', 'Ceniza de Soda',                     'KUS$'),
+                ('Otros',                     'CRISTALIZACIÓN', 'NPT3', 'Otros',                              'KUS$'),
+                ('Mantención',                'CRISTALIZACIÓN', 'NPT3', 'Mantención',                         'KUS$'),
+                ('Mant. Directos',            'CRISTALIZACIÓN', 'NPT3', 'Mant. NPT III-Directos',             'KUS$'),
+                ('Mant. Dist Mantenedores',   'CRISTALIZACIÓN', 'NPT3', 'Mant. NPT III-Dist Mantenedores',    'KUS$'),
+                ('De Korda',                  'CRISTALIZACIÓN', 'NPT3', 'De Korda',                           'KUS$'),
+            ]
+        },
+        'Prilado': {
+            'total': ('GASTO', 'TERMINADOS', 'Gasto Planta Prilado CS', 'KUS'),
+            'items': [
+                ('Remuneraciones',            'TERMINADOS', 'PRILADO', 'REMUNERACIONES',                      'KUS$'),
+                ('Energía',                   'TERMINADOS', 'PRILADO', 'Energía',                             'KUS$'),
+                ('Petroleo/Gas',              'TERMINADOS', 'PRILADO', 'Petroleo/Gas',                        'KUS$'),
+                ('Maq. Pesadas',              'TERMINADOS', 'PRILADO', 'Maq. Pesadas',                        'KUS$'),
+                ('Aditivos/Modificadores',    'TERMINADOS', 'PRILADO', 'Aditivos / Modificadores',            'KUS$'),
+                ('Otros',                     'TERMINADOS', 'PRILADO', 'Otros',                               'KUS$'),
+                ('Mantención',                'TERMINADOS', 'PRILADO', 'Mantención',                          'KUS$'),
+                ('Mant. Directos',            'TERMINADOS', 'PRILADO', 'Mant. Prilado-Directos',              'KUS$'),
+                ('Mant. Dist Mantenedores',   'TERMINADOS', 'PRILADO', 'Mant. Prilado-Dist Mantenedores',     'KUS$'),
+            ]
+        },
+        'Secado': {
+            'total': ('GASTO', 'TERMINADOS', 'Gasto Planta Secado KNO3', 'KUS'),
+            'items': [
+                ('Remuneración',              'TERMINADOS', 'SECADO', 'REMUNERACION',                         'KUS$'),
+                ('Energía',                   'TERMINADOS', 'SECADO', 'Energía',                              'KUS$'),
+                ('Petroleo/Gas',              'TERMINADOS', 'SECADO', 'Petroleo/Gas',                         'KUS$'),
+                ('Aditivos',                  'TERMINADOS', 'SECADO', 'Aditivos',                             'KUS$'),
+                ('Maq. Pesadas',              'TERMINADOS', 'SECADO', 'Maq. Pesadas',                         'KUS$'),
+                ('Otros',                     'TERMINADOS', 'SECADO', 'Otros',                                'KUS$'),
+                ('Mantención',                'TERMINADOS', 'SECADO', 'Mantención',                           'KUS$'),
+                ('Mant. Directos',            'TERMINADOS', 'SECADO', 'Mant. Secado-Directos',                'KUS$'),
+                ('Mant. Dist Mantenedores',   'TERMINADOS', 'SECADO', 'Mant. Secado-Dist Mantenedores',       'KUS$'),
+            ]
+        },
+        'Puerto': {
+            'total': ('Embarque Granel Trimestral', 'EMBARQUE', 'Embarque Granel + Demurrage', 'KUS'),
+            'items': [
+                ('Embarque Granel+Demurrage', 'Embarque Granel Trimestral', 'EMBARQUE',       'Embarque Granel + Demurrage', 'KUS'),
+                ('Almacenaje',                'Almacenaje Trimestral',       'ALMACENAJE',     'Almacenaje Trimestral',       'KUS'),
+                ('Distributivos',             'Distributivos Trimestral',    'DISTRIBUTIVOS',  'Distributivos Trimestral',    'KUS'),
+                ('Depreciación Puerto',       'DEPRECIACION',                'PUERTO',         'Depreciacion Puerto',         'KUS'),
+            ]
+        },
+        'Transporte Sales': {
+            'total': ('TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', 'Total Transporte de Sales NV + PB', 'KUS'),
+            'items': [
+                ('Transporte NV',             'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Transporte Sales NV',      'KUS'),
+                ('Op Canchas + Caminos NV',   'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Op Canchas + Caminos NV',  'KUS'),
+                ('Transporte PB',             'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Transporte Sales PB',      'KUS'),
+            ]
+        },
+    }
+ 
+    # ── helpers locales ───────────────────────────────────────────────────────
+    def get_val(area, subarea, concepto, mes_idx, medida=None, tipo2='PPTO'):
+        return gv(df, area, subarea, concepto, mes_idx, tipo, tipo2, medida)
+ 
+    def get_rp(area, subarea, concepto, mes_idx, medida=None):
+        return rp_val(df, area, subarea, concepto, mes_idx, tipo, medida)
+ 
+    def get_serie(area, subarea, concepto, medida=None, tipo2='PPTO'):
+        return [get_val(area, subarea, concepto, i, medida, tipo2) for i in range(12)]
+ 
+    def get_rp_serie(area, subarea, concepto, medida=None):
+        return [get_rp(area, subarea, concepto, i, medida) for i in range(12)]
+ 
+    # ── Selector de área ─────────────────────────────────────────────────────
+    area_names = list(AREAS_DETALLE.keys())
+    area_sel = st.selectbox("Seleccionar Área:", area_names, key="sel_area_gastos")
+    info = AREAS_DETALLE[area_sel]
+    a_tot, sa_tot, c_tot, med_tot = info['total']
+    items = info['items']
+ 
     st.divider()
  
-    # ── Gráfico barras agrupadas mes seleccionado ─────────────────────────────
-    st.subheader(f"PPTO vs R+P por área — {MESES[mes]}")
-    nombres_g = [n for n, *_ in AREAS_GASTO]
-    vals_p    = [gv(df, a, sa, c, mes, tipo, 'PPTO') for _, a, sa, c in AREAS_GASTO]
-    vals_r    = [rp_val(df, a, sa, c, mes, tipo)      for _, a, sa, c in AREAS_GASTO]
-    deltas_g  = [r - p for r, p in zip(vals_r, vals_p)]
+    # ── KPIs del área seleccionada ────────────────────────────────────────────
+    val_p = get_val(a_tot, sa_tot, c_tot, mes, med_tot if med_tot != 'KUS' else None)
+    val_r = get_rp(a_tot, sa_tot, c_tot, mes, med_tot if med_tot != 'KUS' else None)
+    delta = val_r - val_p
+    k1, k2 = st.columns(2)
+    k1.metric(f"PPTO {area_sel} — {MESES[mes]} ({modo})", f"${val_p:,.0f} KUS")
+    k2.metric(f"R+P {area_sel} — {MESES[mes]} ({modo})",  f"${val_r:,.0f} KUS",
+              delta=f"{delta:+,.0f} KUS vs PPTO", delta_color="inverse")
+ 
+    st.divider()
+ 
+    # ── Gráfico desglose mes seleccionado ─────────────────────────────────────
+    st.subheader(f"Desglose {area_sel} — {MESES[mes]} ({modo})")
+ 
+    item_names = [it[0] for it in items]
+    item_vals_p, item_vals_r = [], []
+    for it in items:
+        nom, a, sa, c = it[0], it[1], it[2], it[3]
+        med = it[4] if len(it) > 4 else None
+        med_arg = med if med not in ('KUS', 'KUS$', None) else None
+        item_vals_p.append(get_val(a, sa, c, mes, med_arg))
+        item_vals_r.append(get_rp(a, sa, c, mes, med_arg))
+ 
+    deltas_i = [r - p for r, p in zip(item_vals_r, item_vals_p)]
  
     fig1 = go.Figure()
-    fig1.add_trace(go.Bar(name="PPTO", x=nombres_g, y=vals_p, marker_color='#152578',
-                          text=[f"${v:,.0f}" for v in vals_p], textposition="outside", textfont_size=10))
-    fig1.add_trace(go.Bar(name="R+P",  x=nombres_g, y=vals_r,
-                          marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(vals_r, vals_p)],
-                          text=[f"${v:,.0f}" for v in vals_r], textposition="outside", textfont_size=10))
+    fig1.add_trace(go.Bar(name="PPTO", x=item_names, y=item_vals_p, marker_color='#152578',
+                          text=[f"${v:,.0f}" for v in item_vals_p], textposition="outside", textfont_size=9))
+    fig1.add_trace(go.Bar(name="R+P",  x=item_names, y=item_vals_r,
+                          marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(item_vals_r, item_vals_p)],
+                          text=[f"${v:,.0f}" for v in item_vals_r], textposition="outside", textfont_size=9))
  
-    annotations1 = []
-    for i, (nombre, delta) in enumerate(zip(nombres_g, deltas_g)):
-        if abs(delta) > 0:
-            color  = "#D83030" if delta > 0 else "#80BC00"
-            symbol = "▲" if delta > 0 else "▼"
-            annotations1.append(dict(
-                x=nombre, y=max(vals_p[i], vals_r[i]) * 1.18,
-                text=f"{symbol} {delta:+,.0f}", showarrow=False,
-                font=dict(size=11, color=color, family="Arial Black"), xanchor="center"
-            ))
-    fig1.update_layout(barmode="group", height=420, xaxis_tickangle=-15,
+    ann1 = []
+    for i, (n, d) in enumerate(zip(item_names, deltas_i)):
+        if abs(d) > 0:
+            color  = "#D83030" if d > 0 else "#80BC00"
+            symbol = "▲" if d > 0 else "▼"
+            ann1.append(dict(x=n, y=max(item_vals_p[i], item_vals_r[i]) * 1.18,
+                             text=f"{symbol} {d:+,.0f}", showarrow=False,
+                             font=dict(size=10, color=color, family="Arial Black"), xanchor="center"))
+    fig1.update_layout(barmode="group", height=420, xaxis_tickangle=-20,
                        legend=dict(orientation="h", y=1.08),
                        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                       margin=dict(t=60, b=60), annotations=annotations1)
+                       margin=dict(t=60, b=80), annotations=ann1)
     fig1.update_yaxes(gridcolor="#333333")
     st.plotly_chart(fig1, use_container_width=True)
  
     st.divider()
  
-    # ── Evolución anual por área ──────────────────────────────────────────────
-    st.subheader("Evolución anual por área")
-    area_idx = st.selectbox("Área:", range(len(AREAS_GASTO)),
-                             format_func=lambda i: AREAS_GASTO[i][0], key="sel_area_gastos")
-    nombre_sel, area_sel, sa_sel, c_sel = AREAS_GASTO[area_idx]
- 
-    s_p = gs(df, area_sel, sa_sel, c_sel, tipo, 'PPTO')
-    s_r = rp_serie(df, area_sel, sa_sel, c_sel, tipo)
-    deltas_a = [r - p for r, p in zip(s_r, s_p)]
+    # ── Evolución anual del total del área ────────────────────────────────────
+    st.subheader(f"Evolución anual — {area_sel} ({modo})")
+    med_arg_tot = med_tot if med_tot not in ('KUS', 'KUS$', None) else None
+    s_p_tot = get_serie(a_tot, sa_tot, c_tot, med_arg_tot)
+    s_r_tot = get_rp_serie(a_tot, sa_tot, c_tot, med_arg_tot)
+    deltas_a = [r - p for r, p in zip(s_r_tot, s_p_tot)]
  
     fig2 = go.Figure()
-    fig2.add_trace(go.Bar(name="PPTO", x=MESES, y=s_p, marker_color='#152578',
-                          text=[f"${v:,.0f}" for v in s_p], textposition="outside", textfont_size=10))
-    fig2.add_trace(go.Bar(name="R+P",  x=MESES, y=s_r,
-                          marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(s_r, s_p)],
-                          text=[f"${v:,.0f}" for v in s_r], textposition="outside", textfont_size=10))
+    fig2.add_trace(go.Bar(name="PPTO", x=MESES, y=s_p_tot, marker_color='#152578',
+                          text=[f"${v:,.0f}" for v in s_p_tot], textposition="outside", textfont_size=10))
+    fig2.add_trace(go.Bar(name="R+P",  x=MESES, y=s_r_tot,
+                          marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(s_r_tot, s_p_tot)],
+                          text=[f"${v:,.0f}" for v in s_r_tot], textposition="outside", textfont_size=10))
  
-    annotations2 = []
-    for i, (m, delta) in enumerate(zip(MESES, deltas_a)):
-        if abs(delta) > 0:
-            color  = "#D83030" if delta > 0 else "#80BC00"
-            symbol = "▲" if delta > 0 else "▼"
-            annotations2.append(dict(
-                x=m, y=max(s_p[i], s_r[i]) * 1.18,
-                text=f"{symbol} {delta:+,.0f}", showarrow=False,
-                font=dict(size=11, color=color, family="Arial Black"), xanchor="center"
-            ))
+    ann2 = []
+    for i, (m, d) in enumerate(zip(MESES, deltas_a)):
+        if abs(d) > 0:
+            color  = "#D83030" if d > 0 else "#80BC00"
+            symbol = "▲" if d > 0 else "▼"
+            ann2.append(dict(x=m, y=max(s_p_tot[i], s_r_tot[i]) * 1.18,
+                             text=f"{symbol} {d:+,.0f}", showarrow=False,
+                             font=dict(size=11, color=color, family="Arial Black"), xanchor="center"))
     fig2.update_layout(barmode="group", height=400,
-                       title=f"{nombre_sel} — {modo} (KUS)",
                        legend=dict(orientation="h", y=1.08),
                        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                       margin=dict(t=60, b=20), annotations=annotations2)
+                       margin=dict(t=60, b=20), annotations=ann2)
     fig2.update_yaxes(gridcolor="#333333")
     st.plotly_chart(fig2, use_container_width=True)
  
     st.divider()
  
-    # ── Tabla comparativa anual ───────────────────────────────────────────────
-    st.subheader("Comparativa anual — todos los gastos (KUS)")
-    rows_g = []
-    for nombre, area, sa, c in AREAS_GASTO:
-        sp = gs(df, area, sa, c, tipo, 'PPTO')
-        sr = rp_serie(df, area, sa, c, tipo)
-        row_p = {"Área": nombre, "Tipo": "PPTO"}
-        row_r = {"Área": nombre, "Tipo": "R+P"}
+    # ── Tabla desglose anual ──────────────────────────────────────────────────
+    st.subheader(f"Tabla desglose anual — {area_sel} (KUS)")
+    rows_d = []
+    for it in items:
+        nom, a, sa, c = it[0], it[1], it[2], it[3]
+        med = it[4] if len(it) > 4 else None
+        med_arg = med if med not in ('KUS', 'KUS$', None) else None
+        sp = get_serie(a, sa, c, med_arg)
+        sr = get_rp_serie(a, sa, c, med_arg)
+        row_p = {"Concepto": nom, "Tipo": "PPTO"}
+        row_r = {"Concepto": nom, "Tipo": "R+P"}
         for i, m in enumerate(MESES):
             row_p[m] = round(sp[i], 0)
             row_r[m] = round(sr[i], 0)
-        row_p["Acum Dic"] = round(gv(df, area, sa, c, 11, 'Acumulado', 'PPTO'), 0)
-        row_r["Acum Dic"] = round(rp_val(df, area, sa, c, 11, 'Acumulado'), 0)
-        rows_g.append(row_p)
-        rows_g.append(row_r)
+        row_p["Total"] = round(sum(sp), 0)
+        row_r["Total"] = round(sum(sr), 0)
+        rows_d.append(row_p)
+        rows_d.append(row_r)
  
-    df_g = pd.DataFrame(rows_g)
-    cols_num_g = MESES + ["Acum Dic"]
+    # Fila total
+    row_tot_p = {"Concepto": f"TOTAL {area_sel}", "Tipo": "PPTO"}
+    row_tot_r = {"Concepto": f"TOTAL {area_sel}", "Tipo": "R+P"}
+    for i, m in enumerate(MESES):
+        row_tot_p[m] = round(get_val(a_tot, sa_tot, c_tot, i, med_arg_tot), 0)
+        row_tot_r[m] = round(get_rp(a_tot, sa_tot, c_tot, i, med_arg_tot), 0)
+    row_tot_p["Total"] = round(sum(row_tot_p[m] for m in MESES), 0)
+    row_tot_r["Total"] = round(sum(row_tot_r[m] for m in MESES), 0)
+    rows_d.append(row_tot_p)
+    rows_d.append(row_tot_r)
  
-    def highlight_g(row):
+    df_d = pd.DataFrame(rows_d)
+    cols_num_d = MESES + ["Total"]
+ 
+    def highlight_d(row):
         styles = [''] * len(row)
+        is_total = "TOTAL" in str(row['Concepto'])
         if row['Tipo'] == 'R+P':
-            for i, col in enumerate(df_g.columns):
-                if col in cols_num_g:
+            for i, col in enumerate(df_d.columns):
+                if col in cols_num_d:
                     try:
-                        ppto_row = df_g[(df_g['Área']==row['Área']) & (df_g['Tipo']=='PPTO')]
+                        ppto_row = df_d[(df_d['Concepto']==row['Concepto']) & (df_d['Tipo']=='PPTO')]
                         if not ppto_row.empty:
                             ppto_val = ppto_row[col].values[0]
-                            if row[col] > ppto_val:   styles[i] = 'color:#D83030;font-weight:bold'
-                            elif row[col] < ppto_val: styles[i] = 'color:#80BC00;font-weight:bold'
+                            base = 'font-weight:bold;' if is_total else ''
+                            if row[col] > ppto_val:   styles[i] = f'{base}color:#D83030'
+                            elif row[col] < ppto_val: styles[i] = f'{base}color:#80BC00'
                     except: pass
+        elif is_total:
+            styles = ['font-weight:bold'] * len(row)
         return styles
  
     st.dataframe(
-        df_g.style.apply(highlight_g, axis=1)
-            .format({col: "{:,.0f}" for col in cols_num_g}),
-        use_container_width=True, hide_index=True, height=420
+        df_d.style.apply(highlight_d, axis=1)
+            .format({col: "{:,.0f}" for col in cols_num_d}),
+        use_container_width=True, hide_index=True, height=500
     )
-
-
