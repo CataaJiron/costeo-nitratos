@@ -965,11 +965,12 @@ elif pagina == "Sensibilidad PPTO":
         costo_base, comp_base = recalcular(BASE)
         costo_sim,  comp_sim  = recalcular(V)
         delta_total = costo_sim - costo_base
- 
-        st.markdown(f"#### 📊 Resultado — {MESES[mes]}")
+        delta_display = 0.0 if abs(delta_total) < 0.005 else round(delta_total, 2)
+
+        st.markdown(f"#### Resultado — {MESES[mes]}")
         st.metric("PPTO Base",       f"${costo_base:.2f} / T")
         st.metric("Simulado",        f"${costo_sim:.2f} / T",
-                  delta=f"{delta_total:+.2f} USD/T", delta_color="inverse")
+                  delta=f"{delta_display:+.2f} USD/T", delta_color="inverse")
  
         st.divider()
         st.markdown("**Detalle por componente**")
@@ -977,7 +978,7 @@ elif pagina == "Sensibilidad PPTO":
         rows = []
         for k in comp_base:
             b, s = comp_base[k], comp_sim[k]
-            rows.append({"Componente": k, "PPTO": round(b,1), "Sim": round(s,1), "Δ": round(s-b,1)})
+            rows.append({"Componente": k, "PPTO": round(b,2), "Sim": round(s,2), "Δ": round(s-b,2)})
         df_det = pd.DataFrame(rows)
  
         def _col_delta(val):
