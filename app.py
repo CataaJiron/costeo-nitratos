@@ -2291,7 +2291,7 @@ elif pagina == "Sim. Gastos PPTO":
  
     with col_inp:
         tab_kpi, tab_pnv, tab_ppb, tab_pcs, tab_npt3, tab_npt4, tab_pril, tab_dtp, tab_sec, tab_puerto, tab_tpte = st.tabs([
-            "KPI", "Pozas NV", "Pozas PB", "Pozas CS", "NPT3", "NPT4", "Prilado", "DTP", "Secado", "Puerto", "Transporte"
+            "Producción", "Pozas NV", "Pozas PB", "Pozas CS", "NPT3", "NPT4", "Prilado", "DTP", "Secado", "Puerto", "Transporte"
         ])
  
         def ni(label, key, val, step=10.0, fmt="%.1f"):
