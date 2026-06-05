@@ -1630,7 +1630,6 @@ elif pagina == "Sensibilidad R+P":
 
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # GASTOS POR ÁREA
 # ══════════════════════════════════════════════════════════════════════════════
 elif pagina == "Gastos por Área":
@@ -1641,171 +1640,224 @@ elif pagina == "Gastos por Área":
         modo = st.radio("Vista", ["Puntual", "Acumulado"], horizontal=True,
                         label_visibility="collapsed", key="modo_gastos")
     tipo = "Puntual" if modo == "Puntual" else "Acumulado"
-    mes = botones_mes("gastos")
+    mes  = botones_mes("gastos")
     st.divider()
  
+    # ── Áreas principales ─────────────────────────────────────────────────────
     AREAS_PRINCIPAL = [
-        ('Pozas NV',   'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas NV',       'KUS'),
-        ('Pozas PB',   'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas PB',       'KUS'),
-        ('Pozas CS',   'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas CS',       'KUS'),
-        ('Tpte NV-PB', 'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', 'Total Transporte de Sales NV + PB', 'KUS'),
-        ('NPT3',       'GASTO', 'CRISTALIZACION',                 'Gasto NPT III + Korda',          'KUS'),
-        ('NPT4',       'GASTO', 'CRISTALIZACION',                 'Gasto NPT IV',                   'KUS'),
-        ('Prilado',    'GASTO', 'TERMINADOS',                     'Gasto Planta Prilado CS',        'KUS'),
-        ('DTP',        'GASTO', 'TERMINADOS',                     'Gasto Planta DTP',               'KUS'),
-        ('Secado',     'GASTO', 'TERMINADOS',                     'Gasto Planta Secado KNO3',       'KUS'),
-        ('Tpte CS-TOC','GASTO', 'TRANSPORTE',                     'Tpte Camiones Terminados',       'KUS'),
-        ('Puerto',     'Embarque Granel Trimestral', 'EMBARQUE',  'Embarque Granel + Demurrage',    'KUS'),
+        ('Pozas NV',    'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas NV'),
+        ('Pozas PB',    'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas PB'),
+        ('Pozas CS',    'GASTO', 'Operación Pozas (NV+CS+PV+PB)', 'Gasto Operación Pozas CS'),
+        ('Tpte NV-PB',  'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', 'Total Transporte de Sales NV + PB'),
+        ('NPT3',        'GASTO', 'CRISTALIZACION', 'Gasto NPT III + Korda'),
+        ('NPT4',        'GASTO', 'CRISTALIZACION', 'Gasto NPT IV'),
+        ('Prilado',     'GASTO', 'TERMINADOS',     'Gasto Planta Prilado CS'),
+        ('DTP',         'GASTO', 'TERMINADOS',     'Gasto Planta DTP'),
+        ('Secado',      'GASTO', 'TERMINADOS',     'Gasto Planta Secado KNO3'),
+        ('Tpte CS-TOC', 'GASTO', 'TRANSPORTE',     'Tpte Camiones Terminados'),
+        ('Puerto',      'Embarque Granel Trimestral', 'EMBARQUE', 'Embarque Granel + Demurrage'),
     ]
  
+    # ── Detalle con subgrupos ─────────────────────────────────────────────────
+    # Formato: lista de (nombre_grupo, [lista de conceptos])
+    # Cada concepto: (label, area, subarea, concepto)
     DETALLE_AREAS = {
         'Pozas NV': [
-            ('Remuneración',         'GASTO POZAS', 'POZAS NV', 'REMUNERACION'),
-            ('Energía',              'GASTO POZAS', 'POZAS NV', 'ENERGIA'),
-            ('Arrdo y Servicios',    'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios'),
-            ('Otros',                'GASTO POZAS', 'POZAS NV', 'Otros'),
-            ('Mantención',           'GASTO POZAS', 'POZAS NV', 'Manteción'),
-            ('Mant. Directos',       'GASTO POZAS', 'POZAS NV', 'Mant. Pozas-Directos'),
-            ('Mant. Dist Mant.',     'GASTO POZAS', 'POZAS NV', 'Mant. Pozas-Dist Mantenedores'),
-            ('Arrdo Serv. Preco',    'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Preco'),
-            ('Otros Preco',          'GASTO POZAS', 'POZAS NV', 'Otros Preco'),
-            ('Arrdo Serv. Produ',    'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Produ'),
-            ('Otros Produ',          'GASTO POZAS', 'POZAS NV', 'Otros Produ'),
+            ('Gasto Pozas SV', [
+                ('Remuneración',        'GASTO POZAS', 'POZAS NV', 'REMUNERACION'),
+                ('Energía',             'GASTO POZAS', 'POZAS NV', 'ENERGIA'),
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios'),
+                ('Otros',               'GASTO POZAS', 'POZAS NV', 'Otros'),
+                ('Mantención',          'GASTO POZAS', 'POZAS NV', 'Manteción'),
+                ('Mant. Directos',      'GASTO POZAS', 'POZAS NV', 'Mant. Pozas-Directos'),
+                ('Mant. Dist Mant.',    'GASTO POZAS', 'POZAS NV', 'Mant. Pozas-Dist Mantenedores'),
+            ]),
+            ('Cosecha Preconcentrado', [
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Preco'),
+                ('Otros',               'GASTO POZAS', 'POZAS NV', 'Otros Preco'),
+            ]),
+            ('Cosecha Producción', [
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Produ'),
+                ('Otros',               'GASTO POZAS', 'POZAS NV', 'Otros Produ'),
+            ]),
         ],
         'Pozas PB': [
-            ('Remuneración',         'GASTO POZAS', 'POZAS PB', 'REMUNERACION'),
-            ('Mat. y Repuestos',     'GASTO POZAS', 'POZAS PB', 'Materiales y repuestos'),
-            ('Combustibles',         'GASTO POZAS', 'POZAS PB', 'Combustibles'),
-            ('Arrdo y Servicios',    'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios'),
-            ('Mantención',           'GASTO POZAS', 'POZAS PB', 'Manteción'),
-            ('Mant. Directos',       'GASTO POZAS', 'POZAS PB', 'Mant. Pozas-Directos'),
-            ('Mant. Dist Mant.',     'GASTO POZAS', 'POZAS PB', 'Mant. Pozas-Dist Mantenedores'),
-            ('Otros',                'GASTO POZAS', 'POZAS PB', 'Otros'),
-            ('Dist. Gen. EE',        'GASTO POZAS', 'POZAS PB', 'Dist. Generación EE'),
-            ('Arrdo Serv. Preco',    'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios Preco'),
-            ('Otros Preco',          'GASTO POZAS', 'POZAS PB', 'Otros Preco'),
-            ('Arrdo Serv. Produ',    'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios Produ'),
-            ('Otros Produ',          'GASTO POZAS', 'POZAS PB', 'Otros Produ'),
+            ('Gasto Total Pozas PB', [
+                ('Remuneración',        'GASTO POZAS', 'POZAS PB', 'REMUNERACION'),
+                ('Mat. y Repuestos',    'GASTO POZAS', 'POZAS PB', 'Materiales y repuestos'),
+                ('Combustibles',        'GASTO POZAS', 'POZAS PB', 'Combustibles'),
+                ('Arriendo y Servicios','GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios'),
+                ('Mantención',          'GASTO POZAS', 'POZAS PB', 'Manteción'),
+                ('Mant. Directos',      'GASTO POZAS', 'POZAS PB', 'Mant. Pozas-Directos'),
+                ('Mant. Dist Mant.',    'GASTO POZAS', 'POZAS PB', 'Mant. Pozas-Dist Mantenedores'),
+                ('Otros',               'GASTO POZAS', 'POZAS PB', 'Otros'),
+                ('Dist. Gen. EE',       'GASTO POZAS', 'POZAS PB', 'Dist. Generación EE'),
+            ]),
+            ('Cosecha Preconcentrado', [
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios Preco'),
+                ('Energía y Comb.',     'GASTO POZAS', 'POZAS PB', 'Otros Preco'),
+            ]),
+            ('Cosecha Producción', [
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS PB', 'Arrdo y Servicios Produ'),
+                ('Otros',               'GASTO POZAS', 'POZAS PB', 'Otros Produ'),
+            ]),
         ],
         'Pozas CS': [
-            ('Remuneración',         'GASTO POZAS', 'POZAS CS', 'REMUNERACION'),
-            ('Mat. y Repuestos',     'GASTO POZAS', 'POZAS CS', 'Materiales y repuestos'),
-            ('Energía y Comb.',      'GASTO POZAS', 'POZAS CS', 'Energia y Combustibles'),
-            ('Arriendo y Servicios', 'GASTO POZAS', 'POZAS CS', 'Arriendo y Servicios'),
-            ('Agua',                 'GASTO POZAS', 'POZAS CS', 'Agua'),
-            ('Mantención',           'GASTO POZAS', 'POZAS CS', 'Mantención'),
-            ('Mant. Directos',       'GASTO POZAS', 'POZAS CS', 'Mant. Pozas-Directos'),
-            ('Mant. Dist Mant.',     'GASTO POZAS', 'POZAS CS', 'Mant. Pozas-Dist Mantenedores'),
-            ('Otros',                'GASTO POZAS', 'POZAS CS', 'Otros'),
-            ('Arrdo Serv. Preco',    'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Preco'),
-            ('Otros Preco',          'GASTO POZAS', 'POZAS CS', 'Otros Preco'),
-            ('Arrdo Serv. Produ',    'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Produ'),
-            ('Otros Produ',          'GASTO POZAS', 'POZAS CS', 'Otros Produ'),
+            ('Gasto Total Pozas CS', [
+                ('Remuneración',        'GASTO POZAS', 'POZAS CS', 'REMUNERACION'),
+                ('Mat. y Repuestos',    'GASTO POZAS', 'POZAS CS', 'Materiales y repuestos'),
+                ('Energía y Comb.',     'GASTO POZAS', 'POZAS CS', 'Energia y Combustibles'),
+                ('Arriendo y Servicios','GASTO POZAS', 'POZAS CS', 'Arriendo y Servicios'),
+                ('Agua',                'GASTO POZAS', 'POZAS CS', 'Agua'),
+                ('Mantención',          'GASTO POZAS', 'POZAS CS', 'Mantención'),
+                ('Mant. Directos',      'GASTO POZAS', 'POZAS CS', 'Mant. Pozas-Directos'),
+                ('Mant. Dist Mant.',    'GASTO POZAS', 'POZAS CS', 'Mant. Pozas-Dist Mantenedores'),
+                ('Otros',               'GASTO POZAS', 'POZAS CS', 'Otros'),
+            ]),
+            ('Cosecha Preconcentrado', [
+                ('Energía y Comb.',     'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Preco'),
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS CS', 'Otros Preco'),
+            ]),
+            ('Cosecha Producción', [
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Produ'),
+                ('Otros',               'GASTO POZAS', 'POZAS CS', 'Otros Produ'),
+            ]),
         ],
         'Tpte NV-PB': [
-            ('Tpte Sales NV',        'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Transporte Sales NV'),
-            ('Op Canchas+Caminos',   'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Op Canchas + Caminos NV'),
-            ('Tpte Sales PB',        'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Transporte Sales PB'),
+            ('Transporte Sales', [
+                ('Tpte Sales NV',       'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Transporte Sales NV'),
+                ('Op Canchas+Caminos',  'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Op Canchas + Caminos NV'),
+                ('Tpte Sales PB',       'TRANSPORTE DE SALES', 'Total Transporte de Sales NV + PB', '- Transporte Sales PB'),
+            ]),
         ],
         'NPT3': [
-            ('Remuneración',         'CRISTALIZACIÓN', 'NPT3', 'REMUNERACION'),
-            ('Energía',              'CRISTALIZACIÓN', 'NPT3', 'Energía'),
-            ('Petroleo/Gas',         'CRISTALIZACIÓN', 'NPT3', 'Petroleo/Gas'),
-            ('Maq. Pesada',          'CRISTALIZACIÓN', 'NPT3', 'MAQ. PESADA'),
-            ('Aguas',                'CRISTALIZACIÓN', 'NPT3', 'AGUAS'),
-            ('Mat. y Repuestos',     'CRISTALIZACIÓN', 'NPT3', 'Materiales y Repuestos'),
-            ('Arriendo y Servicios', 'CRISTALIZACIÓN', 'NPT3', 'Arriendo y Servicios'),
-            ('Ceniza de Soda',       'CRISTALIZACIÓN', 'NPT3', 'Ceniza de Soda'),
-            ('Otros',                'CRISTALIZACIÓN', 'NPT3', 'Otros'),
-            ('Mantención',           'CRISTALIZACIÓN', 'NPT3', 'Mantención'),
-            ('Mant. Directos',       'CRISTALIZACIÓN', 'NPT3', 'Mant. NPT III-Directos'),
-            ('Mant. Dist Mant.',     'CRISTALIZACIÓN', 'NPT3', 'Mant. NPT III-Dist Mantenedores'),
-            ('De Korda',             'CRISTALIZACIÓN', 'NPT3', 'De Korda'),
+            ('Gastos en NPT III', [
+                ('Remuneración',        'CRISTALIZACIÓN', 'NPT3', 'REMUNERACION'),
+                ('Energía',             'CRISTALIZACIÓN', 'NPT3', 'Energía'),
+                ('Petroleo/Gas',        'CRISTALIZACIÓN', 'NPT3', 'Petroleo/Gas'),
+                ('Maq. Pesada',         'CRISTALIZACIÓN', 'NPT3', 'MAQ. PESADA'),
+                ('Aguas',               'CRISTALIZACIÓN', 'NPT3', 'AGUAS'),
+                ('Mat. y Repuestos',    'CRISTALIZACIÓN', 'NPT3', 'Materiales y Repuestos'),
+                ('Arriendo y Servicios','CRISTALIZACIÓN', 'NPT3', 'Arriendo y Servicios'),
+                ('Ceniza de Soda',      'CRISTALIZACIÓN', 'NPT3', 'Ceniza de Soda'),
+                ('Otros',               'CRISTALIZACIÓN', 'NPT3', 'Otros'),
+                ('Mantención',          'CRISTALIZACIÓN', 'NPT3', 'Mantención'),
+                ('Mant. Directos',      'CRISTALIZACIÓN', 'NPT3', 'Mant. NPT III-Directos'),
+                ('Mant. Dist Mant.',    'CRISTALIZACIÓN', 'NPT3', 'Mant. NPT III-Dist Mantenedores'),
+                ('De Korda',            'CRISTALIZACIÓN', 'NPT3', 'De Korda'),
+            ]),
         ],
         'NPT4': [
-            ('Remuneraciones',       'CRISTALIZACIÓN', 'NPT4', 'REMUNERACIONES'),
-            ('Energía',              'CRISTALIZACIÓN', 'NPT4', 'ENERGÍA'),
-            ('Petroleo/Gas',         'CRISTALIZACIÓN', 'NPT4', 'PETROLEO/GAS'),
-            ('Maq. Pesada',          'CRISTALIZACIÓN', 'NPT4', 'MAQ. PESADA'),
-            ('Agua',                 'CRISTALIZACIÓN', 'NPT4', 'AGUA'),
-            ('Ceniza de Soda',       'CRISTALIZACIÓN', 'NPT4', 'Ceniza de Soda'),
-            ('Otros',                'CRISTALIZACIÓN', 'NPT4', 'Otros'),
-            ('Mantención',           'CRISTALIZACIÓN', 'NPT4', 'Mantención'),
-            ('Mant. Directos',       'CRISTALIZACIÓN', 'NPT4', 'Mant npt-Directos'),
-            ('Mant. Dist Mant.',     'CRISTALIZACIÓN', 'NPT4', 'Mant.npt-Dist Mantenedores'),
-            ('De Korda',             'CRISTALIZACIÓN', 'NPT4', 'De Korda'),
+            ('Gastos NPT II S/Ceniza Soda', [
+                ('Remuneraciones',      'CRISTALIZACIÓN', 'NPT4', 'REMUNERACIONES'),
+                ('Energía',             'CRISTALIZACIÓN', 'NPT4', 'ENERGÍA'),
+                ('Petroleo/Gas',        'CRISTALIZACIÓN', 'NPT4', 'PETROLEO/GAS'),
+                ('Maq. Pesada',         'CRISTALIZACIÓN', 'NPT4', 'MAQ. PESADA'),
+                ('Agua',                'CRISTALIZACIÓN', 'NPT4', 'AGUA'),
+                ('Ceniza de Soda',      'CRISTALIZACIÓN', 'NPT4', 'Ceniza de Soda'),
+                ('Otros',               'CRISTALIZACIÓN', 'NPT4', 'Otros'),
+                ('Mantención',          'CRISTALIZACIÓN', 'NPT4', 'Mantención'),
+                ('Mant. Directos',      'CRISTALIZACIÓN', 'NPT4', 'Mant npt-Directos'),
+                ('Mant. Dist Mant.',    'CRISTALIZACIÓN', 'NPT4', 'Mant.npt-Dist Mantenedores'),
+                ('De Korda',            'CRISTALIZACIÓN', 'NPT4', 'De Korda'),
+            ]),
         ],
         'Prilado': [
-            ('Remuneraciones',       'TERMINADOS', 'PRILADO', 'REMUNERACIONES'),
-            ('Energía',              'TERMINADOS', 'PRILADO', 'Energía'),
-            ('Petroleo/Gas',         'TERMINADOS', 'PRILADO', 'Petroleo/Gas'),
-            ('Maq. Pesadas',         'TERMINADOS', 'PRILADO', 'Maq. Pesadas'),
-            ('Aditivos',             'TERMINADOS', 'PRILADO', 'Aditivos / Modificadores'),
-            ('Otros',                'TERMINADOS', 'PRILADO', 'Otros'),
-            ('Mantención',           'TERMINADOS', 'PRILADO', 'Mantención'),
-            ('Mant. Directos',       'TERMINADOS', 'PRILADO', 'Mant. Prilado-Directos'),
-            ('Mant. Dist Mant.',     'TERMINADOS', 'PRILADO', 'Mant. Prilado-Dist Mantenedores'),
+            ('Total Operación', [
+                ('Remuneraciones',      'TERMINADOS', 'PRILADO', 'REMUNERACIONES'),
+                ('Energía',             'TERMINADOS', 'PRILADO', 'Energía'),
+                ('Petroleo/Gas',        'TERMINADOS', 'PRILADO', 'Petroleo/Gas'),
+                ('Maq. Pesadas',        'TERMINADOS', 'PRILADO', 'Maq. Pesadas'),
+                ('Aditivos',            'TERMINADOS', 'PRILADO', 'Aditivos / Modificadores'),
+                ('Otros',               'TERMINADOS', 'PRILADO', 'Otros'),
+                ('Mantención',          'TERMINADOS', 'PRILADO', 'Mantención'),
+                ('Mant. Directos',      'TERMINADOS', 'PRILADO', 'Mant. Prilado-Directos'),
+                ('Mant. Dist Mant.',    'TERMINADOS', 'PRILADO', 'Mant. Prilado-Dist Mantenedores'),
+            ]),
         ],
         'DTP': [
-            ('Remuneraciones',       'TERMINADOS', 'DTP', 'REMUNERACIONES'),
-            ('Energía',              'TERMINADOS', 'DTP', 'ENERGIA'),
-            ('Petroleo/Gas',         'TERMINADOS', 'DTP', 'Petroleo/Gas'),
-            ('Aditivos',             'TERMINADOS', 'DTP', 'Aditivos'),
-            ('Otros',                'TERMINADOS', 'DTP', 'Otros'),
-            ('Mantención',           'TERMINADOS', 'DTP', 'Mantencion'),
-            ('Mant. Directos',       'TERMINADOS', 'DTP', 'Mant. DTP-Directos'),
-            ('Mant. Dist Mant.',     'TERMINADOS', 'DTP', 'Mant. Prilado-Dist Mantenedores'),
+            ('Total DTP', [
+                ('Remuneraciones',      'TERMINADOS', 'DTP', 'REMUNERACIONES'),
+                ('Energía',             'TERMINADOS', 'DTP', 'ENERGIA'),
+                ('Petroleo/Gas',        'TERMINADOS', 'DTP', 'Petroleo/Gas'),
+                ('Aditivos',            'TERMINADOS', 'DTP', 'Aditivos'),
+                ('Otros',               'TERMINADOS', 'DTP', 'Otros'),
+                ('Mantención',          'TERMINADOS', 'DTP', 'Mantencion'),
+                ('Mant. Directos',      'TERMINADOS', 'DTP', 'Mant. DTP-Directos'),
+                ('Mant. Dist Mant.',    'TERMINADOS', 'DTP', 'Mant. Prilado-Dist Mantenedores'),
+            ]),
         ],
         'Secado': [
-            ('Remuneración',         'TERMINADOS', 'SECADO', 'REMUNERACION'),
-            ('Energía',              'TERMINADOS', 'SECADO', 'Energía'),
-            ('Petroleo/Gas',         'TERMINADOS', 'SECADO', 'Petroleo/Gas'),
-            ('Aditivos',             'TERMINADOS', 'SECADO', 'Aditivos'),
-            ('Maq. Pesadas',         'TERMINADOS', 'SECADO', 'Maq. Pesadas'),
-            ('Otros',                'TERMINADOS', 'SECADO', 'Otros'),
-            ('Mantención',           'TERMINADOS', 'SECADO', 'Mantención'),
-            ('Mant. Directos',       'TERMINADOS', 'SECADO', 'Mant. Secado-Directos'),
-            ('Mant. Dist Mant.',     'TERMINADOS', 'SECADO', 'Mant. Secado-Dist Mantenedores'),
+            ('Gasto Planta Secado KNO3', [
+                ('Remuneración',        'TERMINADOS', 'SECADO', 'REMUNERACION'),
+                ('Energía',             'TERMINADOS', 'SECADO', 'Energía'),
+                ('Petroleo/Gas',        'TERMINADOS', 'SECADO', 'Petroleo/Gas'),
+                ('Aditivos',            'TERMINADOS', 'SECADO', 'Aditivos'),
+                ('Maq. Pesadas',        'TERMINADOS', 'SECADO', 'Maq. Pesadas'),
+                ('Otros',               'TERMINADOS', 'SECADO', 'Otros'),
+                ('Mantención',          'TERMINADOS', 'SECADO', 'Mantención'),
+                ('Mant. Directos',      'TERMINADOS', 'SECADO', 'Mant. Secado-Directos'),
+                ('Mant. Dist Mant.',    'TERMINADOS', 'SECADO', 'Mant. Secado-Dist Mantenedores'),
+            ]),
         ],
         'Tpte CS-TOC': [
-            ('Tpte Camiones',        'GASTO', 'TRANSPORTE', 'Tpte Camiones Terminados'),
+            ('Transporte Terminados', [
+                ('Tpte Camiones',       'GASTO', 'TRANSPORTE', 'Tpte Camiones Terminados'),
+            ]),
         ],
         'Puerto': [
-            ('Embarque+Demurrage',   'Embarque Granel Trimestral', 'EMBARQUE',      'Embarque Granel + Demurrage'),
-            ('Almacenaje',           'Almacenaje Trimestral',       'ALMACENAJE',    'Almacenaje Trimestral'),
-            ('Distributivos',        'Distributivos Trimestral',    'DISTRIBUTIVOS', 'Distributivos Trimestral'),
-            ('Depreciación Puerto',  'DEPRECIACION',                'PUERTO',        'Depreciacion Puerto'),
+            ('Puerto', [
+                ('Embarque+Demurrage',  'Embarque Granel Trimestral', 'EMBARQUE',      'Embarque Granel + Demurrage'),
+                ('Almacenaje',          'Almacenaje Trimestral',       'ALMACENAJE',    'Almacenaje Trimestral'),
+                ('Distributivos',       'Distributivos Trimestral',    'DISTRIBUTIVOS', 'Distributivos Trimestral'),
+                ('Depreciación Puerto', 'DEPRECIACION',                'PUERTO',        'Depreciacion Puerto'),
+            ]),
         ],
     }
  
-    nombres  = [a[0] for a in AREAS_PRINCIPAL]
-    vals_p   = [gv(df, a[1], a[2], a[3], mes, tipo, 'PPTO') for a in AREAS_PRINCIPAL]
-    vals_r   = [rp_val(df, a[1], a[2], a[3], mes, tipo) for a in AREAS_PRINCIPAL]
-    deltas   = [r - p for r, p in zip(vals_r, vals_p)]
+    # ── Helpers ───────────────────────────────────────────────────────────────
+    fechas_g = sorted(df['Fecha'].unique())
+    fecha_g  = fechas_g[mes] if mes < len(fechas_g) else fechas_g[-1]
  
-    # Header
+    def det_ppto(area, sub, con):
+        mask = (df['Fecha']==fecha_g)&(df['AREA']==area)&(df['SUBAREA']==sub)&(df['CONCEPTO']==con)&(df['Tipo']==tipo)&(df['Tipo_2']=='PPTO')
+        for med in ['KUS$','KUS']:
+            r = df[mask&(df['Medida']==med)]['GASTO/COSTO']
+            if not r.empty: return float(r.values[0])
+        r = df[mask]['GASTO/COSTO']
+        return float(r.values[0]) if not r.empty else 0.0
+ 
+    def det_rp(area, sub, con):
+        for t2 in ['REAL','PROY']:
+            mask = (df['Fecha']==fecha_g)&(df['AREA']==area)&(df['SUBAREA']==sub)&(df['CONCEPTO']==con)&(df['Tipo']==tipo)&(df['Tipo_2']==t2)
+            for med in ['KUS$','KUS']:
+                r = df[mask&(df['Medida']==med)]['GASTO/COSTO']
+                if not r.empty and r.values[0] != 0: return float(r.values[0])
+        return 0.0
+ 
+    # ── Tabla principal tipo Plan Industrial ──────────────────────────────────
+    nombres = [a[0] for a in AREAS_PRINCIPAL]
+    vals_p  = [gv(df, a[1], a[2], a[3], mes, tipo, 'PPTO') for a in AREAS_PRINCIPAL]
+    vals_r  = [rp_val(df, a[1], a[2], a[3], mes, tipo) for a in AREAS_PRINCIPAL]
+    deltas  = [r - p for r, p in zip(vals_r, vals_p)]
+ 
     cols_h = st.columns([2] + [1]*len(nombres))
     cols_h[0].markdown("**COSTO [KUS]**")
     for i, n in enumerate(nombres):
         cols_h[i+1].markdown(f"<div style='text-align:center;font-size:11px;font-weight:bold'>{n}</div>", unsafe_allow_html=True)
  
-    # Fila PPTO
     cols_p = st.columns([2] + [1]*len(nombres))
     cols_p[0].markdown("**PPTO**")
     for i, v in enumerate(vals_p):
         cols_p[i+1].markdown(f"<div style='text-align:center;background:#152578;border-radius:8px;padding:6px;font-size:12px'>{v:,.0f}</div>", unsafe_allow_html=True)
- 
     st.markdown("")
  
-    # Fila R+P
     cols_r = st.columns([2] + [1]*len(nombres))
     cols_r[0].markdown("**R+P**")
     for i, v in enumerate(vals_r):
         cols_r[i+1].markdown(f"<div style='text-align:center;background:#1a3a1a;border-radius:8px;padding:6px;font-size:12px'>{v:,.0f}</div>", unsafe_allow_html=True)
- 
     st.markdown("")
  
-    # Fila Delta
     cols_d = st.columns([2] + [1]*len(nombres))
     cols_d[0].markdown("**Δ**")
     for i, d in enumerate(deltas):
@@ -1830,69 +1882,134 @@ elif pagina == "Gastos por Área":
                 st.rerun()
  
     area_sel = st.session_state['gastos_area_sel']
-    items    = DETALLE_AREAS.get(area_sel, [])
+    grupos   = DETALLE_AREAS.get(area_sel, [])
  
-    if items:
-        fechas_g = sorted(df['Fecha'].unique())
-        fecha_g  = fechas_g[mes] if mes < len(fechas_g) else fechas_g[-1]
+    if grupos:
+        st.markdown(f"##### {area_sel} — {MESES[mes]} ({modo})")
  
-        def get_det(area, sub, con, tipo2):
-            mask = (df['Fecha']==fecha_g)&(df['AREA']==area)&(df['SUBAREA']==sub)&(df['CONCEPTO']==con)&(df['Tipo']==tipo)&(df['Tipo_2']==tipo2)&(df['Medida']=='KUS$')
-            r = df[mask]['GASTO/COSTO']
-            if not r.empty and r.values[0] != 0: return float(r.values[0])
-            # fallback KUS
-            mask2 = (df['Fecha']==fecha_g)&(df['AREA']==area)&(df['SUBAREA']==sub)&(df['CONCEPTO']==con)&(df['Tipo']==tipo)&(df['Tipo_2']==tipo2)
-            r2 = df[mask2]['GASTO/COSTO']
-            return float(r2.values[0]) if not r2.empty else 0.0
+        for nombre_grupo, conceptos in grupos:
+            vp_list = [det_ppto(c[1], c[2], c[3]) for c in conceptos]
+            vr_list = [det_rp(c[1],   c[2], c[3]) for c in conceptos]
+            tot_p   = sum(vp_list)
+            tot_r   = sum(vr_list)
+            det_d   = [r - p for r, p in zip(vr_list, vp_list)]
  
-        def det_p(area, sub, con): return get_det(area, sub, con, 'PPTO')
-        def det_r(area, sub, con):
-            for t2 in ['REAL','PROY']:
-                v = get_det(area, sub, con, t2)
-                if v != 0: return v
-            return 0.0
+            # Gráfico del grupo
+            det_nombres = [c[0] for c in conceptos]
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name="PPTO", x=det_nombres, y=vp_list, marker_color='#152578',
+                                 text=[f"${v:,.0f}" for v in vp_list], textposition="outside", textfont_size=9))
+            fig.add_trace(go.Bar(name="R+P",  x=det_nombres, y=vr_list,
+                                 marker_color=['#80BC00' if r<=p else '#D83030' for r,p in zip(vr_list,vp_list)],
+                                 text=[f"${v:,.0f}" for v in vr_list], textposition="outside", textfont_size=9))
+            anns = []
+            for i, (n, d) in enumerate(zip(det_nombres, det_d)):
+                if abs(d) > 0:
+                    color = "#D83030" if d > 0 else "#80BC00"
+                    sym   = "▲" if d > 0 else "▼"
+                    anns.append(dict(x=n, y=max(vp_list[i], vr_list[i])*1.2,
+                                     text=f"{sym} {d:+,.0f}", showarrow=False,
+                                     font=dict(size=10, color=color, family="Arial Black"), xanchor="center"))
+            fig.update_layout(
+                title=f"<b>{nombre_grupo}</b> — PPTO: ${tot_p:,.0f} KUS | R+P: ${tot_r:,.0f} KUS | Δ: {tot_r-tot_p:+,.0f}",
+                barmode="group", height=350, xaxis_tickangle=-15,
+                legend=dict(orientation="h", y=1.12),
+                plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                margin=dict(t=70, b=70), annotations=anns
+            )
+            fig.update_yaxes(gridcolor="#333333")
+            st.plotly_chart(fig, use_container_width=True)
  
-        det_nombres = [it[0] for it in items]
-        det_vp      = [det_p(it[1], it[2], it[3]) for it in items]
-        det_vr      = [det_r(it[1], it[2], it[3]) for it in items]
-        det_d       = [r - p for r, p in zip(det_vr, det_vp)]
+            # Tabla del grupo con fila total
+            rows = [{"Concepto": c[0], "PPTO": round(p,0), "R+P": round(r,0), "Δ": round(r-p,0)}
+                    for c, p, r in zip(conceptos, vp_list, vr_list)]
+            rows.append({"Concepto": f"▶ {nombre_grupo}", "PPTO": round(tot_p,0), "R+P": round(tot_r,0), "Δ": round(tot_r-tot_p,0)})
+            df_g = pd.DataFrame(rows)
  
-        st.markdown(f"##### {area_sel} — {MESES[mes]} ({modo}) — KUS")
+            def hl_g(row):
+                is_tot = str(row['Concepto']).startswith('▶')
+                base   = 'font-weight:bold;' if is_tot else ''
+                s      = [base]*4
+                if row['Δ'] > 0:   s[3] = f'{base}color:#D83030'
+                elif row['Δ'] < 0: s[3] = f'{base}color:#80BC00'
+                return s
  
-        fig = go.Figure()
-        fig.add_trace(go.Bar(name="PPTO", x=det_nombres, y=det_vp, marker_color='#152578',
-                             text=[f"${v:,.0f}" for v in det_vp], textposition="outside", textfont_size=9))
-        fig.add_trace(go.Bar(name="R+P",  x=det_nombres, y=det_vr,
-                             marker_color=['#80BC00' if r <= p else '#D83030' for r, p in zip(det_vr, det_vp)],
-                             text=[f"${v:,.0f}" for v in det_vr], textposition="outside", textfont_size=9))
-        anns = []
-        for i, (n, d) in enumerate(zip(det_nombres, det_d)):
-            if abs(d) > 0:
-                color = "#D83030" if d > 0 else "#80BC00"
-                sym   = "▲" if d > 0 else "▼"
-                anns.append(dict(x=n, y=max(det_vp[i], det_vr[i])*1.2,
-                                 text=f"{sym} {d:+,.0f}", showarrow=False,
-                                 font=dict(size=10, color=color, family="Arial Black"), xanchor="center"))
-        fig.update_layout(barmode="group", height=380, xaxis_tickangle=-20,
-                          legend=dict(orientation="h", y=1.08),
-                          plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                          margin=dict(t=60, b=80), annotations=anns)
-        fig.update_yaxes(gridcolor="#333333")
-        st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(
+                df_g.style.apply(hl_g, axis=1)
+                    .format({"PPTO":"{:,.0f}", "R+P":"{:,.0f}", "Δ":"{:+,.0f}"}),
+                use_container_width=True, hide_index=True,
+                height=min(400, (len(rows))*38+50)
+            )
+            st.divider()
  
-        rows_det = [{"Concepto": n, "PPTO": round(p,0), "R+P": round(r,0), "Δ": round(r-p,0)}
-                    for n, p, r in zip(det_nombres, det_vp, det_vr)]
-        df_det2 = pd.DataFrame(rows_det)
- 
-        def hl_det2(row):
-            s = ['','','','']
-            if row['Δ'] > 0:   s[3] = 'color:#D83030;font-weight:bold'
-            elif row['Δ'] < 0: s[3] = 'color:#80BC00;font-weight:bold'
-            return s
- 
-        st.dataframe(
-            df_det2.style.apply(hl_det2, axis=1)
-                .format({"PPTO":"{:,.0f}", "R+P":"{:,.0f}", "Δ":"{:+,.0f}"}),
-            use_container_width=True, hide_index=True, height=min(420, len(rows_det)*38+50)
-        )
- 
+elif pagina == "Asistente":
+    st.title("🤖 Asistente de Costeo Nitratos")
+    st.caption("Pregunta sobre costos, producción o cualquier dato de la planilla 2026")
+
+    def build_context():
+        lines = ["# Datos Costeo Nitratos 2026\n"]
+        for tipo in ["Puntual", "Acumulado"]:
+            lines.append(f"\n## {tipo}")
+            ppto = total_serie(df, tipo, 'PPTO')
+            rp   = total_rp_serie(df, tipo)
+            lines.append("### Costo Total USD/T")
+            lines.append("Mes | PPTO | Real+Proy")
+            lines.append("---|---|---")
+            for i, m in enumerate(MESES):
+                lines.append(f"{m} | {ppto[i]:.1f} | {rp[i]:.1f}")
+            lines.append(f"\n### Por componente ({tipo})")
+            for sa, c, nombre in COSTOS:
+                s_p = gs(df, 'COSTO TOTAL', sa, c, tipo, 'PPTO')
+                s_r = rp_serie(df, 'COSTO TOTAL', sa, c, tipo)
+                lines.append(f"\n**{nombre}** (USD/T)")
+                lines.append("Mes | PPTO | R+P")
+                lines.append("---|---|---")
+                for i, m in enumerate(MESES):
+                    lines.append(f"{m} | {s_p[i]:.1f} | {s_r[i]:.1f}")
+        return "\n".join(lines)
+
+    context = build_context()
+
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+
+    for msg in st.session_state["messages"]:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    if prompt := st.chat_input("Pregunta algo sobre los datos..."):
+        st.session_state["messages"].append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            with st.spinner("Analizando..."):
+                try:
+                    api_key = cargar_api_key() or st.secrets.get("ANTHROPIC_API_KEY", "")
+                    client = anthropic.Anthropic(api_key=api_key)
+                    response = client.messages.create(
+                        model="claude-sonnet-4-20250514",
+                        max_tokens=1024,
+                        system=f"""Eres un asistente experto en costos de producción de nitratos.
+Tienes acceso a todos los datos de la planilla de costeo 2026.
+Responde en español, de forma clara y concisa.
+Cuando menciones números usa siempre la unidad (USD/T, Kton, KUS).
+
+DATOS DISPONIBLES:
+{context}""",
+                        messages=[
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state["messages"]
+                        ]
+                    )
+                    answer = response.content[0].text
+                except Exception as e:
+                    answer = f"Error al conectar con el asistente: {e}"
+
+                st.markdown(answer)
+                st.session_state["messages"].append({"role": "assistant", "content": answer})
+
+    if st.session_state["messages"]:
+        if st.button("🗑️ Limpiar conversación"):
+            st.session_state["messages"] = []
+            st.rerun()
