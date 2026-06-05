@@ -1295,7 +1295,7 @@ elif pagina == "Sensibilidad R+P":
                 st.metric(usdpt_label, f"${ratio:.2f}")
 
         # ─── PRODUCCIÓN ─────────────────────────────────────────────────────── 
-        st.markdown("#### 🏭 Producción (Kton)")
+        st.markdown("#### Producción (Kton)")
  
         pc1, pc2 = st.columns(2)
         with pc1:
@@ -1336,7 +1336,7 @@ elif pagina == "Sensibilidad R+P":
  
         
         # ─── GASTOS POZAS ─────────────────────────────────────────────────────
-        st.markdown("#### 💰 Gastos Pozas (KUS) → USD/T sobre NPT3+NPT4")
+        st.markdown("#### Gastos Pozas (KUS) → USD/T sobre NPT3+NPT4")
         st.caption("Gasto (KUS)  |  — denominador: prod total —  |  USD/T resultante")
  
         for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB")]:
@@ -1353,7 +1353,7 @@ elif pagina == "Sensibilidad R+P":
  
         # ─── GASTOS PLANTAS ───────────────────────────────────────────────────  
 
-        st.markdown("#### 🏗️ Gastos Plantas (KUS)")
+        st.markdown("#### Gastos Plantas (KUS)")
  
         st.caption("Cristalización → USD/T sobre NPT3+NPT4")
         for lbl, key in [("NPT3 (+ Korda)", "G_NPT3"), ("NPT4", "G_NPT4")]:
@@ -1380,7 +1380,7 @@ elif pagina == "Sensibilidad R+P":
 
 
 # ─── PUERTO ───────────────────────────────────────────────────────────
-        st.markdown("#### 🚢 Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
+        st.markdown("#### Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
 
         # 1. Función local exclusiva para Puerto
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
@@ -1418,7 +1418,7 @@ elif pagina == "Sensibilidad R+P":
         st.caption(f"ℹ️ Distributivos: denominador = Embarque Total + Despacho Camiones = {vol_d:.2f} Kton")
  
     # ─── TRANSPORTE CAMIONES ──────────────────────────────────────────────
-        st.markdown("#### 🚛 Transporte Terminados — KUS | Kton | USD/T")
+        st.markdown("#### Transporte Terminados — KUS | Kton | USD/T")
         
         # CAMBIO DEFINITIVO: Creamos una función local exclusiva para camiones
         # Esto ignora cualquier problema de caché o duplicado en el código de arriba
