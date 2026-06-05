@@ -2394,7 +2394,7 @@ elif pagina == "Sim. Gastos PPTO":
             st.divider()
             inputs_grupo("Cosecha Producción",
                 [("Arrdo y Servicios","PCS_PRODU_A"),("Otros","PCS_PRODU_O")], [], pt)
-            tot = sum(V[k] for k in ['PCS_REMUN','PCS_MYREP','PCS_ENERG','PCS_ARRDO','PCS_AGUA','PCS_OTROS','PCS_MANT_D','PCS_MANT_M','PCS_PRECO_A','PCS_PRECO_O','PCS_PRODU_A','PCS_PRODU_O'])
+            tot = sum(V[k] for k in ['PCS_REMUN','PCS_MYREP','PCS_ENERG','PCS_ARRDO','PCS_AGUA','PCS_OTROS','PCS_MANT_D','PCS_MANT_M','PCS_PRECO_A','PCS_PRECO_O','PCS_PRODU_A','PCS_PRODU_O','G_DEPRECIACION_CS'])
             st.success(f"**Total Pozas CS: ${tot:,.0f} KUS$**")
  
         # ── NPT3 ─────────────────────────────────────────────────────────────
