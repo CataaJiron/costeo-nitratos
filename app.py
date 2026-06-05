@@ -977,7 +977,7 @@ elif pagina == "Sensibilidad PPTO":
         rows = []
         for k in comp_base:
             b, s = comp_base[k], comp_sim[k]
-            rows.append({"Componente": k, "PPTO": round(b,2), "Sim": round(s,2), "Δ": round(s-b,2)})
+            rows.append({"Componente": k, "PPTO": round(b,1), "Sim": round(s,1), "Δ": round(s-b,1)})
         df_det = pd.DataFrame(rows)
  
         def _col_delta(val):
