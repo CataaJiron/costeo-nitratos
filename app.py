@@ -531,7 +531,18 @@ elif pagina == "Sensibilidad PPTO":
         'P_TPTE_SALES':  _r('TRANSPORTE DE SALES','Total Transporte de Sales (promedio)','Total Transporte de Sales (promedio)'),
         'NV cat 1':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- NV cat 1'),
         'PB':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- PB'),
-        'CS':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- CS'),        
+        'CS':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- CS'),
+        #NPT3
+        'FC_NaNO3_CAT1_NPT3': _r('FC NaNO3','NPT3','CAT1'),
+        'FC_NaNO3_CS_NPT3': _r('FC NaNO3','NPT3','CS'),        
+        'FC_NaNO3_PB_NPT3': _r('FC NaNO3','NPT3','PB'),
+        #NPT4
+        'FC_NaNO3_CS_NPT4': _r('FC NaNO3','NPT4','CS'),
+        'FC_NaNO3_PB_NPT4': _r('FC NaNO3','NPT4','PB'),        
+        'FC_NaNO3_PBCSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
+        'FC_NaNO3_CAT1_CSSI_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSI'),        
+        'FC_NaNO3_CAT1_CSSR_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSR'),
+        'FC_NaNO3_PURGA_NPT4': _r('FC NaNO3','NPT4','FC PURGA'),        
 
 
         # Depreciaciones (fijas, no editables)
@@ -573,10 +584,11 @@ elif pagina == "Sensibilidad PPTO":
         precio_total_transporte = precio_cs + precio_nv + precio_pb
 
         # Precio promedio ponderado por consumo de sales
-        consumo_nv = v['NV cat 1']
-        consumo_pb = v['PB']
-        consumo_cs = v['CS']
+        consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + 'FC_NaNO3_CAT1_CSSR_NPT4' * v['CSSR_NPT4'] + v['CSSI_NPT4'] * 'FC_NaNO3_CAT1_CSSI_NPT4'
+        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PBCSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
+        consumo_cs = npt3 * v['FC_NaNO3_CS_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
+
 
         #precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
         fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
@@ -862,23 +874,39 @@ elif pagina == "Sensibilidad PPTO":
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rc}")
  
         st.divider()
-        # ─── FC NaNO3────────────────────────────────────────────
-        st.markdown("#### 🧂Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
-        cs1, cs2, cs3 = st.columns(3)
-        with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rc}")
-        with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rc}")
-        with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key=f"ui_ts_CS_{rc}")
+ 
+        # ─── FC NaNO3 ────────────────────────────────────────────
+        st.markdown("#### 🧂 FC NaNO3 por ruta y subproducto")
 
-        consumo_tot_v = V['NV cat 1'] + V['PB'] + V['CS']
+        st.caption("NPT3")
+        fn1, fn2, fn3 = st.columns(3)
+        with fn1: V['FC_NaNO3_CAT1_NPT3']      = st.number_input("CAT1",    value=float(f"{V['FC_NaNO3_CAT1_NPT3']:.4f}"),      step=0.01, format="%.4f", key=f"ui_fc_cat1_npt3_{rc}")
+        with fn2: V['FC_NaNO3_PB_NPT3']        = st.number_input("PB",      value=float(f"{V['FC_NaNO3_PB_NPT3']:.4f}"),        step=0.01, format="%.4f", key=f"ui_fc_pb_npt3_{rc}")
+        with fn3: V['FC_NaNO3_CS_NPT3']        = st.number_input("CS",      value=float(f"{V['FC_NaNO3_CS_NPT3']:.4f}"),        step=0.01, format="%.4f", key=f"ui_fc_cs_npt3_{rc}")
+
+        st.caption("NPT4")
+        fn4, fn5, fn6, fn7, fn8 = st.columns(5)
+        with fn4: V['FC_NaNO3_CS_NPT4']        = st.number_input("CS",          value=float(f"{V['FC_NaNO3_CS_NPT4']:.4f}"),        step=0.01, format="%.4f", key=f"ui_fc_cs_npt4_{rc}")
+        with fn5: V['FC_NaNO3_PB_CSSI_NPT4']   = st.number_input("PB CSSI",     value=float(f"{V['FC_NaNO3_PB_CSSI_NPT4']:.4f}"),   step=0.01, format="%.4f", key=f"ui_fc_pb_cssi_{rc}")
+        with fn6: V['FC_NaNO3_CAT1_CSSI_NPT4'] = st.number_input("CAT1 CSSI",   value=float(f"{V['FC_NaNO3_CAT1_CSSI_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssi_{rc}")
+        with fn7: V['FC_NaNO3_CAT1_CSSR_NPT4'] = st.number_input("CAT1 CSSR",   value=float(f"{V['FC_NaNO3_CAT1_CSSR_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssr_{rc}")
+        with fn8: V['FC_NaNO3_PURGA_NPT4']     = st.number_input("FC Purga",    value=float(f"{V['FC_NaNO3_PURGA_NPT4']:.4f}"),     step=0.01, format="%.4f", key=f"ui_fc_purga_{rc}")
+
+        npt3_fc = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
+        consumo_nv_v = npt3_fc * V['FC_NaNO3_CAT1_NPT3'] + V['CSSR_NPT4'] * V['FC_NaNO3_CAT1_CSSR_NPT4'] + V['CSSI_NPT4'] * V['FC_NaNO3_CAT1_CSSI_NPT4']
+        consumo_pb_v = npt3_fc * V['FC_NaNO3_PB_NPT3']   + V['CSSI_NPT4'] * V['FC_NaNO3_PB_CSSI_NPT4']   + V['KNO3_L_NPT4'] * V['FC_NaNO3_PURGA_NPT4']
+        consumo_cs_v = (npt3_fc + V['KNO3_L_NPT4']) * V['FC_NaNO3_CS_NPT4']
+        consumo_tot_v = consumo_nv_v + consumo_pb_v + consumo_cs_v
         prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
-        fc_v          = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
-        precio_nv_v   = V['G_TPTE_NV']    / V['TON_TPTE_NV']  if V['TON_TPTE_NV']  > 0 else 0.0
-        precio_pb_v   = V['G_TPTE_PB']    / V['TON_TPTE_PB']  if V['TON_TPTE_PB']  > 0 else 0.0
-        precio_cs_v   = V['G_CAMINOS_NV'] / V['TON_TPTE_CS']  if V['TON_TPTE_CS']  > 0 else 0.0
-        precio_prom_v = (precio_nv_v*V['NV cat 1'] + precio_pb_v*V['PB'] + precio_cs_v*V['CS']) / consumo_tot_v if consumo_tot_v > 0 else 0.0
-        c11_preview   = precio_prom_v * fc_v
-        st.caption(f"FC: {fc_v:.4f} | Precio prom: ${precio_prom_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
-        st.divider() 
+        fc_v = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
+
+        ton_trans = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
+        precio_tot_v = (V['G_TPTE_NV'] + V['G_TPTE_PB'] + V['G_CAMINOS_NV']) / ton_trans if ton_trans > 0 else 0.0
+        c11_preview = precio_tot_v * fc_v
+        st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
+        st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+        st.divider()
+
 
         # ───Tpte Sales ────────────────────────────────────────────
         st.markdown("#### 🧂 Transporte de Sales")
@@ -1092,6 +1120,17 @@ elif pagina == "Sensibilidad R+P":
         'GEN_Perdidas_Puerto': _r('PERDIDAS','PERDIDAS','Perdidas / FE puerto y cancha'),
         'GEN_Perdidas_Degradacion': _r('Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha','Perdidas y degradaciones puerto y cancha'),
         'OTROS': rp_val(df,'COSTO TOTAL','1.9 OTROS','OTROS', mes, tipo_sens),
+        #NPT3
+        'FC_NaNO3_CAT1_NPT3': _r('FC NaNO3','NPT3','CAT1'),
+        'FC_NaNO3_CS_NPT3': _r('FC NaNO3','NPT3','CS'),        
+        'FC_NaNO3_PB_NPT3': _r('FC NaNO3','NPT3','PB'),
+        #NPT4
+        'FC_NaNO3_CS_NPT4': _r('FC NaNO3','NPT4','CS'),
+        'FC_NaNO3_PB_NPT4': _r('FC NaNO3','NPT4','PB'),        
+        'FC_NaNO3_PBCSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
+        'FC_NaNO3_CAT1_CSSI_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSI'),        
+        'FC_NaNO3_CAT1_CSSR_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSR'),
+        'FC_NaNO3_PURGA_NPT4': _r('FC NaNO3','NPT4','FC PURGA'),
     }
 
    
@@ -1114,9 +1153,9 @@ elif pagina == "Sensibilidad R+P":
         precio_total_transporte = precio_cs + precio_nv + precio_pb
 
         # Precio promedio ponderado por consumo de sales
-        consumo_nv = v['NV cat 1']
-        consumo_pb = v['PB']
-        consumo_cs = v['CS']
+        consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + 'FC_NaNO3_CAT1_CSSR_NPT4' * v['CSSR_NPT4'] + v['CSSI_NPT4'] * 'FC_NaNO3_CAT1_CSSI_NPT4'
+        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PBCSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
+        consumo_cs = npt3 * v['FC_NaNO3_CS_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
 
         #precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
@@ -1809,7 +1848,18 @@ elif pagina == "Sensibilidad PLAN INDUSTRIAL":
         'P_TPTE_SALES':  _r('TRANSPORTE DE SALES','Total Transporte de Sales (promedio)','Total Transporte de Sales (promedio)'),
         'NV cat 1':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- NV cat 1'),
         'PB':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- PB'),
-        'CS':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- CS'),        
+        'CS':  _r('TRANSPORTE DE SALES','Consumo Total de Sales','- CS'),    
+        #NPT3
+        'FC_NaNO3_CAT1_NPT3': _r('FC NaNO3','NPT3','CAT1'),
+        'FC_NaNO3_CS_NPT3': _r('FC NaNO3','NPT3','CS'),        
+        'FC_NaNO3_PB_NPT3': _r('FC NaNO3','NPT3','PB'),
+        #NPT4
+        'FC_NaNO3_CS_NPT4': _r('FC NaNO3','NPT4','CS'),
+        'FC_NaNO3_PB_NPT4': _r('FC NaNO3','NPT4','PB'),        
+        'FC_NaNO3_PBCSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
+        'FC_NaNO3_CAT1_CSSI_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSI'),        
+        'FC_NaNO3_CAT1_CSSR_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSR'),
+        'FC_NaNO3_PURGA_NPT4': _r('FC NaNO3','NPT4','FC PURGA'),
 
 
         # Depreciaciones (fijas, no editables)
@@ -2289,6 +2339,7 @@ elif pagina == "Gastos por Área":
                 ('Otros Preco',               'GASTO POZAS', 'POZAS NV', 'Otros Preco',                   'KUS$'),
                 ('Arrdo y Serv. Produ',       'GASTO POZAS', 'POZAS NV', 'Arrdo y Servicios Produ',       'KUS$'),
                 ('Otros Produ',               'GASTO POZAS', 'POZAS NV', 'Otros Produ',                   'KUS$'),
+                ('')
             ]
         },
         'Pozas PB': {
