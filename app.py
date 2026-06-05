@@ -1462,40 +1462,23 @@ elif pagina == "Sensibilidad R+P":
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rp_rc}")
  
         st.divider()
-        # ─── FC NaNO3 ────────────────────────────────────────────
-        st.markdown("#### FC NaNO3")
+        # ─── FC NaNO3────────────────────────────────────────────
+        st.markdown("#### 🧂Consumo Sales por origen (KTon NaNO3) y FC NaNO3 ")
+        cs1, cs2, cs3 = st.columns(3)
+        with cs1: V['NV cat 1'] = st.number_input("NV cat 1", value=round(V['NV cat 1'],3), step=0.1, format="%.3f", key=f"ui_ts_NV_{rp_rc}")
+        with cs2: V['PB']       = st.number_input("PB",       value=round(V['PB'],3),       step=0.1, format="%.3f", key=f"ui_ts_PB_{rp_rc}")
+        with cs3: V['CS']       = st.number_input("CS",       value=round(V['CS'],3),       step=0.1, format="%.3f", key=f"ui_ts_CS_{rp_rc}")
 
-        st.caption("NPT3")
-        fn1, fn2, fn3 = st.columns(3)
-        with fn1: V['FC_NaNO3_CAT1_NPT3']      = st.number_input("CAT1",    value=float(f"{V['FC_NaNO3_CAT1_NPT3']:.4f}"),      step=0.01, format="%.4f", key=f"ui_fc_cat1_npt3_{rp_rc}")
-        with fn2: V['FC_NaNO3_PB_NPT3']        = st.number_input("PB",      value=float(f"{V['FC_NaNO3_PB_NPT3']:.4f}"),        step=0.01, format="%.4f", key=f"ui_fc_pb_npt3_{rp_rc}")
-        with fn3: V['FC_NaNO3_CS_NPT3']        = st.number_input("CS",      value=float(f"{V['FC_NaNO3_CS_NPT3']:.4f}"),        step=0.01, format="%.4f", key=f"ui_fc_cs_npt3_{rp_rc}")
-
-        st.caption("NPT4")
-        fn4, fn5, fn6, fn7, fn8 = st.columns(5)
-        with fn4: V['FC_NaNO3_CS_NPT4']        = st.number_input("CS",          value=float(f"{V['FC_NaNO3_CS_NPT4']:.4f}"),        step=0.01, format="%.4f", key=f"ui_fc_cs_npt4_{rp_rc}")
-        with fn5: V['FC_NaNO3_PB_CSSI_NPT4']   = st.number_input("PB CSSI",     value=float(f"{V['FC_NaNO3_PB_CSSI_NPT4']:.4f}"),   step=0.01, format="%.4f", key=f"ui_fc_pb_cssi_{rp_rc}")
-        with fn6: V['FC_NaNO3_CAT1_CSSI_NPT4'] = st.number_input("CAT1 CSSI",   value=float(f"{V['FC_NaNO3_CAT1_CSSI_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssi_{rp_rc}")
-        with fn7: V['FC_NaNO3_CAT1_CSSR_NPT4'] = st.number_input("CAT1 CSSR",   value=float(f"{V['FC_NaNO3_CAT1_CSSR_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssr_{rp_rc}")
-        with fn8: V['FC_NaNO3_PURGA_NPT4']     = st.number_input("FC Purga",    value=float(f"{V['FC_NaNO3_PURGA_NPT4']:.4f}"),     step=0.01, format="%.4f", key=f"ui_fc_purga_{rp_rc}")
-        
-        npt3_fc = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
-        consumo_nv_v = (npt3_fc * V['FC_NaNO3_CAT1_NPT3']
-                        + V['CSSR_NPT4'] * V['FC_NaNO3_CAT1_CSSR_NPT4']
-                        + V['CSSI_NPT4'] * V['FC_NaNO3_CAT1_CSSI_NPT4'])
-        consumo_pb_v = (npt3_fc * V['FC_NaNO3_PB_NPT3']
-                        + V['CSSI_NPT4'] * V['FC_NaNO3_PB_CSSI_NPT4'])
-        consumo_cs_v = V['KNO3_L_NPT4'] * V['FC_NaNO3_CS_NPT4']
-        consumo_tot_v = consumo_nv_v + consumo_pb_v + consumo_cs_v
+        consumo_tot_v = V['NV cat 1'] + V['PB'] + V['CS']
         prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
-        fc_v = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
-
-        ton_trans = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
-        precio_tot_v = (V['G_TPTE_NV'] + V['G_TPTE_PB'] + V['G_CAMINOS_NV']) / ton_trans if ton_trans > 0 else 0.0
-        c11_preview = precio_tot_v * fc_v
-        st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
-        #st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
-
+        fc_v          = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
+        precio_nv_v   = V['G_TPTE_NV']    / V['TON_TPTE_NV']  if V['TON_TPTE_NV']  > 0 else 0.0
+        precio_pb_v   = V['G_TPTE_PB']    / V['TON_TPTE_PB']  if V['TON_TPTE_PB']  > 0 else 0.0
+        precio_cs_v   = V['G_CAMINOS_NV'] / V['TON_TPTE_CS']  if V['TON_TPTE_CS']  > 0 else 0.0
+        precio_prom_v = (precio_nv_v*V['NV cat 1'] + precio_pb_v*V['PB'] + precio_cs_v*V['CS']) / consumo_tot_v if consumo_tot_v > 0 else 0.0
+        c11_preview   = precio_prom_v * fc_v
+        st.caption(f"FC: {fc_v:.4f} | Precio prom: ${precio_prom_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+        st.divider() 
 
         # ───Tpte Sales ────────────────────────────────────────────
         st.markdown("#### 🧂 Transporte de Sales")
@@ -1521,6 +1504,14 @@ elif pagina == "Sensibilidad R+P":
             ratio_cam = V['G_CAMINOS_NV'] / ton_total if ton_total > 0 else 0.0
             st.metric("USD/KTon", f"${ratio_cam:.2f}")
 
+        fs1, fs2 = st.columns(2)
+        with fs1:
+            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rp_rc}")
+        with fs2:
+            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rp_rc}")
+        st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
+        st.divider()
+
         
         if st.button(f"🔄 Restablecer valores REAL+PROY ({modo_sens})", use_container_width=True):
             st.session_state['rp_rc']      = st.session_state.get('rp_rc', 0) + 1
@@ -1529,19 +1520,18 @@ elif pagina == "Sensibilidad R+P":
             st.session_state['sv_rp_tipo'] = tipo_sens
             st.rerun()
 
-
     # ── PANEL RESULTADO ───────────────────────────────────────────────────────
     with col_res:
         costo_base, comp_base = recalcular(BASE)
         costo_sim,  comp_sim  = recalcular(V)
         delta_total = costo_sim - costo_base
-        delta_display = 0.0 if abs(delta_total) < 0.005 else round(delta_total, 1)
-        delta_str = "0.00 USD/T" if delta_display == 0.0 else f"{delta_display:+.1f} USD/T"
-
+ 
         st.markdown(f"#### 📊 Resultado — {MESES[mes]}")
-        st.metric("PPTO Base",   f"${costo_base:.1f} / T")
-        st.metric("Simulado",    f"${costo_sim:.1f} / T",
-                  delta=delta_str, delta_color="inverse")
+        st.metric("REAL + PROY BASE",       f"${costo_base:.2f} / T")
+        st.metric("Simulado",        f"${costo_sim:.2f} / T",
+                  delta=f"{delta_total:+.2f} USD/T", delta_color="inverse")
+ 
+        st.divider()
         
         st.markdown("**Detalle por componente**")
  
