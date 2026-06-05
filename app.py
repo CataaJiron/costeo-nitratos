@@ -1494,7 +1494,7 @@ elif pagina == "Sensibilidad R+P":
         with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key=f"ui_P_MOP70_{rp_rc}")
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rp_rc}")
         
-        cost_prom = ((V['P_MOP90'] * (V['FC_MOP90_NPT3'] + V['FC_MOP90_NPT4'])) + (V['P_MOP70']*(V['FC_MOP70_NPT4']+V['FC_MOP70_NPT3'])) + (V['P_SS'] *(V['FC_SS_NPT4']+V['FC_SS_NPT3'])))/(npt3_v2+V['KNO3_L_NPT4'])
+        cost_prom = ((V['P_MOP90'] * (V['FC_MOP90_NPT3'] + V['FC_MOP90_NPT4'])) + (V['P_MOP70']*(V['FC_MOP70_NPT4']+V['FC_MOP70_NPT3'])) + (V['P_SS'] *(V['FC_SS_NPT4']+V['FC_SS_NPT3'])))/(V['P_MOP90']+V['P_MOP70']+V['P_SS'])
         
         st.caption(f"Costo promedio: {cost_prom:.2f} USD/Ton")        
         st.divider()
