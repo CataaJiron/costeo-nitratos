@@ -901,6 +901,23 @@ elif pagina == "Sensibilidad PPTO":
         with fn7: V['FC_NaNO3_CAT1_CSSR_NPT4'] = st.number_input("CAT1 CSSR",   value=float(f"{V['FC_NaNO3_CAT1_CSSR_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssr_{rc}")
         with fn8: V['FC_NaNO3_PURGA_NPT4']     = st.number_input("FC Purga",    value=float(f"{V['FC_NaNO3_PURGA_NPT4']:.4f}"),     step=0.01, format="%.4f", key=f"ui_fc_purga_{rc}")
 
+        npt3_fc = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
+        consumo_nv_v = (npt3_fc * V['FC_NaNO3_CAT1_NPT3']
+                        + V['CSSR_NPT4'] * V['FC_NaNO3_CAT1_CSSR_NPT4']
+                        + V['CSSI_NPT4'] * V['FC_NaNO3_CAT1_CSSI_NPT4'])
+        consumo_pb_v = (npt3_fc * V['FC_NaNO3_PB_NPT3']
+                        + V['CSSI_NPT4'] * V['FC_NaNO3_PB_CSSI_NPT4'])
+        consumo_cs_v = V['KNO3_L_NPT4'] * V['FC_NaNO3_CS_NPT4']
+        consumo_tot_v = consumo_nv_v + consumo_pb_v + consumo_cs_v
+        prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
+        fc_v = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
+
+        ton_trans = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
+        precio_tot_v = (V['G_TPTE_NV'] + V['G_TPTE_PB'] + V['G_CAMINOS_NV']) / ton_trans if ton_trans > 0 else 0.0
+        c11_preview = precio_tot_v * fc_v
+        st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
+        #st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+
 
         # ───Tpte Sales ────────────────────────────────────────────
         st.markdown("#### Transporte de Sales")
@@ -1150,20 +1167,10 @@ elif pagina == "Sensibilidad R+P":
         precio_total_transporte = precio_cs + precio_nv + precio_pb
 
         # Precio promedio ponderado por consumo de sales
-        CAT1_NPT3 = npt3 * v['FC_NaNO3_CAT1_NPT3']
-        CAT1_CSSR = v['FC_NaNO3_CAT1_CSSR_NPT4'] * v['CSSR_NPT4']
-        CAT1_CSSI = v['CSSI_NPT4'] * v['FC_NaNO3_CAT1_CSSI_NPT4']
-        PB_NPT3 = npt3 * v['FC_NaNO3_PB_NPT3']
-        PB_CSSI = v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4']
-        PB_NPT4 = v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
-        CS_NPT3 = npt3 * v['FC_NaNO3_CS_NPT3'] 
-        CS_NPT4 = v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
-
-        consumo_nv = CAT1_NPT3 + CAT1_CSSI + CAT1_CSSR 
-        consumo_pb = PB_NPT3 + PB_NPT4 + PB_CSSI
-        consumo_cs = CS_NPT3 + CS_NPT4
+        consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + v['FC_NaNO3_CAT1_CSSR_NPT4'] * v['CSSR_NPT4'] + v['CSSI_NPT4'] * v['FC_NaNO3_CAT1_CSSI_NPT4']
+        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
+        consumo_cs = npt3 * v['FC_NaNO3_CS_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
-
 
         #precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
         fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
@@ -1471,7 +1478,23 @@ elif pagina == "Sensibilidad R+P":
         with fn6: V['FC_NaNO3_CAT1_CSSI_NPT4'] = st.number_input("CAT1 CSSI",   value=float(f"{V['FC_NaNO3_CAT1_CSSI_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssi_{rp_rc}")
         with fn7: V['FC_NaNO3_CAT1_CSSR_NPT4'] = st.number_input("CAT1 CSSR",   value=float(f"{V['FC_NaNO3_CAT1_CSSR_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssr_{rp_rc}")
         with fn8: V['FC_NaNO3_PURGA_NPT4']     = st.number_input("FC Purga",    value=float(f"{V['FC_NaNO3_PURGA_NPT4']:.4f}"),     step=0.01, format="%.4f", key=f"ui_fc_purga_{rp_rc}")
-        st.caption(f"Consumo NV: {consumo_nv:.3f} | PB: {consumo_pb:.3f} | CS: {consumo_cs:.3f} Kton")
+        
+        npt3_fc = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
+        consumo_nv_v = (npt3_fc * V['FC_NaNO3_CAT1_NPT3']
+                        + V['CSSR_NPT4'] * V['FC_NaNO3_CAT1_CSSR_NPT4']
+                        + V['CSSI_NPT4'] * V['FC_NaNO3_CAT1_CSSI_NPT4'])
+        consumo_pb_v = (npt3_fc * V['FC_NaNO3_PB_NPT3']
+                        + V['CSSI_NPT4'] * V['FC_NaNO3_PB_CSSI_NPT4'])
+        consumo_cs_v = V['KNO3_L_NPT4'] * V['FC_NaNO3_CS_NPT4']
+        consumo_tot_v = consumo_nv_v + consumo_pb_v + consumo_cs_v
+        prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
+        fc_v = consumo_tot_v / prod_total_ts if prod_total_ts > 0 else 0.0
+
+        ton_trans = V['TON_TPTE_NV'] + V['TON_TPTE_PB'] + V['TON_TPTE_CS']
+        precio_tot_v = (V['G_TPTE_NV'] + V['G_TPTE_PB'] + V['G_CAMINOS_NV']) / ton_trans if ton_trans > 0 else 0.0
+        c11_preview = precio_tot_v * fc_v
+        st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
+        #st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
 
 
         # ───Tpte Sales ────────────────────────────────────────────
