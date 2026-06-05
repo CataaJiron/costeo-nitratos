@@ -514,9 +514,11 @@ elif pagina == "Sensibilidad PPTO":
         'TON_TPTE_CS':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)', 'KTon NaNO3'),
 
         # FC KCl (adimensional: KTon KCl / Kton prod)
+        #NPT3
         'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
         'FC_MOP70_NPT3': _r('KCl','Fc KCl NPT3','MOP 70', nth=0),
         'FC_SS_NPT3':    _r('KCl','Fc KCl NPT3','SS', nth=0),
+        #NPT4
         'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
         'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
         'FC_SS_NPT4':    _r('KCl','Fc KCl NPT4','SS', nth=0),
@@ -598,7 +600,6 @@ elif pagina == "Sensibilidad PPTO":
         consumo_cs = CS_NPT3 + CS_NPT4
         consumo_total = consumo_nv + consumo_pb + consumo_cs
 
-
         #precio_prom = (precio_nv * consumo_nv + precio_pb * consumo_pb + precio_cs * consumo_cs) / consumo_total if consumo_total > 0 else 0.0
         fc_sales = consumo_total / prod_total if prod_total > 0 else 0.0
         c11 = precio_total_transporte * fc_sales
@@ -616,12 +617,23 @@ elif pagina == "Sensibilidad PPTO":
         c13 = (v['G_NPT3'] + v['G_NPT4'] + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
 
         # 1.4 KCl
-        cons_mop90 = (v['FC_MOP90_NPT3'] * npt3) + (v['FC_MOP90_NPT4'] * v['KNO3_L_NPT4'])
-        cons_mop70 = (v['FC_MOP70_NPT3'] * npt3) + (v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4'])
-        cons_ss    = (v['FC_SS_NPT3'] * npt3)  + (v['FC_SS_NPT4'] * v['KNO3_L_NPT4'])
+        MOP90_NPT3 = (v['FC_MOP90_NPT3'] * npt3)
+        MOP90_NPT4 = (v['FC_MOP90_NPT4'] * v['KNO3_L_NPT4'])
+        MOP70_NPT3 = (v['FC_MOP70_NPT3'] * npt3)
+        MOP70_NPT4 = (v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4'])
+        SS_NPT3 = (v['FC_SS_NPT3'] * npt3) 
+        SS_NPT4 = (v['FC_SS_NPT4'] * v['KNO3_L_NPT4'])
+
+        #CONSUMO
+        cons_mop90 = MOP90_NPT3 + MOP90_NPT4
+        cons_mop70 = MOP70_NPT3 + MOP70_NPT4
+        cons_ss    = SS_NPT3 + SS_NPT4
+        
         cons_total = cons_mop90 + cons_mop70 + cons_ss
+        
         costo_total_kcl = (v['P_MOP90'] * cons_mop90) + (v['P_MOP70'] * cons_mop70) + (v['P_SS'] * cons_ss)
         c14 = costo_total_kcl / prod_sin_Sod if prod_sin_Sod > 0 else 0.0
+
 
         # 1.5 Terminados
        # Gasto_Total_terminados = (v['G_PRIL'] + v['G_DTP'] + v['G_SECADO'] + v['G_TPTE_INT'] + v['DEP_PRIL'] + v['DEP_DTP'] + v['DEP_SECADO'])
