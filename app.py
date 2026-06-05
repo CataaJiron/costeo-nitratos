@@ -515,11 +515,11 @@ elif pagina == "Sensibilidad PPTO":
 
         # FC KCl (adimensional: KTon KCl / Kton prod)
         'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
-        'FC_MOP70_NPT3': _r('KCl','CONSUMO NPT3','MOP 70', nth=0),
-        'FC_SS_NPT3':    _r('KCl','CONSUMO NPT3','SS', nth=0),
+        'FC_MOP70_NPT3': _r('KCl','Fc KCl NPT3','MOP 70', nth=0),
+        'FC_SS_NPT3':    _r('KCl','Fc KCl NPT3','SS', nth=0),
         'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
         'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
-        'FC_SS_NPT4':    _r('KCl','CONSUMO NPT4','SS', nth=0),
+        'FC_SS_NPT4':    _r('KCl','Fc KCl NPT4','SS', nth=0),
         
         # Precio KCl (US$/T)
         'P_MOP90':       _r('KCl','Costo Promedio KCl','MOP 90'),
@@ -1105,12 +1105,14 @@ elif pagina == "Sensibilidad R+P":
         'TON_TPTE_PB':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS','KTon NaNO3'),
         'G_CAMINOS_NV':  _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Op Canchas + Caminos NV','KUS'),
         'TON_TPTE_CS':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)','KTon NaNO3'),
-        'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90',nth=0),
-        'FC_MOP70_NPT3': _r('KCl','CONSUMO NPT3','MOP 70',nth=0),
-        'FC_SS_NPT3':    _r('KCl','CONSUMO NPT3','SS',nth=0),
-        'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90',nth=0),
-        'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70',nth=0),
-        'FC_SS_NPT4':    _r('KCl','Fc KCl NPT4','SS',nth=0),
+        # FC KCl (adimensional: KTon KCl / Kton prod)
+        'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90', nth=0),
+        'FC_MOP70_NPT3': _r('KCl','Fc KCl NPT3','MOP 70', nth=0),
+        'FC_SS_NPT3':    _r('KCl','Fc KCl NPT3','SS', nth=0),
+        'FC_MOP90_NPT4': _r('KCl','Fc KCl NPT4','MOP 90', nth=0),
+        'FC_MOP70_NPT4': _r('KCl','Fc KCl NPT4','MOP 70', nth=0),
+        'FC_SS_NPT4':    _r('KCl','Fc KCl NPT4','SS', nth=0),
+
         'P_MOP90':       _r('KCl','Costo Promedio KCl','MOP 90'),
         'P_MOP70':       _r('KCl','Costo Promedio KCl','MOP 70'),
         'P_SS':          _r('KCl','Costo Promedio KCl','SS'),
