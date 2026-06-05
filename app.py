@@ -2080,7 +2080,7 @@ elif pagina == "Sim. Gastos PPTO":
         'PCS_PRECO_O': _rdet('GASTO POZAS','POZAS CS','Otros Preco'),
         'PCS_PRODU_A': _rdet('GASTO POZAS','POZAS CS','Arrdo y Servicios Produ'),
         'PCS_PRODU_O': _rdet('GASTO POZAS','POZAS CS','Otros Produ'),
-        'PCS_DEP': _rdet('GASTO POZAS','POZAS','DEPRECIACION CS')
+        'PCS_DEP':     _rdet('GASTO POZAS','POZAS','DEPRECIACION CS'),
         # NPT3 (sin 'Mantención' cabecera ni 'Gastos en NPT III' subtotal)
         'N3_REMUN':    _rdet('CRISTALIZACIÓN','NPT3','REMUNERACION'),
         'N3_ENERG':    _rdet('CRISTALIZACIÓN','NPT3','Energía'),
