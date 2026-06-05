@@ -1495,7 +1495,6 @@ elif pagina == "Sensibilidad R+P":
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rp_rc}")
         
        
-        st.caption(f"Costo promedio: {cost_prom:.2f} USD/Ton")        
         st.divider()
 
         # ─── FC NaNO3 ────────────────────────────────────────────
