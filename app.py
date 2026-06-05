@@ -761,10 +761,10 @@ elif pagina == "Sensibilidad PPTO":
             with c1:
                 V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],2), step=10.0, format="%.2f", key=f"ui_{key}_{rc}")
             with c2:
-                st.metric("USD/T", f"${V[key]/prod_total_v:.3f}" if prod_total_v > 0 else "-")
+                st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
  
         tot_pozas = V['G_POZAS_NV']+V['G_POZAS_CS']+V['G_POZAS_PB']+V['G_DEPRECIACION_CS']
-        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['G_DEPRECIACION_CS']:.0f} KUS fija): **${tot_pozas:.0f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
+        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['G_DEPRECIACION_CS']:.0f} KUS fija): **${tot_pozas:.1f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
  
         st.divider()
  
@@ -1344,10 +1344,10 @@ elif pagina == "Sensibilidad R+P":
             with c1:
                 V[key] = st.number_input(f"Gasto Pozas {lbl} (KUS)", value=round(V[key],2), step=10.0, format="%.2f", key=f"ui_{key}_{rp_rc}")
             with c2:
-                st.metric("USD/T", f"${V[key]/prod_total_v:.3f}" if prod_total_v > 0 else "-")
+                st.metric("USD/T", f"${V[key]/prod_total_v:.2f}" if prod_total_v > 0 else "-")
  
         tot_pozas = V['G_POZAS_NV']+V['G_POZAS_CS']+V['G_POZAS_PB']+V['G_DEPRECIACION_CS']
-        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['G_DEPRECIACION_CS']:.0f} KUS fija): **${tot_pozas:.1f} KUS** → **${tot_pozas/prod_total_v:.3f} USD/T**" if prod_total_v > 0 else "")
+        st.caption(f"📌 Total Pozas (incl. depr. CS ${V['G_DEPRECIACION_CS']:.0f} KUS fija): **${tot_pozas:.1f} KUS** → **${tot_pozas/prod_total_v:.2f} USD/T**" if prod_total_v > 0 else "")
  
         st.divider()
  
