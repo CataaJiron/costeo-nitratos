@@ -916,7 +916,7 @@ elif pagina == "Sensibilidad PPTO":
         precio_tot_v = (V['G_TPTE_NV'] + V['G_TPTE_PB'] + V['G_CAMINOS_NV']) / ton_trans if ton_trans > 0 else 0.0
         c11_preview = precio_tot_v * fc_v
         st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
-        st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+        #st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
 
 
         # ───Tpte Sales ────────────────────────────────────────────
