@@ -906,7 +906,7 @@ elif pagina == "Sensibilidad PPTO":
                         + V['CSSR_NPT4'] * V['FC_NaNO3_CAT1_CSSR_NPT4']
                         + V['CSSI_NPT4'] * V['FC_NaNO3_CAT1_CSSI_NPT4'])
         consumo_pb_v = (npt3_fc * V['FC_NaNO3_PB_NPT3']
-                        + V['CSSI_NPT4'] * V['FC_NaNO3_PBCSSI_NPT4'])
+                        + V['CSSI_NPT4'] * V['FC_NaNO3_PB_CSSI_NPT4'])
         consumo_cs_v = V['KNO3_L_NPT4'] * V['FC_NaNO3_CS_NPT4']
         consumo_tot_v = consumo_nv_v + consumo_pb_v + consumo_cs_v
         prod_total_ts = (V['KNO3_T_NPT3']+V['KNO3_R_NPT3']) + (V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
