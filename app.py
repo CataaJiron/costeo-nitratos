@@ -1525,13 +1525,13 @@ elif pagina == "Sensibilidad R+P":
         costo_base, comp_base = recalcular(BASE)
         costo_sim,  comp_sim  = recalcular(V)
         delta_total = costo_sim - costo_base
- 
+        delta_display = 0.0 if abs(delta_total) < 0.005 else round(delta_total, 1)
+        delta_str = "0.00 USD/T" if delta_display == 0.0 else f"{delta_display:+.1f} USD/T"
+
         st.markdown(f"#### 📊 Resultado — {MESES[mes]}")
-        st.metric("REAL + PROY BASE",       f"${costo_base:.2f} / T")
-        st.metric("Simulado",        f"${costo_sim:.2f} / T",
-                  delta=f"{delta_total:+.2f} USD/T", delta_color="inverse")
- 
-        st.divider()
+        st.metric("PPTO Base",   f"${costo_base:.1f} / T")
+        st.metric("Simulado",    f"${costo_sim:.1f} / T",
+                  delta=delta_str, delta_color="inverse")
         
         st.markdown("**Detalle por componente**")
  
