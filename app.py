@@ -2306,14 +2306,21 @@ elif pagina == "Sim. Gastos PPTO":
         
         df_det = pd.DataFrame(rows)
 
+# Función de mapeo de colores corregida y robustecida
         def _col_delta(val):
-            if isinstance(val, float):
-                if val > 0.01: return 'color:#D83030; font-weight:bold'
-                if val < -0.01: return 'color:#80BC00; font-weight:bold'
+            try:
+                val_float = float(val)
+                if val_float > 0.01: 
+                    return 'color:#D83030; font-weight:bold'
+                if val_float < -0.01: 
+                    return 'color:#80BC00; font-weight:bold'
+            except (ValueError, TypeError):
+                pass
             return 'color:gray'
 
+        # Renderizado de la tabla usando .map() en lugar de .applymap()
         st.dataframe(
-            df_det.style.applymap(_col_delta, subset=['Δ']).format({
+            df_det.style.map(_col_delta, subset=['Δ']).format({
                 'PPTO Base': '{:.2f}', 'Simulado': '{:.2f}', 'Δ': '{:+.2f}'
             }),
             use_container_width=True, hide_index=True, height=380
