@@ -713,7 +713,7 @@ elif pagina == "Sensibilidad PPTO":
                 st.metric(usdpt_label, f"${ratio:.2f}")
  
         # ─── PRODUCCIÓN ───────────────────────────────────────────────────────
-        st.markdown("####Producción (Kton)")
+        st.markdown("#### Producción (Kton)")
  
         pc1, pc2 = st.columns(2)
         with pc1:
@@ -753,7 +753,7 @@ elif pagina == "Sensibilidad PPTO":
  
  
         # ─── GASTOS POZAS ─────────────────────────────────────────────────────
-        st.markdown("####Gastos Pozas (KUS) → USD/T sobre NPT3+NPT4")
+        st.markdown("#### Gastos Pozas (KUS) → USD/T sobre NPT3+NPT4")
         st.caption("Gasto (KUS)  |  — denominador: prod total —  |  USD/T resultante")
  
         for lbl, key in [("NV", "G_POZAS_NV"), ("CS", "G_POZAS_CS"), ("PB", "G_POZAS_PB")]:
@@ -769,7 +769,7 @@ elif pagina == "Sensibilidad PPTO":
         st.divider()
  
         # ─── GASTOS PLANTAS ───────────────────────────────────────────────────
-        st.markdown("####Gastos Plantas (KUS)")
+        st.markdown("#### Gastos Plantas (KUS)")
  
         st.caption("Cristalización → USD/T sobre NPT3+NPT4")
         for lbl, key in [("NPT3 (+ Korda)", "G_NPT3"), ("NPT4", "G_NPT4")]:
@@ -794,7 +794,7 @@ elif pagina == "Sensibilidad PPTO":
         st.divider()
  
 # ─── PUERTO ───────────────────────────────────────────────────────────
-        st.markdown("####Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
+        st.markdown("#### Puerto — Gasto (KUS) | Toneladas (Kton) | USD/T")
 
         # 1. Función local exclusiva para Puerto
         def fila_usdton_puerto(label_usd, key_usd, label_ton, key_ton, step_ton=0.1):
@@ -853,7 +853,7 @@ elif pagina == "Sensibilidad PPTO":
  
         st.divider()
         # ─── FC KCl ───────────────────────────────────────────────────────────
-        st.markdown("####Factor Consumo KCl (KTon KCl / Kton prod)")
+        st.markdown("#### Factor Consumo KCl (KTon KCl / Kton prod)")
  
         npt3_v2 = V['KNO3_T_NPT3'] + V['KNO3_R_NPT3']
         npt4_v2 = V['KNO3_L_NPT4'] + V['CSSI_NPT4'] + V['CSSR_NPT4']
@@ -885,7 +885,7 @@ elif pagina == "Sensibilidad PPTO":
         st.divider()
  
         # ─── FC NaNO3 ────────────────────────────────────────────
-        st.markdown("####FC NaNO3")
+        st.markdown("#### FC NaNO3")
 
         st.caption("NPT3")
         fn1, fn2, fn3 = st.columns(3)
@@ -920,7 +920,7 @@ elif pagina == "Sensibilidad PPTO":
 
 
         # ───Tpte Sales ────────────────────────────────────────────
-        st.markdown("####Transporte de Sales")
+        st.markdown("#### Transporte de Sales")
 
         def fila_tpte(label, key_g, key_ton):
             c1, c2, c3 = st.columns([2, 2, 1])
