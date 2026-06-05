@@ -1502,7 +1502,7 @@ elif pagina == "Sensibilidad R+P":
         precio_tot_v = (V['G_TPTE_NV'] + V['G_TPTE_PB'] + V['G_CAMINOS_NV']) / ton_trans if ton_trans > 0 else 0.0
         c11_preview = precio_tot_v * fc_v
         st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
-        #st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
+        st.caption(f"FC total: {fc_v:.4f} | Precio tpte: ${precio_tot_v:.2f} | **=> 1.1 Tpte Sales = ${c11_preview:.2f} USD/T**")
         st.divider()
 
         # ───Tpte Sales ────────────────────────────────────────────
@@ -1534,7 +1534,7 @@ elif pagina == "Sensibilidad R+P":
         #    V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rp_rc}")
         #with fs2:
         #    V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rp_rc}")
-        #st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
+        st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
         st.divider()
 
         
