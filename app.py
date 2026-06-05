@@ -1722,6 +1722,9 @@ elif pagina == "Gastos por Área":
                 ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Produ'),
                 ('Otros',               'GASTO POZAS', 'POZAS CS', 'Otros Produ'),
             ]),
+            ('Depreciación Pozas CS', [
+                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS', 'DEPRECIACION CS'),
+            ]),
         ],
         'Tpte NV-PB': [
             ('Transporte Sales', [
