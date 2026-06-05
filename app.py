@@ -864,8 +864,8 @@ elif pagina == "Sensibilidad PPTO":
         with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT3_{rc}")
         with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT3_{rc}")
  
-        cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])*npt3_v2
-        st.caption(f"Consumo KCl NPT3: {cons3:.2f} KTon")
+        cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])
+        st.caption(f"KCl fresco NPT3: {cons3:.2f} KTon")
  
         st.caption("NPT4")
         fck4, fck5, fck6 = st.columns(3)
@@ -873,8 +873,8 @@ elif pagina == "Sensibilidad PPTO":
         with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT4_{rc}")
         with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT4_{rc}")
  
-        cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])*npt4_v2
-        st.caption(f"Consumo KCl NPT4: {cons4:.2f} KTon")
+        cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])
+        st.caption(f"KCl fresco NPT4: {cons4:.2f} KTon")
  
         st.caption("Precio KCl (US$/T)")
         pk1, pk2, pk3 = st.columns(3)
@@ -1506,7 +1506,7 @@ elif pagina == "Sensibilidad R+P":
         st.divider()
 
         # ───Tpte Sales ────────────────────────────────────────────
-        st.markdown("#### 🧂 Transporte de Sales")
+        st.markdown("#### Transporte de Sales")
 
         def fila_tpte(label, key_g, key_ton):
             c1, c2, c3 = st.columns([2, 2, 1])
@@ -1529,12 +1529,12 @@ elif pagina == "Sensibilidad R+P":
             ratio_cam = V['G_CAMINOS_NV'] / ton_total if ton_total > 0 else 0.0
             st.metric("USD/KTon", f"${ratio_cam:.2f}")
 
-        fs1, fs2 = st.columns(2)
-        with fs1:
-            V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rp_rc}")
-        with fs2:
-            V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rp_rc}")
-        st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
+        #fs1, fs2 = st.columns(2)
+        #with fs1:
+        #    V['P_TPTE_SALES'] = st.number_input("Precio Tpte Sales (USD/TNitr)", value=round(V['P_TPTE_SALES'],4), step=0.1, format="%.4f", key=f"ui_P_TPTE_SALES_{rp_rc}")
+        #with fs2:
+        #    V['FC_SALES'] = st.number_input("FC Consumo Sales (NaNO3/Ton)", value=float(f"{V['FC_SALES']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_SALES_{rp_rc}")
+        #st.caption(f"=> 1.1 Tpte Sales = ${V['P_TPTE_SALES']:.4f} × {V['FC_SALES']:.4f} = **${V['P_TPTE_SALES']*V['FC_SALES']:.4f} USD/T**")
         st.divider()
 
         
