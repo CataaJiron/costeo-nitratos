@@ -1153,7 +1153,7 @@ elif pagina == "Sensibilidad R+P":
         precio_total_transporte = precio_cs + precio_nv + precio_pb
 
         # Precio promedio ponderado por consumo de sales
-        consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + 'FC_NaNO3_CAT1_CSSR_NPT4' * v['CSSR_NPT4'] + v['CSSI_NPT4'] * 'FC_NaNO3_CAT1_CSSI_NPT4'
+        consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + v['FC_NaNO3_CAT1_CSSR_NPT4'] * v['CSSR_NPT4'] + v['CSSI_NPT4'] * v['FC_NaNO3_CAT1_CSSI_NPT4']
         consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
         consumo_cs = npt3 * v['FC_NaNO3_CS_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
