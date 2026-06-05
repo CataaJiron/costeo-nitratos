@@ -1471,7 +1471,7 @@ elif pagina == "Sensibilidad R+P":
         with fn6: V['FC_NaNO3_CAT1_CSSI_NPT4'] = st.number_input("CAT1 CSSI",   value=float(f"{V['FC_NaNO3_CAT1_CSSI_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssi_{rp_rc}")
         with fn7: V['FC_NaNO3_CAT1_CSSR_NPT4'] = st.number_input("CAT1 CSSR",   value=float(f"{V['FC_NaNO3_CAT1_CSSR_NPT4']:.4f}"), step=0.01, format="%.4f", key=f"ui_fc_cat1_cssr_{rp_rc}")
         with fn8: V['FC_NaNO3_PURGA_NPT4']     = st.number_input("FC Purga",    value=float(f"{V['FC_NaNO3_PURGA_NPT4']:.4f}"),     step=0.01, format="%.4f", key=f"ui_fc_purga_{rp_rc}")
-        st.caption(f"Consumo NV: {consumo_nv_v:.3f} | PB: {consumo_pb_v:.3f} | CS: {consumo_cs_v:.3f} Kton")
+        st.caption(f"Consumo NV: {consumo_nv:.3f} | PB: {consumo_pb:.3f} | CS: {consumo_cs:.3f} Kton")
 
 
         # ───Tpte Sales ────────────────────────────────────────────
