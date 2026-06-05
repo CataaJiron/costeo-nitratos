@@ -1486,13 +1486,17 @@ elif pagina == "Sensibilidad R+P":
  
         cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])
         st.caption(f"KCl fresco NPT4: {cons4:.2f} KTon")
- 
+
+         
         st.caption("Precio KCl (US$/T)")
         pk1, pk2, pk3 = st.columns(3)
         with pk1: V['P_MOP90'] = st.number_input("MOP 90", value=round(V['P_MOP90'],2), step=1.0, format="%.2f", key=f"ui_P_MOP90_{rp_rc}")
         with pk2: V['P_MOP70'] = st.number_input("MOP 70", value=round(V['P_MOP70'],2), step=1.0, format="%.2f", key=f"ui_P_MOP70_{rp_rc}")
         with pk3: V['P_SS']    = st.number_input("SS",     value=round(V['P_SS'],2),    step=1.0, format="%.2f", key=f"ui_P_SS_{rp_rc}")
- 
+        
+        cost_prom = (V['P_MOP90'] * (V['FC_MOP90_NPT3'] + V['FC_MOP90_NPT4'])) + (V['P_MOP70']*(V['FC_MOP70_NPT4']+V['FC_MOP70_NPT3']+ )) + (V['P_SS'] *(V['FC_SS_NPT4']+V['FC_SS_NPT3']))
+        
+        st.caption(f"Costo promedio: {const_prom:.2f} USD/Ton")        
         st.divider()
 
         # ─── FC NaNO3 ────────────────────────────────────────────
