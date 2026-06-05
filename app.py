@@ -2364,10 +2364,7 @@ elif pagina == "Sim. Gastos PPTO":
                 [("Arrdo y Servicios","PCS_PRODU_A"),("Otros","PCS_PRODU_O")], [], pt)
             tot = sum(V[k] for k in ['PCS_REMUN','PCS_MYREP','PCS_ENERG','PCS_ARRDO','PCS_AGUA','PCS_OTROS','PCS_MANT_D','PCS_MANT_M','PCS_PRECO_A','PCS_PRECO_O','PCS_PRODU_A','PCS_PRODU_O'])
             st.success(f"**Total Pozas CS: ${tot:,.0f} KUS$**")
-            inputs_grupo("DEPRECIACION",
-                [("Arrdo y Servicios","PCS_PRODU_A"),("Otros","PCS_PRODU_O")], [], pt)
-            tot = sum(V[k] for k in ['PCS_REMUN','PCS_MYREP','PCS_ENERG','PCS_ARRDO','PCS_AGUA','PCS_OTROS','PCS_MANT_D','PCS_MANT_M','PCS_PRECO_A','PCS_PRECO_O','PCS_PRODU_A','PCS_PRODU_O'])
-            st.success(f"**Total Pozas CS: ${tot:,.0f} KUS$**")            
+           
 
 
  
