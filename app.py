@@ -1451,8 +1451,8 @@ elif pagina == "Sensibilidad R+P":
         with fck2: V['FC_MOP70_NPT3'] = st.number_input("MOP 70 NPT3", value=float(f"{V['FC_MOP70_NPT3']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT3_{rp_rc}")
         with fck3: V['FC_SS_NPT3']    = st.number_input("SS NPT3",     value=float(f"{V['FC_SS_NPT3']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT3_{rp_rc}")
  
-        cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])*npt3_v2
-        st.caption(f"Consumo KCl NPT3: {cons3:.2f} KTon")
+        cons3 = (V['FC_MOP90_NPT3']+V['FC_MOP70_NPT3']+V['FC_SS_NPT3'])
+        st.caption(f"KCl fresco NPT3: {cons3:.2f} KTon")
  
         st.caption("NPT4")
         fck4, fck5, fck6 = st.columns(3)
@@ -1460,8 +1460,8 @@ elif pagina == "Sensibilidad R+P":
         with fck5: V['FC_MOP70_NPT4'] = st.number_input("MOP 70 NPT4", value=float(f"{V['FC_MOP70_NPT4']:.6f}"), step=0.001, format="%.6f", key=f"ui_FC_MOP70_NPT4_{rp_rc}")
         with fck6: V['FC_SS_NPT4']    = st.number_input("SS NPT4",     value=float(f"{V['FC_SS_NPT4']:.6f}"),    step=0.001, format="%.6f", key=f"ui_FC_SS_NPT4_{rp_rc}")
  
-        cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])*npt4_v2
-        st.caption(f"Consumo KCl NPT4: {cons4:.2f} KTon")
+        cons4 = (V['FC_MOP90_NPT4']+V['FC_MOP70_NPT4']+V['FC_SS_NPT4'])
+        st.caption(f"KCl fresco NPT4: {cons4:.2f} KTon")
  
         st.caption("Precio KCl (US$/T)")
         pk1, pk2, pk3 = st.columns(3)
