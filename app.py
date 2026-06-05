@@ -1722,9 +1722,6 @@ elif pagina == "Gastos por Área":
                 ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS CS', 'Arrdo y Servicios Produ'),
                 ('Otros',               'GASTO POZAS', 'POZAS CS', 'Otros Produ'),
             ]),
-            ('Depreciación Pozas CS', [
-                ('Arrdo y Servicios',   'GASTO POZAS', 'POZAS', 'DEPRECIACION CS'),
-            ]),
         ],
         'Tpte NV-PB': [
             ('Transporte Sales', [
@@ -2083,6 +2080,7 @@ elif pagina == "Sim. Gastos PPTO":
         'PCS_PRECO_O': _rdet('GASTO POZAS','POZAS CS','Otros Preco'),
         'PCS_PRODU_A': _rdet('GASTO POZAS','POZAS CS','Arrdo y Servicios Produ'),
         'PCS_PRODU_O': _rdet('GASTO POZAS','POZAS CS','Otros Produ'),
+        'PCS_DEP': _rdet('GASTO POZAS','POZAS','DEPRECIACION CS')
         # NPT3 (sin 'Mantención' cabecera ni 'Gastos en NPT III' subtotal)
         'N3_REMUN':    _rdet('CRISTALIZACIÓN','NPT3','REMUNERACION'),
         'N3_ENERG':    _rdet('CRISTALIZACIÓN','NPT3','Energía'),
@@ -2156,7 +2154,7 @@ elif pagina == "Sim. Gastos PPTO":
         g_pcs = (v['PCS_REMUN']+v['PCS_MYREP']+v['PCS_ENERG']+v['PCS_ARRDO']+
                  v['PCS_AGUA']+v['PCS_OTROS']+
                  v['PCS_MANT_D']+v['PCS_MANT_M']+
-                 v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O'])
+                 v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O']+v['PCS_DEP'])
         g_n3  = (v['N3_REMUN']+v['N3_ENERG']+v['N3_PETROL']+v['N3_MAQ']+v['N3_AGUA']+
                  v['N3_MYREP']+v['N3_ARRDO']+v['N3_CSODA']+v['N3_OTROS']+
                  v['N3_MANT_D']+v['N3_MANT_M']+v['N3_KORDA'])
@@ -2335,6 +2333,7 @@ elif pagina == "Sim. Gastos PPTO":
                 [("Arrdo y Servicios","PNV_PRODU_A"),("Otros","PNV_PRODU_O")], [], pt)
             tot = sum(V[k] for k in ['PNV_REMUN','PNV_ENERG','PNV_ARRDO','PNV_OTROS','PNV_MANT_D','PNV_MANT_M','PNV_PRECO_A','PNV_PRECO_O','PNV_PRODU_A','PNV_PRODU_O'])
             st.success(f"**Total Pozas NV: ${tot:,.0f} KUS$**")
+
  
         # ── Pozas PB ─────────────────────────────────────────────────────────
         with tab_ppb:
@@ -2365,6 +2364,12 @@ elif pagina == "Sim. Gastos PPTO":
                 [("Arrdo y Servicios","PCS_PRODU_A"),("Otros","PCS_PRODU_O")], [], pt)
             tot = sum(V[k] for k in ['PCS_REMUN','PCS_MYREP','PCS_ENERG','PCS_ARRDO','PCS_AGUA','PCS_OTROS','PCS_MANT_D','PCS_MANT_M','PCS_PRECO_A','PCS_PRECO_O','PCS_PRODU_A','PCS_PRODU_O'])
             st.success(f"**Total Pozas CS: ${tot:,.0f} KUS$**")
+            inputs_grupo("DEPRECIACION",
+                [("Arrdo y Servicios","PCS_PRODU_A"),("Otros","PCS_PRODU_O")], [], pt)
+            tot = sum(V[k] for k in ['PCS_REMUN','PCS_MYREP','PCS_ENERG','PCS_ARRDO','PCS_AGUA','PCS_OTROS','PCS_MANT_D','PCS_MANT_M','PCS_PRECO_A','PCS_PRECO_O','PCS_PRODU_A','PCS_PRODU_O'])
+            st.success(f"**Total Pozas CS: ${tot:,.0f} KUS$**")            
+
+
  
         # ── NPT3 ─────────────────────────────────────────────────────────────
         with tab_npt3:
