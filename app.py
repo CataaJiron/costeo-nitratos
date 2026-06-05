@@ -2144,27 +2144,14 @@ elif pagina == "Sim. Gastos PPTO":
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
         # Gastos desde detalle
-        g_pnv = (v['PNV_REMUN']+v['PNV_ENERG']+v['PNV_ARRDO']+v['PNV_OTROS']+ v['PNV_MANT_D']+v['PNV_MANT_M']+
-                 v['PNV_PRECO_A']+v['PNV_PRECO_O']+v['PNV_PRODU_A']+v['PNV_PRODU_O'])
-        g_ppb = (v['PPB_REMUN']+v['PPB_MYREP']+v['PPB_COMB']+v['PPB_ARRDO']+
-                 v['PPB_OTROS']+v['PPB_DIST_EE']+
-                 v['PPB_MANT_D']+v['PPB_MANT_M']+
-                 v['PPB_PRECO_A']+v['PPB_PRECO_O']+v['PPB_PRODU_A']+v['PPB_PRODU_O'])
-        g_pcs = (v['PCS_REMUN']+v['PCS_MYREP']+v['PCS_ENERG']+v['PCS_ARRDO']+
-                 v['PCS_AGUA']+v['PCS_OTROS']+
-                 v['PCS_MANT_D']+v['PCS_MANT_M']+
-                 v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O']+v['PCS_DEP'])
-        g_n3  = (v['N3_REMUN']+v['N3_ENERG']+v['N3_PETROL']+v['N3_MAQ']+v['N3_AGUA']+
-                 v['N3_MYREP']+v['N3_ARRDO']+v['N3_CSODA']+v['N3_OTROS']+
-                 v['N3_MANT_D']+v['N3_MANT_M']+v['N3_KORDA'])
-        g_n4  = (v['N4_REMUN']+v['N4_ENERG']+v['N4_PETROL']+v['N4_MAQ']+v['N4_AGUA']+
-                 v['N4_CSODA']+v['N4_OTROS']+v['N4_MANT_D']+v['N4_MANT_M']+v['N4_KORDA'])
-        g_pr  = (v['PR_REMUN']+v['PR_ENERG']+v['PR_PETROL']+v['PR_MAQ']+
-                 v['PR_ADITI']+v['PR_OTROS']+v['PR_MANT_D']+v['PR_MANT_M'])
-        g_dt  = (v['DT_REMUN']+v['DT_ENERG']+v['DT_PETROL']+v['DT_ADITI']+
-                 v['DT_OTROS']+v['DT_MANT_D']+v['DT_MANT_M'])
-        g_sc  = (v['SC_REMUN']+v['SC_ENERG']+v['SC_PETROL']+v['SC_ADITI']+
-                 v['SC_MAQ']+v['SC_OTROS']+v['SC_MANT_D']+v['SC_MANT_M'])
+        g_pnv = (v['PNV_REMUN']+v['PNV_ENERG']+v['PNV_ARRDO']+v['PNV_OTROS']+ v['PNV_MANT_D']+v['PNV_MANT_M']+ v['PNV_PRECO_A']+v['PNV_PRECO_O']+v['PNV_PRODU_A']+v['PNV_PRODU_O'])
+        g_ppb = (v['PPB_REMUN']+v['PPB_MYREP']+v['PPB_COMB']+v['PPB_ARRDO']+v['PPB_OTROS']+v['PPB_DIST_EE']+ v['PPB_MANT_D']+v['PPB_MANT_M']+v['PPB_PRECO_A']+v['PPB_PRECO_O']+v['PPB_PRODU_A']+v['PPB_PRODU_O'])
+        g_pcs = (v['PCS_REMUN']+v['PCS_MYREP']+v['PCS_ENERG']+v['PCS_ARRDO']+v['PCS_AGUA']+v['PCS_OTROS']+v['PCS_MANT_D']+v['PCS_MANT_M']+v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O']+v['PCS_DEP'])
+        g_n3  = (v['N3_REMUN']+v['N3_ENERG']+v['N3_PETROL']+v['N3_MAQ']+v['N3_AGUA']+v['N3_MYREP']+v['N3_ARRDO']+v['N3_CSODA']+v['N3_OTROS']+v['N3_MANT_D']+v['N3_MANT_M']+v['N3_KORDA'])
+        g_n4  = (v['N4_REMUN']+v['N4_ENERG']+v['N4_PETROL']+v['N4_MAQ']+v['N4_AGUA']+v['N4_CSODA']+v['N4_OTROS']+v['N4_MANT_D']+v['N4_MANT_M']+v['N4_KORDA'])
+        g_pr  = (v['PR_REMUN']+v['PR_ENERG']+v['PR_PETROL']+v['PR_MAQ']+v['PR_ADITI']+v['PR_OTROS']+v['PR_MANT_D']+v['PR_MANT_M'])
+        g_dt  = (v['DT_REMUN']+v['DT_ENERG']+v['DT_PETROL']+v['DT_ADITI']+v['DT_OTROS']+v['DT_MANT_D']+v['DT_MANT_M'])
+        g_sc  = (v['SC_REMUN']+v['SC_ENERG']+v['SC_PETROL']+v['SC_ADITI']+v['SC_MAQ']+v['SC_OTROS']+v['SC_MANT_D']+v['SC_MANT_M'])
  
     def recalcular(v):
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
