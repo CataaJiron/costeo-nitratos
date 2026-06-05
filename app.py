@@ -539,7 +539,7 @@ elif pagina == "Sensibilidad PPTO":
         #NPT4
         'FC_NaNO3_CS_NPT4': _r('FC NaNO3','NPT4','CS'),
         'FC_NaNO3_PB_NPT4': _r('FC NaNO3','NPT4','PB'),        
-        'FC_NaNO3_PBCSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
+        'FC_NaNO3_PB_CSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
         'FC_NaNO3_CAT1_CSSI_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSI'),        
         'FC_NaNO3_CAT1_CSSR_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSR'),
         'FC_NaNO3_PURGA_NPT4': _r('FC NaNO3','NPT4','FC PURGA'),        
@@ -585,7 +585,7 @@ elif pagina == "Sensibilidad PPTO":
 
         # Precio promedio ponderado por consumo de sales
         consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + 'FC_NaNO3_CAT1_CSSR_NPT4' * v['CSSR_NPT4'] + v['CSSI_NPT4'] * 'FC_NaNO3_CAT1_CSSI_NPT4'
-        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PBCSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
+        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
         consumo_cs = npt3 * v['FC_NaNO3_CS_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
 
@@ -1127,7 +1127,7 @@ elif pagina == "Sensibilidad R+P":
         #NPT4
         'FC_NaNO3_CS_NPT4': _r('FC NaNO3','NPT4','CS'),
         'FC_NaNO3_PB_NPT4': _r('FC NaNO3','NPT4','PB'),        
-        'FC_NaNO3_PBCSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
+        'FC_NaNO3_PB_CSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
         'FC_NaNO3_CAT1_CSSI_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSI'),        
         'FC_NaNO3_CAT1_CSSR_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSR'),
         'FC_NaNO3_PURGA_NPT4': _r('FC NaNO3','NPT4','FC PURGA'),
@@ -1154,7 +1154,7 @@ elif pagina == "Sensibilidad R+P":
 
         # Precio promedio ponderado por consumo de sales
         consumo_nv = npt3 * v['FC_NaNO3_CAT1_NPT3'] + 'FC_NaNO3_CAT1_CSSR_NPT4' * v['CSSR_NPT4'] + v['CSSI_NPT4'] * 'FC_NaNO3_CAT1_CSSI_NPT4'
-        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PBCSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
+        consumo_pb = npt3 * v['FC_NaNO3_PB_NPT3'] + v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4']
         consumo_cs = npt3 * v['FC_NaNO3_CS_NPT4'] + v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4']
         consumo_total = consumo_nv + consumo_pb + consumo_cs
 
@@ -1856,7 +1856,7 @@ elif pagina == "Sensibilidad PLAN INDUSTRIAL":
         #NPT4
         'FC_NaNO3_CS_NPT4': _r('FC NaNO3','NPT4','CS'),
         'FC_NaNO3_PB_NPT4': _r('FC NaNO3','NPT4','PB'),        
-        'FC_NaNO3_PBCSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
+        'FC_NaNO3_PB_CSSI_NPT4': _r('FC NaNO3','NPT4','PB CSSI'),
         'FC_NaNO3_CAT1_CSSI_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSI'),        
         'FC_NaNO3_CAT1_CSSR_NPT4': _r('FC NaNO3','NPT4','CAT1 CSSR'),
         'FC_NaNO3_PURGA_NPT4': _r('FC NaNO3','NPT4','FC PURGA'),
