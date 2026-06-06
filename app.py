@@ -2188,11 +2188,17 @@ elif pagina == "Sim. Gastos PPTO":
         css = v['FC_SS_NPT3']*npt3+v['FC_SS_NPT4']*v['KNO3_L_NPT4']
         c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_total if prod_total>0 else 0.0
  
-        delta_pr = (g_pr - BASE['G_PRIL'])  # cuánto cambió Prilado según detalle
-        delta_dt = (g_dt - BASE['G_DTP'])
-        delta_sc = (g_sc - BASE['G_SECADO'])
-        c15 = (v['G_PRIL']+delta_pr + v['G_DTP']+delta_dt + v['G_SECADO']+delta_sc + 
-               v['G_TPTE_INT']+v['DEP_PRIL']+v['DEP_DTP']+v['DEP_SECADO']) / prod_term
+        BASE_PR_SUM = (BASE['PR_REMUN']+BASE['PR_ENERG']+BASE['PR_PETROL']+BASE['PR_MAQ']+
+                       BASE['PR_ADITI']+BASE['PR_OTROS']+BASE['PR_MANT_D']+BASE['PR_MANT_M'])
+        BASE_DT_SUM = (BASE['DT_REMUN']+BASE['DT_ENERG']+BASE['DT_PETROL']+BASE['DT_ADITI']+
+                       BASE['DT_OTROS']+BASE['DT_MANT_D']+BASE['DT_MANT_M'])
+        BASE_SC_SUM = (BASE['SC_REMUN']+BASE['SC_ENERG']+BASE['SC_PETROL']+BASE['SC_ADITI']+
+                       BASE['SC_MAQ']+BASE['SC_OTROS']+BASE['SC_MANT_D']+BASE['SC_MANT_M'])
+        delta_pr = g_pr - BASE_PR_SUM
+        delta_dt = g_dt - BASE_DT_SUM
+        delta_sc = g_sc - BASE_SC_SUM
+        c15 = (BASE['G_PRIL']+delta_pr + BASE['G_DTP']+delta_dt + BASE['G_SECADO']+delta_sc +
+               v['G_TPTE_INT']+v['DEP_PRIL']+v['DEP_DTP']+v['DEP_SECADO']) / prod_term if prod_term>0 else 0.0
 
  
         c_t  = v['G_TPTE_CAM']/v['TON_TPTE_CAM'] if v['TON_TPTE_CAM']>0 else 0.0
