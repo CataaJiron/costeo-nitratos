@@ -2260,11 +2260,12 @@ elif pagina == "Sim. Gastos PPTO":
         st.dataframe(df_res.style.map(_cd,subset=["Δ"]).format({"PPTO":"{:.2f}","Sim":"{:.2f}","Δ":"{:+.2f}"}),
                      use_container_width=True,hide_index=True,height=360)
         st.divider()
-        if st.button("🔄 Restablecer todo",use_container_width=True,key="sg_reset"):
-            st.session_state['sg_rc']=st.session_state.get('sg_rc',0)+1
-            st.session_state['sg_sv']=copy.deepcopy(BASE)
-            st.session_state['sg_mes']=mes
-            st.session_state['sg_tipo']=tipo_sens
+        if st.button("🔄 Restablecer todo", use_container_width=True, key="sg_reset"):
+            st.session_state['sg_rc']   = st.session_state.get('sg_rc',0)+1
+            st.session_state['sg_sv']   = copy.deepcopy(BASE)
+            st.session_state['sg_base'] = copy.deepcopy(BASE)
+            st.session_state['sg_mes']  = mes
+            st.session_state['sg_tipo'] = tipo_sens
             st.rerun()
  
     with col_inp:
