@@ -1992,7 +1992,7 @@ elif pagina == "Sim. Gastos PPTO":
         'PRIL_DTP':      _r('PRODUCCION','TERMINADOS','PRILADO + DTP'),
         'SECADO':        _r('PRODUCCION','TERMINADOS','SECADO'),
         'G_DEPRECIACION_CS': _r('GASTO','Operación Pozas (NV+CS+PV+PB)','Gasto Depreciación CS'),
-        'POZ_DEP_CS':    _rdet('GASTO POZAS','POZAS','DEPRECIACION CS'),
+        #'POZ_DEP_CS':    _rdet('GASTO POZAS','POZAS','DEPRECIACION CS'),
         'POZ_OP_PV':     _rdet('GASTO POZAS','POZAS','OPERACIONES PV'),
         'TON_EMBARQUE_TOTAL':  _r('Embarque Granel Trimestral','EMBARQUE','Embarque total','Kton'),
         'TON_EMBARQUE_GRANEL': _r('Embarque Granel Trimestral','EMBARQUE','Embarque Granel','Kton'),
@@ -2153,9 +2153,8 @@ elif pagina == "Sim. Gastos PPTO":
                  v['PPB_MANT_D']+v['PPB_MANT_M']+
                  v['PPB_PRECO_A']+v['PPB_PRECO_O']+v['PPB_PRODU_A']+v['PPB_PRODU_O'])
         g_pcs = (v['PCS_REMUN']+v['PCS_MYREP']+v['PCS_ENERG']+v['PCS_ARRDO']+
-                 v['PCS_AGUA']+v['PCS_OTROS']+
-                 v['PCS_MANT_D']+v['PCS_MANT_M']+
-                 v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O']+v['PCS_DEP'])
+                 v['PCS_AGUA']+v['PCS_OTROS']+ v['PCS_MANT_D']+v['PCS_MANT_M']+
+                 v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O'])
         g_n3  = (v['N3_REMUN']+v['N3_ENERG']+v['N3_PETROL']+v['N3_MAQ']+v['N3_AGUA']+
                  v['N3_MYREP']+v['N3_ARRDO']+v['N3_CSODA']+v['N3_OTROS']+
                  v['N3_MANT_D']+v['N3_MANT_M']+v['N3_KORDA'])
@@ -2178,7 +2177,7 @@ elif pagina == "Sim. Gastos PPTO":
         fc_s = (consumo_nv+consumo_pb+consumo_cs)/prod_total if prod_total>0 else 0.0
         c11 = (p_nv+p_pb+p_cs)*fc_s
  
-        c12 = (g_pnv+g_ppb+g_pcs+v['POZ_DEP_CS']+v['POZ_OP_PV']+v['G_DEPRECIACION_CS'])/prod_total if prod_total>0 else 0.0
+        c12 = (g_pnv+g_ppb+g_pcs+v['POZ_OP_PV']+v['G_DEPRECIACION_CS'])/prod_total if prod_total>0 else 0.0
         c13 = (g_n3+g_n4+v['DEP_NPT3']+v['DEP_NPT4'])/prod_total if prod_total>0 else 0.0
  
         c90 = v['FC_MOP90_NPT3']*npt3+v['FC_MOP90_NPT4']*v['KNO3_L_NPT4']
