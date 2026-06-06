@@ -2146,6 +2146,7 @@ elif pagina == "Sim. Gastos PPTO":
         npt3 = v['KNO3_T_NPT3']+v['KNO3_R_NPT3']
         npt4 = v['KNO3_L_NPT4']+v['CSSI_NPT4']+v['CSSR_NPT4']
         prod_total = npt3+npt4
+        prod_sin_sod = npt3 + v['KNO3_L_NPT4']
         prod_term  = v['PRIL_DTP']+v['SECADO']
  
         g_pnv = (v['PNV_REMUN']+v['PNV_ENERG']+v['PNV_ARRDO']+v['PNV_OTROS']+
@@ -2186,7 +2187,7 @@ elif pagina == "Sim. Gastos PPTO":
         c90 = v['FC_MOP90_NPT3']*npt3+v['FC_MOP90_NPT4']*v['KNO3_L_NPT4']
         c70 = v['FC_MOP70_NPT3']*npt3+v['FC_MOP70_NPT4']*v['KNO3_L_NPT4']
         css = v['FC_SS_NPT3']*npt3+v['FC_SS_NPT4']*v['KNO3_L_NPT4']
-        c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_total if prod_total>0 else 0.0
+        c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_sin_sod if prod_sin_sod>0 else 0.0
  
         BASE_PR_SUM = (BASE['PR_REMUN']+BASE['PR_ENERG']+BASE['PR_PETROL']+BASE['PR_MAQ']+
                        BASE['PR_ADITI']+BASE['PR_OTROS']+BASE['PR_MANT_D']+BASE['PR_MANT_M'])
