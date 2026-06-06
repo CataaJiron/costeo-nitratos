@@ -2008,6 +2008,9 @@ elif pagina == "Sim. Gastos PPTO":
         'TON_TPTE_PB':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales PB a CS','KTon NaNO3'),
         'G_CAMINOS_NV':  _r('TRANSPORTE DE SALES','Total Transporte de Sales NV + PB','- Op Canchas + Caminos NV','KUS'),
         'TON_TPTE_CS':   _r('TRANSPORTE DE SALES','Total Transporte Sales (Promedio)','Transporte de Sales CS (Alimentación)','KTon NaNO3'),
+        'G_PRIL':   _r('GASTO','TERMINADOS','Gasto Planta Prilado CS'),
+        'G_DTP':    _r('GASTO','TERMINADOS','Gasto Planta DTP'),
+        'G_SECADO': _r('GASTO','TERMINADOS','Gasto Planta Secado KNO3'),
         # FC KCl
         'FC_MOP90_NPT3': _r('KCl','Fc KCl NPT3','MOP 90',nth=0),
         'FC_MOP70_NPT3': _r('KCl','Fc KCl NPT3','MOP 70',nth=0),
@@ -2185,7 +2188,12 @@ elif pagina == "Sim. Gastos PPTO":
         css = v['FC_SS_NPT3']*npt3+v['FC_SS_NPT4']*v['KNO3_L_NPT4']
         c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_total if prod_total>0 else 0.0
  
-        c15 = (g_pr+g_dt+g_sc+v['G_TPTE_INT']+v['DEP_PRIL']+v['DEP_DTP']+v['DEP_SECADO'])/prod_term if prod_term>0 else 0.0
+        delta_pr = (g_pr - BASE['G_PRIL'])  # cuánto cambió Prilado según detalle
+        delta_dt = (g_dt - BASE['G_DTP'])
+        delta_sc = (g_sc - BASE['G_SECADO'])
+        c15 = (v['G_PRIL']+delta_pr + v['G_DTP']+delta_dt + v['G_SECADO']+delta_sc + 
+               v['G_TPTE_INT']+v['DEP_PRIL']+v['DEP_DTP']+v['DEP_SECADO']) / prod_term
+
  
         c_t  = v['G_TPTE_CAM']/v['TON_TPTE_CAM'] if v['TON_TPTE_CAM']>0 else 0.0
         c_e  = v['G_EMBARQUE']/v['TON_EMBARQUE_GRANEL'] if v['TON_EMBARQUE_GRANEL']>0 else 0.0
