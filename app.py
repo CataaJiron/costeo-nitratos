@@ -2143,24 +2143,12 @@ elif pagina == "Sim. Gastos PPTO":
     BASE = {**BASE_KPI, **BASE_DET}
  
     def recalcular(v):
-        npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
-        npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
-        prod_total = npt3 + npt4
-        prod_total_sin_Sod = npt3 + v['KNO3_L_NPT4']
-        prod_term  = v['PRIL_DTP'] + v['SECADO']
-
-        # c11 Tpte Sales
-        Ton_t = v['TON_TPTE_NV']+v['TON_TPTE_PB']+v['TON_TPTE_CS']
-        p_nv = v['G_TPTE_NV']/Ton_t if Ton_t>0 else 0.0
-        p_pb = v['G_TPTE_PB']/Ton_t if Ton_t>0 else 0.0
-        p_cs = v['G_CAMINOS_NV']/Ton_t if Ton_t>0 else 0.0
-        consumo_nv = npt3*v['FC_NaNO3_CAT1_NPT3']+v['CSSR_NPT4']*v['FC_NaNO3_CAT1_CSSR_NPT4']+v['CSSI_NPT4']*v['FC_NaNO3_CAT1_CSSI_NPT4']
-        consumo_pb = npt3*v['FC_NaNO3_PB_NPT3']+v['CSSI_NPT4']*v['FC_NaNO3_PB_CSSI_NPT4']
-        consumo_cs = npt3*v['FC_NaNO3_CS_NPT3']+v['KNO3_L_NPT4']*v['FC_NaNO3_CS_NPT4']
-        fc_s = (consumo_nv+consumo_pb+consumo_cs)/prod_total if prod_total>0 else 0.0
-        c11 = (p_nv+p_pb+p_cs)*fc_s
-
-        # c12 Pozas — numerador desde detalle + POZ_OP_PV + DEP
+        npt3 = v['KNO3_T_NPT3']+v['KNO3_R_NPT3']
+        npt4 = v['KNO3_L_NPT4']+v['CSSI_NPT4']+v['CSSR_NPT4']
+        prod_total = npt3+npt4
+        prod_sin_sod = npt3 + v['KNO3_L_NPT4']
+        prod_term  = v['PRIL_DTP']+v['SECADO']
+ 
         g_pnv = (v['PNV_REMUN']+v['PNV_ENERG']+v['PNV_ARRDO']+v['PNV_OTROS']+
                  v['PNV_MANT_D']+v['PNV_MANT_M']+
                  v['PNV_PRECO_A']+v['PNV_PRECO_O']+v['PNV_PRODU_A']+v['PNV_PRODU_O'])
@@ -2169,32 +2157,38 @@ elif pagina == "Sim. Gastos PPTO":
                  v['PPB_MANT_D']+v['PPB_MANT_M']+
                  v['PPB_PRECO_A']+v['PPB_PRECO_O']+v['PPB_PRODU_A']+v['PPB_PRODU_O'])
         g_pcs = (v['PCS_REMUN']+v['PCS_MYREP']+v['PCS_ENERG']+v['PCS_ARRDO']+
-                 v['PCS_AGUA']+v['PCS_OTROS']+
-                 v['PCS_MANT_D']+v['PCS_MANT_M']+
+                 v['PCS_AGUA']+v['PCS_OTROS']+ v['PCS_MANT_D']+v['PCS_MANT_M']+
                  v['PCS_PRECO_A']+v['PCS_PRECO_O']+v['PCS_PRODU_A']+v['PCS_PRODU_O'])
+        g_n3  = (v['N3_REMUN']+v['N3_ENERG']+v['N3_PETROL']+v['N3_MAQ']+v['N3_AGUA']+
+                 v['N3_MYREP']+v['N3_ARRDO']+v['N3_CSODA']+v['N3_OTROS']+
+                 v['N3_MANT_D']+v['N3_MANT_M']+v['N3_KORDA'])
+        g_n4  = (v['N4_REMUN']+v['N4_ENERG']+v['N4_PETROL']+v['N4_MAQ']+v['N4_AGUA']+
+                 v['N4_CSODA']+v['N4_OTROS']+v['N4_MANT_D']+v['N4_MANT_M']+v['N4_KORDA'])
+        g_pr  = (v['PR_REMUN']+v['PR_ENERG']+v['PR_PETROL']+v['PR_MAQ']+
+                 v['PR_ADITI']+v['PR_OTROS']+v['PR_MANT_D']+v['PR_MANT_M'])
+        g_dt  = (v['DT_REMUN']+v['DT_ENERG']+v['DT_PETROL']+v['DT_ADITI']+
+                 v['DT_OTROS']+v['DT_MANT_D']+v['DT_MANT_M'])
+        g_sc  = (v['SC_REMUN']+v['SC_ENERG']+v['SC_PETROL']+v['SC_ADITI']+
+                 v['SC_MAQ']+v['SC_OTROS']+v['SC_MANT_D']+v['SC_MANT_M'])
+ 
+        Ton_t = v['TON_TPTE_NV']+v['TON_TPTE_PB']+v['TON_TPTE_CS']
+        p_nv = v['G_TPTE_NV']/Ton_t if Ton_t>0 else 0.0
+        p_pb = v['G_TPTE_PB']/Ton_t if Ton_t>0 else 0.0
+        p_cs = v['G_CAMINOS_NV']/Ton_t if Ton_t>0 else 0.0
+        consumo_nv = npt3*v['FC_NaNO3_CAT1_NPT3']+v['CSSR_NPT4']*v['FC_NaNO3_CAT1_CSSR_NPT4']+v['CSSI_NPT4']*v['FC_NaNO3_CAT1_CSSI_NPT4']
+        consumo_pb = npt3*v['FC_NaNO3_PB_NPT3']+v['CSSI_NPT4']*v['FC_NaNO3_PB_CSSI_NPT4']
+        consumo_cs = npt3*v['FC_NaNO3_CS_NPT3'] + v['KNO3_L_NPT4']*v['FC_NaNO3_CS_NPT4']
+        fc_s = (consumo_nv+consumo_pb+consumo_cs)/prod_total if prod_total>0 else 0.0
+        c11 = (p_nv+p_pb+p_cs)*fc_s
+ 
         c12 = (g_pnv+g_ppb+g_pcs+v['POZ_OP_PV']+v['G_DEPRECIACION_CS'])/prod_total if prod_total>0 else 0.0
-
-        # c13 Cristalización — numerador desde detalle
-        g_n3 = (v['N3_REMUN']+v['N3_ENERG']+v['N3_PETROL']+v['N3_MAQ']+v['N3_AGUA']+
-                v['N3_MYREP']+v['N3_ARRDO']+v['N3_CSODA']+v['N3_OTROS']+
-                v['N3_MANT_D']+v['N3_MANT_M']+v['N3_KORDA'])
-        g_n4 = (v['N4_REMUN']+v['N4_ENERG']+v['N4_PETROL']+v['N4_MAQ']+v['N4_AGUA']+
-                v['N4_CSODA']+v['N4_OTROS']+v['N4_MANT_D']+v['N4_MANT_M']+v['N4_KORDA'])
         c13 = (g_n3+g_n4+v['DEP_NPT3']+v['DEP_NPT4'])/prod_total if prod_total>0 else 0.0
-
-        # c14 KCl — denominador prod_total
+ 
         c90 = v['FC_MOP90_NPT3']*npt3+v['FC_MOP90_NPT4']*v['KNO3_L_NPT4']
         c70 = v['FC_MOP70_NPT3']*npt3+v['FC_MOP70_NPT4']*v['KNO3_L_NPT4']
         css = v['FC_SS_NPT3']*npt3+v['FC_SS_NPT4']*v['KNO3_L_NPT4']
-        c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_total_sin_Sod if prod_total_sin_Sod>0 else 0.0
-
-        # c15 Terminados — total base + delta detalle
-        g_pr = (v['PR_REMUN']+v['PR_ENERG']+v['PR_PETROL']+v['PR_MAQ']+
-                v['PR_ADITI']+v['PR_OTROS']+v['PR_MANT_D']+v['PR_MANT_M'])
-        g_dt = (v['DT_REMUN']+v['DT_ENERG']+v['DT_PETROL']+v['DT_ADITI']+
-                v['DT_OTROS']+v['DT_MANT_D']+v['DT_MANT_M'])
-        g_sc = (v['SC_REMUN']+v['SC_ENERG']+v['SC_PETROL']+v['SC_ADITI']+
-                v['SC_MAQ']+v['SC_OTROS']+v['SC_MANT_D']+v['SC_MANT_M'])
+        c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_sin_sod if prod_sin_sod>0 else 0.0
+ 
         BASE_PR_SUM = (BASE['PR_REMUN']+BASE['PR_ENERG']+BASE['PR_PETROL']+BASE['PR_MAQ']+
                        BASE['PR_ADITI']+BASE['PR_OTROS']+BASE['PR_MANT_D']+BASE['PR_MANT_M'])
         BASE_DT_SUM = (BASE['DT_REMUN']+BASE['DT_ENERG']+BASE['DT_PETROL']+BASE['DT_ADITI']+
@@ -2204,10 +2198,10 @@ elif pagina == "Sim. Gastos PPTO":
         delta_pr = g_pr - BASE_PR_SUM
         delta_dt = g_dt - BASE_DT_SUM
         delta_sc = g_sc - BASE_SC_SUM
-        c15 = (BASE['G_PRIL']+delta_pr+BASE['G_DTP']+delta_dt+BASE['G_SECADO']+delta_sc+
-               v['G_TPTE_INT']+v['DEP_PRIL']+v['DEP_DTP']+v['DEP_SECADO'])/prod_term if prod_term>0 else 0.0
+        c15 = (BASE['G_PRIL']+delta_pr + BASE['G_DTP']+delta_dt + BASE['G_SECADO']+delta_sc +
+               v['G_TPTE_INT']+v['DEP_PRIL']+v['DEP_DTP']+v['DEP_SECADO']) / prod_term if prod_term>0 else 0.0
 
-        # c16 Puerto
+ 
         c_t  = v['G_TPTE_CAM']/v['TON_TPTE_CAM'] if v['TON_TPTE_CAM']>0 else 0.0
         c_e  = v['G_EMBARQUE']/v['TON_EMBARQUE_GRANEL'] if v['TON_EMBARQUE_GRANEL']>0 else 0.0
         c_a  = v['G_ALMACENAJE']/v['TON_ALMACENAJE'] if v['TON_ALMACENAJE']>0 else 0.0
@@ -2215,24 +2209,22 @@ elif pagina == "Sim. Gastos PPTO":
         c_d  = v['G_DIST_T']/vd if vd>0 else 0.0
         c_dp = v['DEPR_PUERTO']/vd if vd>0 else 0.0
         c16  = c_t+c_e+c_a+c_d+c_dp
-
-        # c17 Pérdidas
+ 
         Op  = c11+c12+c13+c14
         pfe = (-(v['GEN_FE']+v['GEN_Perdidas']))/prod_term if prod_term>0 else 0.0
         PFE = Op*pfe
-        base_c = Op+PFE+c15
+        base = Op+PFE+c15
         ppc  = prod_total+v['GEN_Perdidas_Puerto']+v['GEN_FE']+v['GEN_Perdidas']
         Pdeg = -(v['GEN_Perdidas_Puerto']/(ppc-v['GEN_FE']-v['GEN_Perdidas']))
-        c17  = PFE+Pdeg*base_c
-
-        c18 = (v['DIST_NITRATOS']+v['DEPR_COM'])/prod_total if prod_total>0 else 0.0
-        c19 = v['OTROS']
-
+        c17  = PFE+Pdeg*base
+        c18  = (v['DIST_NITRATOS']+v['DEPR_COM'])/prod_total if prod_total>0 else 0.0
+        c19  = v['OTROS']
+ 
         comp = {'1.1 Tpte Sales':c11,'1.2 Op. Pozas':c12,'1.3 Cristalización':c13,
                 '1.4 KCl':c14,'1.5 Terminados':c15,'1.6 Tpte+Puerto':c16,
                 '1.7 Pérdidas F/E':c17,'1.8 Distributivos':c18,'1.9 Otros':c19}
         return sum(comp.values()), comp
-     
+ 
     if 'sg_sv' not in st.session_state or st.session_state.get('sg_mes')!=mes or st.session_state.get('sg_tipo')!=tipo_sens:
         st.session_state['sg_sv']   = copy.deepcopy(BASE)
         st.session_state['sg_mes']  = mes
