@@ -2249,7 +2249,7 @@ elif pagina == "Sim. Gastos PPTO":
         c70 = MOP70_NPT3 + MOP70_NPT4
         css = SS_NPT3 + SS_NPT4
         
-        cons_total = c90 + c70 + c70
+        cons_total = c90 + c70 + css
         
         costo_total_kcl = (v['P_MOP90'] * c90) + (v['P_MOP70'] * c70) + (v['P_SS'] * css)
         c14 = costo_total_kcl / prod_sin_sod if prod_sin_sod > 0 else 0.0
