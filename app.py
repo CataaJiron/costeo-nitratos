@@ -2219,7 +2219,7 @@ elif pagina == "Sim. Gastos PPTO":
         g_pb_fin = BASE['G_POZAS_PB'] + (g_ppb - B_PPB)
         g_cs_fin = BASE['G_POZAS_CS'] + (g_pcs - B_PCS)
         c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) / prod_total
- 
+        
         # c13 — FIX: total_base + delta_detalle (igual que c12/c15)
         g_n3 = sum(v[k] for k in ['N3_REMUN','N3_ENERG','N3_PETROL','N3_MAQ','N3_AGUA',
                                    'N3_MYREP','N3_ARRDO','N3_CSODA','N3_OTROS',
@@ -2239,7 +2239,7 @@ elif pagina == "Sim. Gastos PPTO":
         c90 = v['FC_MOP90_NPT3'] * npt3 + v['FC_MOP90_NPT4'] * v['KNO3_L_NPT4']
         c70 = v['FC_MOP70_NPT3'] * npt3 + v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4']
         css = v['FC_SS_NPT3']    * npt3 + v['FC_SS_NPT4']    * v['KNO3_L_NPT4']
-        c14 = (v['P_MOP90'] * c90 + v['P_MOP70'] * c70 + v['P_SS'] * css) / prod_sin_sod if prod_sin_sod > 0 else 0.0
+        c14 = (v['P_MOP90'] * c90 + v['P_MOP70'] * c70 + v['P_SS'] * css) / prod_total if prod_total > 0 else 0.0
  
         # c15 — FIX: total_base + delta_detalle (detalle Prilado incompleto en tabla)
         g_pr = sum(v[k] for k in ['PR_REMUN','PR_ENERG','PR_PETROL','PR_MAQ',
@@ -2288,34 +2288,7 @@ elif pagina == "Sim. Gastos PPTO":
  
     col_inp, col_res = st.columns([3, 2], gap="large")
  
-    with col_res:
-        costo_base, comp_base = recalcular(BASE)
-        costo_sim,  comp_sim  = recalcular(V)
-        delta_total = costo_sim - costo_base
-        dd = 0.0 if abs(delta_total) < 0.005 else round(delta_total, 2)
-        ds = "0.00 USD/T" if dd == 0.0 else f"{dd:+.2f} USD/T"
-        st.markdown(f"#### 📊 Resultado — {MESES[mes]}")
-        st.metric("PPTO Base", f"${costo_base:.2f} / T")
-        st.metric("Simulado",  f"${costo_sim:.2f} / T", delta=ds, delta_color="inverse")
-        st.divider()
-        rows_r = [{"Componente":k,"PPTO":round(b,2),"Sim":round(s,2),"Δ":round(s-b,2)}
-                  for k,(b,s) in zip(comp_base.keys(), zip(comp_base.values(), comp_sim.values()))]
-        df_res = pd.DataFrame(rows_r)
-        def _cd(val):
-            if isinstance(val, float):
-                if val > 0: return 'color:#D83030;font-weight:bold'
-                if val < 0: return 'color:#80BC00;font-weight:bold'
-            return ''
-        st.dataframe(df_res.style.map(_cd, subset=["Δ"]).format({"PPTO":"{:.2f}","Sim":"{:.2f}","Δ":"{:+.2f}"}),
-                     use_container_width=True, hide_index=True, height=360)
-        st.divider()
-        if st.button("🔄 Restablecer todo", use_container_width=True, key="sg_reset"):
-            st.session_state['sg_rc']   = st.session_state.get('sg_rc', 0) + 1
-            st.session_state['sg_sv']   = copy.deepcopy(st.session_state['sg_base'])
-            st.session_state['sg_mes']  = mes
-            st.session_state['sg_tipo'] = tipo_sens
-            st.rerun()
- 
+    # FIX: col_inp PRIMERO para que V tenga los valores actualizados antes de recalcular
     with col_inp:
         ptv = lambda: (V['KNO3_T_NPT3']+V['KNO3_R_NPT3'])+(V['KNO3_L_NPT4']+V['CSSI_NPT4']+V['CSSR_NPT4'])
         ptm = lambda: V['PRIL_DTP'] + V['SECADO']
@@ -2497,31 +2470,32 @@ elif pagina == "Sim. Gastos PPTO":
             fc_t=(nv_c+pb_c+cs_c)/pt2 if pt2>0 else 0.0
             st.caption(f"NV:{nv_c:.3f} | PB:{pb_c:.3f} | CS:{cs_c:.3f} KTon")
             st.caption(f"FC:{fc_t:.4f} | Precio:${precio_t:.2f} | **=> 1.1=${precio_t*fc_t:.2f} USD/T**")
-
-elif pagina == "Asistente":
-    st.title("🤖 Asistente de Costeo Nitratos")
-    st.caption("Pregunta sobre costos, producción o cualquier dato de la planilla 2026")
  
-    def build_context():
-        lines = ["# Datos Costeo Nitratos 2026\n"]
-        for tipo in ["Puntual", "Acumulado"]:
-            lines.append(f"\n## {tipo}")
-            ppto = total_serie(df, tipo, 'PPTO')
-            rp   = total_rp_serie(df, tipo)
-            lines.append("### Costo Total USD/T")
-            lines.append("Mes | PPTO | Real+Proy")
-            lines.append("---|---|---")
-            for i, m in enumerate(MESES):
-                lines.append(f"{m} | {ppto[i]:.1f} | {rp[i]:.1f}")
-            lines.append(f"\n### Por componente ({tipo})")
-            for sa, c, nombre in COSTOS:
-                s_p = gs(df, 'COSTO TOTAL', sa, c, tipo, 'PPTO')
-                s_r = rp_serie(df, 'COSTO TOTAL', sa, c, tipo)
-                lines.append(f"\n**{nombre}** (USD/T)")
-                lines.append("Mes | PPTO | R+P")
-                lines.append("---|---|---")
-                for i, m in enumerate(MESES):
-                    lines.append(f"{m} | {s_p[i]:.1f} | {s_r[i]:.1f}")
-        return "\n".join(lines)
- 
-    context = build_context()
+    # FIX: col_res DESPUÉS de col_inp — V ya tiene todos los valores actualizados
+    with col_res:
+        costo_base, comp_base = recalcular(BASE)
+        costo_sim,  comp_sim  = recalcular(V)
+        delta_total = costo_sim - costo_base
+        dd = 0.0 if abs(delta_total) < 0.005 else round(delta_total, 2)
+        ds = "0.00 USD/T" if dd == 0.0 else f"{dd:+.2f} USD/T"
+        st.markdown(f"#### 📊 Resultado — {MESES[mes]}")
+        st.metric("PPTO Base", f"${costo_base:.2f} / T")
+        st.metric("Simulado",  f"${costo_sim:.2f} / T", delta=ds, delta_color="inverse")
+        st.divider()
+        rows_r = [{"Componente":k,"PPTO":round(b,2),"Sim":round(s,2),"Δ":round(s-b,2)}
+                  for k,(b,s) in zip(comp_base.keys(), zip(comp_base.values(), comp_sim.values()))]
+        df_res = pd.DataFrame(rows_r)
+        def _cd(val):
+            if isinstance(val, float):
+                if val > 0: return 'color:#D83030;font-weight:bold'
+                if val < 0: return 'color:#80BC00;font-weight:bold'
+            return ''
+        st.dataframe(df_res.style.map(_cd, subset=["Δ"]).format({"PPTO":"{:.2f}","Sim":"{:.2f}","Δ":"{:+.2f}"}),
+                     use_container_width=True, hide_index=True, height=360)
+        st.divider()
+        if st.button("🔄 Restablecer todo", use_container_width=True, key="sg_reset"):
+            st.session_state['sg_rc']   = st.session_state.get('sg_rc', 0) + 1
+            st.session_state['sg_sv']   = copy.deepcopy(st.session_state['sg_base'])
+            st.session_state['sg_mes']  = mes
+            st.session_state['sg_tipo'] = tipo_sens
+            st.rerun()
