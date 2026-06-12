@@ -2218,8 +2218,8 @@ elif pagina == "Sim. Gastos PPTO":
         g_nv_fin = BASE['G_POZAS_NV'] + (g_pnv - B_PNV)
         g_pb_fin = BASE['G_POZAS_PB'] + (g_ppb - B_PPB)
         g_cs_fin = BASE['G_POZAS_CS'] + (g_pcs - B_PCS)
-        c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) /
-        
+        c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) / prod_total
+
         # c13 — FIX: total_base + delta_detalle (igual que c12/c15)
         g_n3 = sum(v[k] for k in ['N3_REMUN','N3_ENERG','N3_PETROL','N3_MAQ','N3_AGUA',
                                    'N3_MYREP','N3_ARRDO','N3_CSODA','N3_OTROS',
