@@ -2236,10 +2236,24 @@ elif pagina == "Sim. Gastos PPTO":
         c13 = (g_n3_fin + g_n4_fin + v['DEP_NPT3'] + v['DEP_NPT4']) / prod_total if prod_total > 0 else 0.0
  
         # c14 — FIX: denominador prod_total (no prod_sin_sod)
-        c90 = v['FC_MOP90_NPT3'] * npt3 + v['FC_MOP90_NPT4'] * v['KNO3_L_NPT4']
-        c70 = v['FC_MOP70_NPT3'] * npt3 + v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4']
-        css = v['FC_SS_NPT3']    * npt3 + v['FC_SS_NPT4']    * v['KNO3_L_NPT4']
-        c14 = (v['P_MOP90'] * c90 + v['P_MOP70'] * c70 + v['P_SS'] * css) / prod_sin_sod if prod_sin_sod > 0 else 0.0
+        # 1.4 KCl
+        MOP90_NPT3 = (v['FC_MOP90_NPT3'] * npt3)
+        MOP90_NPT4 = (v['FC_MOP90_NPT4'] * v['KNO3_L_NPT4'])
+        MOP70_NPT3 = (v['FC_MOP70_NPT3'] * npt3)
+        MOP70_NPT4 = (v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4'])
+        SS_NPT3 = (v['FC_SS_NPT3'] * npt3) 
+        SS_NPT4 = (v['FC_SS_NPT4'] * v['KNO3_L_NPT4'])
+
+        #CONSUMO
+        c90 = MOP90_NPT3 + MOP90_NPT4
+        c70 = MOP70_NPT3 + MOP70_NPT4
+        css = SS_NPT3 + SS_NPT4
+        
+        cons_total = cons_mop90 + cons_mop70 + cons_ss
+        
+        costo_total_kcl = (v['P_MOP90'] * c90) + (v['P_MOP70'] * c70) + (v['P_SS'] * css)
+        c14 = costo_total_kcl / prod_sin_sod if prod_sin_sod > 0 else 0.0
+
  
         # c15 — FIX: total_base + delta_detalle (detalle Prilado incompleto en tabla)
         g_pr = sum(v[k] for k in ['PR_REMUN','PR_ENERG','PR_PETROL','PR_MAQ',
