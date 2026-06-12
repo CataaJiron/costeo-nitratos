@@ -2189,7 +2189,8 @@ elif pagina == "Sim. Gastos PPTO":
                       v['CSSR_NPT4'] * v['FC_NaNO3_CAT1_CSSR_NPT4'] +
                       v['CSSI_NPT4'] * v['FC_NaNO3_CAT1_CSSI_NPT4'])
         consumo_pb = (npt3 * v['FC_NaNO3_PB_NPT3'] +
-                      v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4'])
+              v['KNO3_L_NPT4'] * v['FC_NaNO3_PB_NPT4'] +
+              v['CSSI_NPT4'] * v['FC_NaNO3_PB_CSSI_NPT4'])
         consumo_cs = (npt3 * v['FC_NaNO3_CS_NPT3'] +          # ← FIX: incluye NPT3
                       v['KNO3_L_NPT4'] * v['FC_NaNO3_CS_NPT4'])
         fc_s = (consumo_nv + consumo_pb + consumo_cs) / prod_total if prod_total > 0 else 0.0
@@ -2218,7 +2219,7 @@ elif pagina == "Sim. Gastos PPTO":
         g_nv_fin = BASE['G_POZAS_NV'] + (g_pnv - B_PNV)
         g_pb_fin = BASE['G_POZAS_PB'] + (g_ppb - B_PPB)
         g_cs_fin = BASE['G_POZAS_CS'] + (g_pcs - B_PCS)
-        c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) / prod_total
+        c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) / prod_total if prod_total > 0 else 0.0
 
         # c13 — FIX: total_base + delta_detalle (igual que c12/c15)
         g_n3 = sum(v[k] for k in ['N3_REMUN','N3_ENERG','N3_PETROL','N3_MAQ','N3_AGUA',
@@ -2479,7 +2480,7 @@ elif pagina == "Sim. Gastos PPTO":
             with fn7: V['FC_NaNO3_CAT1_CSSR_NPT4']=ni("CAT1 CSSR", "FC_NaNO3_CAT1_CSSR_NPT4",V['FC_NaNO3_CAT1_CSSR_NPT4'],0.01,"%.4f")
             with fn8: V['FC_NaNO3_PURGA_NPT4']    =ni("FC Purga",  "FC_NaNO3_PURGA_NPT4",    V['FC_NaNO3_PURGA_NPT4'],    0.01,"%.4f")
             nv_c=(nfc*V['FC_NaNO3_CAT1_NPT3']+V['CSSR_NPT4']*V['FC_NaNO3_CAT1_CSSR_NPT4']+V['CSSI_NPT4']*V['FC_NaNO3_CAT1_CSSI_NPT4'])
-            pb_c=(nfc*V['FC_NaNO3_PB_NPT3']+V['CSSI_NPT4']*V['FC_NaNO3_PB_CSSI_NPT4'])
+            pb_c=(nfc*V['FC_NaNO3_PB_NPT3'] + V['KNO3_L_NPT4']*V['FC_NaNO3_PB_NPT4']+ V['CSSI_NPT4']*V['FC_NaNO3_PB_CSSI_NPT4'])
             cs_c=nfc*V['FC_NaNO3_CS_NPT3']+V['KNO3_L_NPT4']*V['FC_NaNO3_CS_NPT4']
             Tt2=V['TON_TPTE_NV']+V['TON_TPTE_PB']+V['TON_TPTE_CS']
             pt2=ptv(); precio_t=(V['G_TPTE_NV']+V['G_TPTE_PB']+V['G_CAMINOS_NV'])/Tt2 if Tt2>0 else 0.0
