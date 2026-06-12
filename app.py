@@ -2177,7 +2177,7 @@ elif pagina == "Sim. Gastos PPTO":
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
-        prod_sin_sod = npt3 + v['KNO3_L_NPT4'] 
+        prod_sin_sod = npt3 + v['KNO3_L_NPT4']
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
         # c11 — FIX: consumo_cs incluye npt3*FC_NaNO3_CS_NPT3 (importante en acumulado)
@@ -2218,7 +2218,7 @@ elif pagina == "Sim. Gastos PPTO":
         g_nv_fin = BASE['G_POZAS_NV'] + (g_pnv - B_PNV)
         g_pb_fin = BASE['G_POZAS_PB'] + (g_ppb - B_PPB)
         g_cs_fin = BASE['G_POZAS_CS'] + (g_pcs - B_PCS)
-        c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) / prod_total
+        c12 = (g_nv_fin + g_pb_fin + g_cs_fin + v['G_DEPRECIACION_CS']) /
         
         # c13 — FIX: total_base + delta_detalle (igual que c12/c15)
         g_n3 = sum(v[k] for k in ['N3_REMUN','N3_ENERG','N3_PETROL','N3_MAQ','N3_AGUA',
@@ -2239,7 +2239,7 @@ elif pagina == "Sim. Gastos PPTO":
         c90 = v['FC_MOP90_NPT3'] * npt3 + v['FC_MOP90_NPT4'] * v['KNO3_L_NPT4']
         c70 = v['FC_MOP70_NPT3'] * npt3 + v['FC_MOP70_NPT4'] * v['KNO3_L_NPT4']
         css = v['FC_SS_NPT3']    * npt3 + v['FC_SS_NPT4']    * v['KNO3_L_NPT4']
-        c14 = (v['P_MOP90'] * c90 + v['P_MOP70'] * c70 + v['P_SS'] * css) / prod_total if prod_total > 0 else 0.0
+        c14 = (v['P_MOP90'] * c90 + v['P_MOP70'] * c70 + v['P_SS'] * css) / prod_sin_sod if prod_sin_sod > 0 else 0.0
  
         # c15 — FIX: total_base + delta_detalle (detalle Prilado incompleto en tabla)
         g_pr = sum(v[k] for k in ['PR_REMUN','PR_ENERG','PR_PETROL','PR_MAQ',
@@ -2294,7 +2294,9 @@ elif pagina == "Sim. Gastos PPTO":
         ptm = lambda: V['PRIL_DTP'] + V['SECADO']
  
         def ni(label, key, val, step=10.0, fmt="%.1f"):
-            return st.number_input(label, value=round(float(val), 3), step=step, format=fmt, key=f"sg_{key}_{sg_rc}")
+            # FIX: no redondear a 3 decimales — respetar la precisión original del valor
+            # El format del widget controla la visualización, el valor interno queda exacto
+            return st.number_input(label, value=float(val), step=step, format=fmt, key=f"sg_{key}_{sg_rc}")
  
         def inputs_grupo(titulo, items_edit, items_mant, denom, denom_label="USD/T"):
             st.caption(f"**{titulo}**")
