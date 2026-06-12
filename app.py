@@ -2490,32 +2490,6 @@ elif pagina == "Sim. Gastos PPTO":
  
     # FIX: col_res DESPUÉS de col_inp — V ya tiene todos los valores actualizados
     with col_res:
-        with st.expander("🔍 Diagnóstico recálculo (temporal)"):
-        def _diag(v, tag):
-            npt3 = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
-            npt4 = v['KNO3_L_NPT4'] + v['CSSI_NPT4'] + v['CSSR_NPT4']
-            pt   = npt3 + npt4
-            Tt   = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
-            c_nv = npt3*v['FC_NaNO3_CAT1_NPT3'] + v['CSSR_NPT4']*v['FC_NaNO3_CAT1_CSSR_NPT4'] + v['CSSI_NPT4']*v['FC_NaNO3_CAT1_CSSI_NPT4']
-            c_pb = npt3*v['FC_NaNO3_PB_NPT3'] + v['KNO3_L_NPT4']*v['FC_NaNO3_PB_NPT4'] + v['CSSI_NPT4']*v['FC_NaNO3_PB_CSSI_NPT4']
-            c_cs = npt3*v['FC_NaNO3_CS_NPT3'] + v['KNO3_L_NPT4']*v['FC_NaNO3_CS_NPT4']
-            st.write(f"**{tag}**", {
-                'npt3': round(npt3,3), 'npt4': round(npt4,3), 'prod_total': round(pt,3),
-                'prod_term': round(v['PRIL_DTP']+v['SECADO'],3),
-                'Tt_transporte': round(Tt,3),
-                'consumo NV/PB/CS': (round(c_nv,3), round(c_pb,3), round(c_cs,3)),
-                'fc_sales': round((c_nv+c_pb+c_cs)/pt, 4) if pt>0 else 0,
-                'precio_tpte': round((v['G_TPTE_NV']+v['G_TPTE_PB']+v['G_CAMINOS_NV'])/Tt, 2) if Tt>0 else 0,
-            })
-        _diag(BASE, "BASE (congelado)")
-        _diag(V, "SIMULADO")
-        st.write("**Factores base:**", {k: BASE[k] for k in [
-            'FC_NaNO3_CAT1_NPT3','FC_NaNO3_PB_NPT3','FC_NaNO3_CS_NPT3',
-            'FC_NaNO3_PB_NPT4','FC_NaNO3_CS_NPT4',
-            'FC_MOP90_NPT3','FC_MOP70_NPT3','FC_SS_NPT3',
-            'P_MOP90','P_MOP70','P_SS','OTROS']})
-
-
         costo_base, comp_base = recalcular(BASE)
         costo_sim,  comp_sim  = recalcular(V)
         delta_total = costo_sim - costo_base
@@ -2542,3 +2516,35 @@ elif pagina == "Sim. Gastos PPTO":
             st.session_state['sg_mes']  = mes
             st.session_state['sg_tipo'] = tipo_sens
             st.rerun()
+
+    with col_res:
+        with st.expander("🔍 Diagnóstico recálculo (temporal)"):
+            def _diag(v, tag):
+                npt3 = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
+                npt4 = v['KNO3_L_NPT4'] + v['CSSI_NPT4'] + v['CSSR_NPT4']
+                pt   = npt3 + npt4
+                Tt   = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
+                c_nv = npt3*v['FC_NaNO3_CAT1_NPT3'] + v['CSSR_NPT4']*v['FC_NaNO3_CAT1_CSSR_NPT4'] + v['CSSI_NPT4']*v['FC_NaNO3_CAT1_CSSI_NPT4']
+                c_pb = npt3*v['FC_NaNO3_PB_NPT3'] + v['KNO3_L_NPT4']*v['FC_NaNO3_PB_NPT4'] + v['CSSI_NPT4']*v['FC_NaNO3_PB_CSSI_NPT4']
+                c_cs = npt3*v['FC_NaNO3_CS_NPT3'] + v['KNO3_L_NPT4']*v['FC_NaNO3_CS_NPT4']
+                st.write(f"**{tag}**", {
+                    'npt3': round(npt3, 3),
+                    'npt4': round(npt4, 3),
+                    'prod_total': round(pt, 3),
+                    'prod_term': round(v['PRIL_DTP'] + v['SECADO'], 3),
+                    'Tt_transporte': round(Tt, 3),
+                    'consumo NV/PB/CS': (round(c_nv, 3), round(c_pb, 3), round(c_cs, 3)),
+                    'fc_sales': round((c_nv + c_pb + c_cs) / pt, 4) if pt > 0 else 0,
+                    'precio_tpte': round((v['G_TPTE_NV'] + v['G_TPTE_PB'] + v['G_CAMINOS_NV']) / Tt, 2) if Tt > 0 else 0,
+                })
+
+            _diag(BASE, "BASE (congelado)")
+            _diag(V, "SIMULADO")
+            st.write("**Factores base:**", {k: BASE[k] for k in [
+                'FC_NaNO3_CAT1_NPT3', 'FC_NaNO3_PB_NPT3', 'FC_NaNO3_CS_NPT3',
+                'FC_NaNO3_PB_NPT4', 'FC_NaNO3_CS_NPT4',
+                'FC_MOP90_NPT3', 'FC_MOP70_NPT3', 'FC_SS_NPT3',
+                'P_MOP90', 'P_MOP70', 'P_SS', 'OTROS']})
+
+        costo_base, comp_base = recalcular(BASE)
+        # ... el resto de col_res sigue igual
