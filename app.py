@@ -2775,7 +2775,7 @@ elif pagina == "Sim. Gastos R+P":
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
-        prod_sin_Sod = npt3 + v['KNO3_L_NPT4']]
+        prod_sin_Sod = npt3 + v['KNO3_L_NPT4']
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
         Tt  = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
