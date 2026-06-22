@@ -2775,7 +2775,7 @@ elif pagina == "Sim. Gastos R+P":
         npt3       = v['KNO3_T_NPT3'] + v['KNO3_R_NPT3']
         npt4       = v['KNO3_L_NPT4'] + v['CSSI_NPT4']  + v['CSSR_NPT4']
         prod_total = npt3 + npt4
-        prod_sin_Sod = npt3 + v['KNO3_L_NPT4']
+        prod_sin_Sod = npt3 + v['KNO3_L_NPT4']]
         prod_term  = v['PRIL_DTP'] + v['SECADO']
  
         Tt  = v['TON_TPTE_NV'] + v['TON_TPTE_PB'] + v['TON_TPTE_CS']
@@ -2790,7 +2790,7 @@ elif pagina == "Sim. Gastos R+P":
                       v['CSSI_NPT4']*v['FC_NaNO3_PB_CSSI_NPT4'])
         consumo_cs = (npt3*v['FC_NaNO3_CS_NPT3'] +
                       v['KNO3_L_NPT4']*v['FC_NaNO3_CS_NPT4'])
-        fc_s = (consumo_nv+consumo_pb+consumo_cs)/prod_sin_Sod if prod_sin_Sod>0 else 0.0
+        fc_s = (consumo_nv+consumo_pb+consumo_cs)/prod_total if prod_total>0 else 0.0
         c11  = (p_nv+p_pb+p_cs)*fc_s
  
         g_pnv = sum(v[k] for k in ['PNV_REMUN','PNV_ENERG','PNV_ARRDO','PNV_OTROS','PNV_MANT_D','PNV_MANT_M','PNV_PRECO_A','PNV_PRECO_O','PNV_PRODU_A','PNV_PRODU_O'])
@@ -2815,7 +2815,7 @@ elif pagina == "Sim. Gastos R+P":
         c90 = v['FC_MOP90_NPT3']*npt3 + v['FC_MOP90_NPT4']*v['KNO3_L_NPT4']
         c70 = v['FC_MOP70_NPT3']*npt3 + v['FC_MOP70_NPT4']*v['KNO3_L_NPT4']
         css = v['FC_SS_NPT3']   *npt3 + v['FC_SS_NPT4']   *v['KNO3_L_NPT4']
-        c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_total if prod_total>0 else 0.0
+        c14 = (v['P_MOP90']*c90+v['P_MOP70']*c70+v['P_SS']*css)/prod_sin_Sod if prod_sin_Sod>0 else 0.0
  
         g_pr = sum(v[k] for k in ['PR_REMUN','PR_ENERG','PR_PETROL','PR_MAQ','PR_ADITI','PR_OTROS','PR_MANT_D','PR_MANT_M'])
         g_dt = sum(v[k] for k in ['DT_REMUN','DT_ENERG','DT_PETROL','DT_ADITI','DT_OTROS','DT_MANT_D','DT_MANT_M'])
